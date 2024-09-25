@@ -1,0 +1,25 @@
+[golang]
+# format = "via [$version](bold cyan) "
+# symbol=" "
+symbol="󰟓 "
+style = 'bold cyan'
+
+[ruby]
+symbol=" "
+
+[git_branch]
+symbol=" "
+
+[aws]
+symbol="aws  "
+
+
+[terraform]
+symbol=" "
+
+
+[vagrant]
+symbol="V "
+
+# [nomad]
+# symbol=" "

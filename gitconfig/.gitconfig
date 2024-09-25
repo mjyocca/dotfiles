@@ -1,0 +1,18 @@
+# Global .gitconfig
+[init]
+  defaultBranch = main
+
+[user]
+	name = Michael Yocca
+  email = mjyocca@gmail.com
+
+# Per parent directory settings
+; [includeIf "gitdir:~/Projects/Development/work/"]
+;   path = .gitconfig-work
+;
+; [includeIf "gitdir:~/Projects/Development/personal/"]
+;   path = .gitconfig-personal
+
+[alias]
+fza = "!git ls-files -m -o --extend-standard | fzf --print0 -m | xargs -0 -t -o git add"
+cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
