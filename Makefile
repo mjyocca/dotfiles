@@ -26,6 +26,10 @@ else ifeq ($(OS), Linux)
 	UPDATE_CMD := sudo $(PKG_MANAGER) update
 endif
 
+dotfiles:
+	@echo "Stowing Dotfile Packages..."
+	@bash ./scripts/stow.sh
+
 setup_osx:
 	@echo "Initializing macOS-specific tools..."
 	@bash ./osx/core.sh
