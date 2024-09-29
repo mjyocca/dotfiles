@@ -30,7 +30,7 @@ dotfiles:
 	@echo "Stowing Dotfile Packages..."
 	@bash ./scripts/stow.sh
 
-setup_osx:
+pre_install_macos:
 	@echo "Initializing macOS-specific tools..."
 	@bash ./osx/core.sh
 	@bash ./osx/config.sh
@@ -52,13 +52,11 @@ bootstrap_macos: bootstrap install_macos_tools
 
 install_macos_tools:
 	@echo "Installing macOS-specific tools..."
-	$(INSTALL_CMD) htop
-	$(INSTALL_CMD) wget  # For example, if wget isn't installed by default
+	@brew bundle --file="~/Brewfile"	
 
-# TODO: LINUX
-# bootstrap_linux: bootstrap install_linux_tools
+# TODO: LINUX PLACEHOLDER
+bootstrap_linux: bootstrap install_linux_tools
 
-# install_linux_tools:
-# 	@echo "Installing Linux-specific tools..."
-# 	$(INSTALL_CMD) htop
-# 	$(INSTALL_CMD) build-essential
+install_linux_tools:
+	@echo "Installing Linux-specific tools..."
+	@echo "LINUX $(DISTRO)"

@@ -25,6 +25,10 @@ install_homebrew() {
 	fi
 }
 
+# install_starship() {
+#   NONINTERACTIVE=1 /bin/bash -c "$(curl -sS https://starship.rs/install.sh | sh)"
+# }
+
 install_xcode
 install_homebrew
 

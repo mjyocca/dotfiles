@@ -1,0 +1,33 @@
+# Taps
+tap "homebrew/bundle"
+tap "neovim/neovim"
+
+# Binaries
+brew 'bat'
+brew 'cmake'
+brew 'curl'
+brew 'coreutils'
+brew 'direnv'
+brew 'fzf'
+brew 'git'
+brew 'htop'
+brew 'lazygit'
+brew 'lazydocker'
+brew 'jq'
+brew 'make'
+brew 'sqlite'
+brew 'stow'
+brew 'starship'
+brew 'tmux'
+brew 'tree'
+brew 'wget'
+brew 'zsh-autosuggestions'
+
+# Applications
+# cask 'slack'
+# cask 'spotify'
+# cask '1password'
+# cask 'visual-studio-code'
+# cask 'zed'
+# cask 'zen-browser'
+# cask 'keycastr'
