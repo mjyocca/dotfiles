@@ -6,4 +6,8 @@ stow_dotfiles() {
 	stow --dir stow --verbose 2 --target "$HOME" $to_stow
 }
 
-stow_dotfiles
+# Check if the script is being run directly or sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  # Script is being run directly, so call the function
+  stow_dotfiles
+fi
