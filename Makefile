@@ -52,7 +52,8 @@ bootstrap_osx: bootstrap pre_install_osx install_osx_tools
 
 install_osx_tools:
 	@echo "Installing macOS-specific tools..."
-	@brew bundle --file="~/Brewfile"	
+	@brew bundle --file="~/Brewfile"
+	@bash ./osx/plugins.sh
 
 # TODO: LINUX PLACEHOLDER
 bootstrap_linux: bootstrap install_linux_tools
