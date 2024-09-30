@@ -30,7 +30,7 @@ dotfiles:
 	@echo "Stowing Dotfile Packages..."
 	@bash ./scripts/stow.sh
 
-pre_install_macos:
+pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
 	@bash ./osx/core-utils.sh
 	@bash ./osx/config.sh
@@ -48,9 +48,9 @@ install_common_tools:
 	# $(INSTALL_CMD) curl
 
 # OS-specific tasks
-bootstrap_macos: bootstrap pre_install_macos install_macos_tools
+bootstrap_osx: bootstrap pre_install_osx install_osx_tools
 
-install_macos_tools:
+install_osx_tools:
 	@echo "Installing macOS-specific tools..."
 	@brew bundle --file="~/Brewfile"	
 

@@ -68,5 +68,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	cd "$REPO_PATH" >/dev/null
 
 	info "Installing dependencies..."
-	make bootstrap_macos
+	make bootstrap_osx
 fi
