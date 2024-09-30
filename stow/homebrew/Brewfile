@@ -1,6 +1,5 @@
 # Taps
 tap "homebrew/bundle"
-tap "neovim/neovim"
 
 # Binaries
 brew 'bat'
@@ -15,6 +14,7 @@ brew 'lazygit'
 brew 'lazydocker'
 brew 'jq'
 brew 'make'
+brew 'neovim'
 brew 'sqlite'
 brew 'stow'
 brew 'starship'
