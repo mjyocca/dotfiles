@@ -2,6 +2,7 @@
 tap "homebrew/bundle"
 
 # Binaries
+brew 'asdf'
 brew 'bat'
 brew 'cmake'
 brew 'curl'
