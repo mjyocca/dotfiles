@@ -53,7 +53,7 @@ install_homebrew() {
 # Check if the script is being run directly or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	info "### DOTFILES ###"
-	info "Bootstraping..."
+	info "bootstrapping..."
 
 	install_xcode
 	install_homebrew
