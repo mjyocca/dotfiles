@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
 
-reset_color=$(tput sgr 0)
+# Color codes
+RESET='\033[0m'      # No Color / Reset
+GREEN='\033[0;32m'   # Green for Success
+YELLOW='\033[0;33m'  # Yellow for Warnings
+RED='\033[0;31m'     # Red for Errors
+BLUE='\033[0;34m'    # Blue for Logs
 
+# Logging Functions
 info() {
-	printf "%s[*] %s%s\n" "$(tput setaf 4)" "$1" "$reset_color"
-}
-
-success() {
-	printf "%s[*] %s%s\n" "$(tput setaf 2)" "$1" "$reset_color"
-}
-
-err() {
-	printf "%s[*] %s%s\n" "$(tput setaf 1)" "$1" "$reset_color"
+  printf "${BLUE}[INFO] %s${RESET}\n" "$1"
 }
 
 warn() {
-	printf "%s[*] %s%s\n" "$(tput setaf 3)" "$1" "$reset_color"
+  printf "${YELLOW}[WARN] %s${RESET}\n" "$1"
+}
+
+error() {
+  printf "${RED}[ERROR] %s${RESET}\n" "$1"
+}
+
+success() {
+  printf "${GREEN}[SUCCESS] %s${RESET}\n" "$1"
 }

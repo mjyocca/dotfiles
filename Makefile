@@ -32,7 +32,7 @@ dotfiles:
 
 pre_install_macos:
 	@echo "Initializing macOS-specific tools..."
-	@bash ./osx/core.sh
+	@bash ./osx/core-utils.sh
 	@bash ./osx/config.sh
 
 # Common tasks
@@ -48,7 +48,7 @@ install_common_tools:
 	# $(INSTALL_CMD) curl
 
 # OS-specific tasks
-bootstrap_macos: bootstrap install_macos_tools
+bootstrap_macos: bootstrap pre_install_macos install_macos_tools
 
 install_macos_tools:
 	@echo "Installing macOS-specific tools..."
