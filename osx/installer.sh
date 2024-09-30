@@ -52,22 +52,21 @@ install_homebrew() {
 
 # Check if the script is being run directly or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-	installer() {
-		info "### DOTFILES ###"
-		info "Bootstraping..."
+	info "### DOTFILES ###"
+	info "Bootstraping..."
 
-		install_xcode
-		install_homebrew
+	install_xcode
+	install_homebrew
 
-		info "Installing Git"
-		brew install git
+	info "Installing Git..."
+	brew install git
 
-		info "Cloning repo $REPO_URL into $REPO_PATH"
-		git clone "$REPO_URL" "$REPO_PATH"
+	info "Cloning repo $REPO_URL into $REPO_PATH"
+	git clone "$REPO_URL" "$REPO_PATH"
 
-		info "Change path to $REPO_PATH"
-		cd "$REPO_PATH" >/dev/null
-	}
+	info "Change path to $REPO_PATH"
+	cd "$REPO_PATH" >/dev/null
 
-	installer
+	info "Installing dependencies..."
+	make bootstrap_macos
 fi
