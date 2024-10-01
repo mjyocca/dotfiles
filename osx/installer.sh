@@ -5,6 +5,7 @@ set -o errexit
 REPO_URL=https://github.com/mjyocca/dotfiles.git
 REPO_PATH="$HOME/dotfiles"
 
+## NOTE: Sourced from ./scripts/utils.sh to make install/execution easier
 # Color codes
 RESET='\033[0m'      # No Color / Reset
 GREEN='\033[0;32m'   # Green for Success
@@ -28,6 +29,7 @@ error() {
 success() {
   printf "${GREEN}[SUCCESS] %s${RESET}\n" "$1"
 }
+## NOTE: Sourced from ./scripts/utils.sh to make install/execution easier
 
 install_xcode() {
 	if xcode-select -p >/dev/null; then
