@@ -1,6 +1,18 @@
 # Starship
 eval "$(starship init zsh)"
 
+## Create/Load global env vars file
+if [ -f ~/.global_env.sh ]; then
+  # Load env vars
+  . ~/.global_env.sh
+else
+  touch ~/.global_env.sh
+  cat <<EOF > ~/.global_env.sh
+#!/usr/bin/env bash
+## export TEST_VAR="test"
+EOF
+fi
+
 # ASDF
 ## asdf go plugin
 ## Environment variables should generally be set before sourcing asdf.sh
