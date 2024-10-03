@@ -19,6 +19,6 @@ setup_github_ssh() {
 
 # Check if the script is being run directly or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  # Script is being run directly, so call the function
-  setup_github_ssh
+	# Script is being run directly, so call the function
+	setup_github_ssh
 fi

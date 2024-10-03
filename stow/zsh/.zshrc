@@ -3,11 +3,11 @@ eval "$(starship init zsh)"
 
 ## Create/Load global env vars file
 if [ -f ~/.global_env.sh ]; then
-  # Load env vars
-  . ~/.global_env.sh
+	# Load env vars
+	. ~/.global_env.sh
 else
-  touch ~/.global_env.sh
-  cat <<EOF > ~/.global_env.sh
+	touch ~/.global_env.sh
+	cat <<EOF > ~/.global_env.sh
 #!/usr/bin/env bash
 ## export TEST_VAR="test"
 EOF
@@ -26,8 +26,8 @@ export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 # pnpm
 export PNPM_HOME="/Users/michaelyocca/Library/pnpm"
 case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
+	*":$PNPM_HOME:"*) ;;
+	*) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
 

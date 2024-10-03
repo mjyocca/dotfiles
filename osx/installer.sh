@@ -15,19 +15,19 @@ BLUE='\033[0;34m'    # Blue for Logs
 
 # Logging Functions
 info() {
-  printf "${BLUE}[INFO] %s${RESET}\n" "$1"
+	printf "${BLUE}[INFO] %s${RESET}\n" "$1"
 }
 
 warn() {
-  printf "${YELLOW}[WARN] %s${RESET}\n" "$1"
+	printf "${YELLOW}[WARN] %s${RESET}\n" "$1"
 }
 
 error() {
-  printf "${RED}[ERROR] %s${RESET}\n" "$1"
+	printf "${RED}[ERROR] %s${RESET}\n" "$1"
 }
 
 success() {
-  printf "${GREEN}[SUCCESS] %s${RESET}\n" "$1"
+	printf "${GREEN}[SUCCESS] %s${RESET}\n" "$1"
 }
 ## NOTE: Sourced from ./scripts/utils.sh to make install/execution easier
 

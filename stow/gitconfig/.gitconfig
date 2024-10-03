@@ -6,8 +6,8 @@
 	defaultBranch = main
 
 [user]
-  name = Michael Yocca
-  email = 19916665+mjyocca@users.noreply.github.com
+	name = Michael Yocca
+	email = 19916665+mjyocca@users.noreply.github.com
 
 [alias]
 	fza = "!git ls-files -m -o --extend-standard | fzf --print0 -m | xargs -0 -t -o git add"
