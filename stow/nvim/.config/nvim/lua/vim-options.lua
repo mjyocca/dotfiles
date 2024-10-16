@@ -18,3 +18,7 @@ vim.keymap.set('n', '<leader>h', ':nohlsearch<CR>')
 vim.wo.number = true
 
 vim.o.fillchars = "eob: "
+
+-- Remap visual mode indenting to keep the selection active
+vim.api.nvim_set_keymap('v', '>', '>gv', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<', '<gv', { noremap = true, silent = true })

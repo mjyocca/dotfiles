@@ -26,6 +26,7 @@ return {
             -- ["E"] = "expand_all_nodes", -- Press 'E' to expand all nodes under the current one
             ["Z"] = "expand_all_nodes",
             ["z"] = "close_all_nodes",
+            ["q"] = "close_window",
           },
         },
         filtered_items = {

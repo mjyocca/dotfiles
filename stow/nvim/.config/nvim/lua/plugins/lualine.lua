@@ -5,8 +5,11 @@ return {
     require('lualine').setup({
       options = {
         -- theme = 'dracula' -- 'dracula' -- 'horizon'
-        theme = 'github-dark', -- Your custom theme name
-      }
+        theme = 'github-dark',-- 'github-dark', -- Your custom theme name
+        icons_enabled = true,
+        component_separators = ' ',
+        section_separators = { left = '', right = '' },
+      },
     })
   end
 }
