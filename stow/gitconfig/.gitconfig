@@ -10,7 +10,7 @@
 	email = 19916665+mjyocca@users.noreply.github.com
 
 [alias]
-	fza = "!git ls-files -m -o --extend-standard | fzf --print0 -m | xargs -0 -t -o git add"
+	fza = "!git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add"
 	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
 
 # Per parent directory settings
