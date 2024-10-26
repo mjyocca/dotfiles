@@ -4,3 +4,50 @@
 # Prompt-wide configuration options
 command_timeout = 1000
 
+# Format see https://starship.rs/config/#default-prompt-format
+format = """
+[](#1b1f23)\
+$os\
+$username\
+[ ](#1b1f23)\
+$directory\
+$git_branch\
+$git_status\
+$fill\
+$docker_context\
+$jobs\
+$package\
+$c\
+$cmake\
+$cobol\
+$deno\
+$golang\
+$haskell\
+$helm\
+$java\
+$kotlin\
+$kubernetes\
+$lua\
+$nodejs\
+$python\
+$ruby\
+$rust\
+$scala\
+$swift\
+$terraform\
+$vagrant\
+$zig\
+$buf\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$direnv\
+$env_var\
+$sudo\
+$cmd_duration\
+$line_break\
+$character"""
+
+[fill]
+symbol = ' '
