@@ -51,6 +51,10 @@ $character"""
 
 [fill]
 symbol = ' '
+
+# Palettes
+# TODO
+
 # Moduless
 [os]
 disabled = false
@@ -82,3 +86,37 @@ show_always = true
 style_user = "bg:#1b1f23 fg:#cdd6f4"
 style_root = "bg:#1b1f23 fg:#cdd6f4"
 format = '[ $user ]($style)'
+
+# Language Modules
+[c]
+symbol = " "
+
+[rust]
+symbol = ""
+
+[golang]
+symbol = "󰟓 "
+
+[java]
+symbol = ""
+
+[kotlin]
+symbol = ""
+
+[nodejs]
+symbol = " " 
+
+[deno]
+symbol = "🦕|󰛦"
+
+[ruby]
+symbol = ""
+
+[terraform]
+symbol = ""
+
+[vagrant]
+symbol = "V"
+
+[aws]
+symbol = "󰸏"
