@@ -24,6 +24,8 @@ $c\
 $cmake\
 $cobol\
 $deno\
+$bun\
+$nodejs\
 $golang\
 $haskell\
 $helm\
@@ -31,7 +33,6 @@ $java\
 $kotlin\
 $kubernetes\
 $lua\
-$nodejs\
 $python\
 $ruby\
 $rust\
@@ -92,11 +93,15 @@ format = '[ $user ]($style)'
 
 # Language Modules
 [c]
-symbol = " "
+symbol = ""
 format = "[$symbol ($version)]($style) "
 
 [rust]
 symbol = ""
+format = "[$symbol ($version)]($style) "
+
+[zig]
+symbol = ""
 format = "[$symbol ($version)]($style) "
 
 [golang]
@@ -111,16 +116,32 @@ format = "[$symbol ($version)]($style) "
 symbol = ""
 format = "[$symbol ($version)]($style) "
 
+[lua]
+symbol = ""
+format = "[$symbol ($version)]($style) "
+
 [nodejs]
 symbol = ""
 format = "[$symbol ($version)]($style) "
 
 [deno]
-symbol = "🦕|󰛦"
+symbol = "Deno🦕|󰛦"
+format = "[$symbol ($version)]($style) "
+
+[bun]
+symbol = "Bun🥟|󰛦"
 format = "[$symbol ($version)]($style) "
 
 [ruby]
 symbol = ""
+format = "[$symbol ($version)]($style) "
+
+[python]
+symbol = ""
+format = "[$symbol ($version)]($style) "
+
+[swift]
+symbol = ""
 format = "[$symbol ($version)]($style) "
 
 [docker_context]
@@ -132,7 +153,7 @@ symbol = ""
 format = "[$symbol ($version)]($style) "
 
 [vagrant]
-symbol = "V"
+symbol = "⍱"
 format = "[$symbol ($version)]($style) "
 
 [aws]
