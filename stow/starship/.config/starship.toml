@@ -93,33 +93,49 @@ format = '[ $user ]($style)'
 # Language Modules
 [c]
 symbol = " "
+format = "[$symbol ($version)]($style) "
 
 [rust]
 symbol = ""
+format = "[$symbol ($version)]($style) "
 
 [golang]
-symbol = "󰟓 "
+symbol = "󰟓"
+format = "[$symbol ($version)]($style) "
 
 [java]
 symbol = ""
+format = "[$symbol ($version)]($style) "
 
 [kotlin]
 symbol = ""
+format = "[$symbol ($version)]($style) "
 
 [nodejs]
-symbol = " " 
+symbol = ""
+format = "[$symbol ($version)]($style) "
 
 [deno]
 symbol = "🦕|󰛦"
+format = "[$symbol ($version)]($style) "
 
 [ruby]
 symbol = ""
+format = "[$symbol ($version)]($style) "
+
+[docker_context]
+symbol = "🐳"
+format = "[$symbol ($context)]($style) " 
 
 [terraform]
 symbol = ""
+format = "[$symbol ($version)]($style) "
 
 [vagrant]
 symbol = "V"
+format = "[$symbol ($version)]($style) "
 
 [aws]
 symbol = "󰸏"
+format = "[$symbol ($version)]($style) "
+
