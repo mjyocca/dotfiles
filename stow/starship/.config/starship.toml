@@ -9,10 +9,10 @@ command_timeout = 1000
 
 # Format see https://starship.rs/config/#default-prompt-format
 format = """
-[](#1b1f23)\
+[](surface0)\
 $os\
 $username\
-[ ](#1b1f23)\
+[ ](surface0)\
 $directory\
 $git_branch\
 $git_status\
@@ -53,16 +53,38 @@ $cmd_duration\
 $line_break\
 $character"""
 
+palette = 'github_dark'
+
 [fill]
 symbol = ' '
 
 # Palettes
-# TODO create palettes to re-use colors and toggle themes
+[palettes.github_dark]
+surface0 = "#0d1117"
+surface1 = "#1b1f23"
+text = "#c9d1d9"
+accent = "#F78166"
+black = "#0d1117"
+blue = "#58a6ff"
+cyan = "#76e3ea"
+green = "#3fb950"
+magenta = "#bc8cff"
+red = "#ff7b72"
+white = "#b1bac4"
+yellow = "#d29922"
+bright_black = "#161b22"
+bright_blue = "#79c0ff"
+bright_cyan = "#b3f0ff"
+bright_green = "#56d364"
+bright_magenta = "#d2a8ff"
+bright_red = "#ffa198"
+bright_white = "#b1bac4"
+bright_yellow = "#e3b341"
 
 # Moduless
 [os]
 disabled = false
-style = "bg:#1b1f23 fg:#cdd6f4"
+style = "bg:surface0 fg:text"
 
 [os.symbols]
 Windows = "󰍲"
@@ -87,9 +109,9 @@ RedHatEnterprise = "󱄛"
 
 [username]
 show_always = true
-style_user = "bg:#1b1f23 fg:#cdd6f4"
-style_root = "bg:#1b1f23 fg:#cdd6f4"
-format = '[ $user ]($style)'
+style_user = "bg:surface0 fg:text"
+style_root = "bg:surface0 fg:text"
+format = '[ $user]($style)'
 
 # Language Modules
 [c]
