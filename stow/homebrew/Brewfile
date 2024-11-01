@@ -1,7 +1,9 @@
+##############
 # Taps
 tap "homebrew/bundle"
 
-# Binaries
+##############
+# Binaries & Tools
 brew 'asdf'
 brew 'bat'
 brew 'btop'
@@ -32,6 +34,7 @@ brew 'wget'
 brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
 
+###############
 # Applications
 # cask 'slack'
 # cask 'spotify'
@@ -42,3 +45,8 @@ brew 'zero-sh/tap/apply-user-defaults'
 # cask 'keycastor'
 cask 'qmk-toolbox'
 cask 'alacritty'
+
+
+###############
+# Mac App Store
+mas "system-color-picker", id: 1545870783
