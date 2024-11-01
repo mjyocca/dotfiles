@@ -1,0 +1,23 @@
+# MACOS Settings controlled by (apply-user-defaults)
+# see: https://github.com/zero-sh/apply-user-defaults
+
+com.apple.dock:
+  # System Preferences > Dock > Automatically hide and show the Dock.
+  autohide: true
+  # hide icons from desktop
+  CreateDesktop: false
+  # System Preferences > Dock > Show indicators for open applications.
+  show-process-indicators: true
+
+NSGlobalDomain:
+  # defaults write NSGlobalDomain _HIHideMenuBar -bool true
+  _HIHideMenuBar: true
+
+com.apple.finder:
+  # defaults write com.apple.finder "AppleShowAllFiles" -bool true
+  AppleShowAllFiles: true
+
+com.microsoft.VSCode:
+  # defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false 	
+  ApplePressAndHoldEnabled: false
+

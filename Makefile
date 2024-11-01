@@ -26,14 +26,10 @@ else ifeq ($(OS), Linux)
 	UPDATE_CMD := sudo $(PKG_MANAGER) update
 endif
 
+# NOTE: Shared tasks
 dotfiles:
 	@echo "Stowing Dotfile Packages..."
 	@bash ./scripts/stow.sh
-
-pre_install_osx:
-	@echo "Initializing macOS-specific tools..."
-	@bash ./osx/core-utils.sh
-	@bash ./osx/config.sh
 
 # Common tasks
 bootstrap: update_packages install_common_tools
@@ -44,11 +40,17 @@ update_packages:
 
 install_common_tools:
 	@echo "Installing common tools on $(PLATFORM)..."
-	# $(INSTALL_CMD) git
-	# $(INSTALL_CMD) curl
 
-# OS-specific tasks
+# NOTE: OSX - specific tasks
 bootstrap_osx: bootstrap pre_install_osx install_osx_tools
+
+apply_defaults_osx:
+	apply-user-defaults ./osx/defaults.yml
+
+pre_install_osx:
+	@echo "Initializing macOS-specific tools..."
+	@bash ./osx/core-utils.sh
+	@bash ./osx/config.sh
 
 install_osx_tools:
 	@echo "Installing macOS-specific tools..."
