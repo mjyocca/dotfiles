@@ -22,6 +22,7 @@ brew 'jq'
 brew 'make'
 brew 'mas'
 brew 'neovim'
+brew 'neofetch'
 brew 'pv'
 brew 'ripgrep' # required for telescope
 brew 'sqlite'
