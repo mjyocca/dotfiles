@@ -36,17 +36,32 @@ brew 'zero-sh/tap/apply-user-defaults'
 
 ###############
 # Applications
-# cask 'slack'
-# cask 'spotify'
-# cask '1password'
-# cask 'visual-studio-code'
-# cask 'zed'
-# cask 'zen-browser'
-# cask 'keycastor'
+# Misc.
+cask 'zen-browser'
+cask 'slack'
+cask 'spotify'
+cask 'notion'
+cask '1password'
 cask 'qmk-toolbox'
-cask 'alacritty'
+cask 'MonitorControl'
+cask 'rectangle'
+cask 'raycast'
+cask 'cleanshot'
+cask 'screen-studio'
+cask 'keycastr'
 
+# Development Tools
+cask 'visual-studio-code'
+cask 'warp'
+# NOTE: cask not supported on apple silicon `cask 'zed'`
+cask 'alacritty'
+cask 'tower'
+cask 'gitbutler'
+cask 'orbstack'
 
 ###############
 # Mac App Store
 mas "system-color-picker", id: 1545870783
+
+###############
+# Hooks
