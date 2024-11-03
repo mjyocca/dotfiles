@@ -31,6 +31,7 @@ local Plug = vim.fn['plug#']
 vim.call('plug#begin')
 
 Plug 'tpope/vim-commentary'
+Plug 'rcarriga/nvim-notify'
 
 vim.call('plug#end')
 
