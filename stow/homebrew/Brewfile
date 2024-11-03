@@ -13,7 +13,7 @@ brew 'coreutils'
 brew 'cmatrix'
 brew 'direnv'
 brew 'fzf'
-brew 'figlet'
+brew 'figlet' # ascii art
 brew 'git'
 brew 'htop'
 brew 'lazygit'
