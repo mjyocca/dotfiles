@@ -4,6 +4,7 @@ return {
     'folke/which-key.nvim',
     event = 'VimEnter',
     opts = {
+      preset = "modern",
       icons = {
         -- set icon mappings to true if you have a Nerd Font
         mappings = vim.g.have_nerd_font,
@@ -39,6 +40,11 @@ return {
           F11 = '<F11>',
           F12 = '<F12>',
         },
+      },
+
+      win = {
+        padding = { 2, 4 },
+        border = "rounded"
       },
 
       -- Document existing key chains
