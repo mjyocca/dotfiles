@@ -14,7 +14,6 @@ return {
       end
     end,
     config = function()
-      -- vim.cmd('colorscheme github_dark_default')
       require('lualine').setup({
         options = {
           -- theme = 'dracula' -- 'dracula' -- 'horizon'
