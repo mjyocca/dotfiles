@@ -26,17 +26,26 @@ if vim.fn.empty(vim.fn.glob(data_dir .. '/autoload/plug.vim')) == 1 then
     augroup END
   ]]
 end
-local Plug = vim.fn['plug#']
 
+-- Vim Plugins
+local Plug = vim.fn['plug#']
 vim.call('plug#begin')
 
 Plug 'tpope/vim-commentary'
 
 vim.call('plug#end')
 
-require("vim-options")
+
+-- Setup configuration options
+require("config.options")
+require("config.keymaps")
+require("config.autocmds")
+
+-- Initialize Lazy
 require("lazy").setup({
   spec = {
-    { import = "plugins" },
+    {
+      import = "plugins"
+    },
   },
 })
