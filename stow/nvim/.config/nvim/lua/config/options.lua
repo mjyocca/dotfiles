@@ -5,12 +5,19 @@ vim.cmd("set softtabstop=2")
 vim.cmd("set shiftwidth=2")
 
 vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+-- Set to true if you have a Nerd Font installed and selected in the terminal
+vim.g.have_nerd_font = true
 
 vim.g.background = "light"
 
 vim.opt.swapfile = false
 
 vim.wo.number = true
+
+-- Enable break indent
+vim.opt.breakindent = true
 
 vim.o.fillchars = "eob: "
 
@@ -23,4 +30,8 @@ vim.opt.cursorline = true
 -- Displays which-key popup sooner
 vim.opt.timeoutlen = 300
 
+-- Preview substitutions live, as you type!
+vim.opt.inccommand = 'split'
 
+-- Show which line your cursor is on
+vim.opt.cursorline = true

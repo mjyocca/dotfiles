@@ -15,26 +15,30 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-local data_dir = vim.fn.has('nvim') == 1 and vim.fn.stdpath('data') .. '/site' or '~/.vim'
-if vim.fn.empty(vim.fn.glob(data_dir .. '/autoload/plug.vim')) == 1 then
-  vim.fn.system({ 'curl', '-fLo', data_dir .. '/autoload/plug.vim', '--create-dirs',
-    'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' })
-  vim.cmd [[
+local data_dir = vim.fn.has("nvim") == 1 and vim.fn.stdpath("data") .. "/site" or "~/.vim"
+if vim.fn.empty(vim.fn.glob(data_dir .. "/autoload/plug.vim")) == 1 then
+  vim.fn.system({
+    "curl",
+    "-fLo",
+    data_dir .. "/autoload/plug.vim",
+    "--create-dirs",
+    "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim",
+  })
+  vim.cmd([[
     augroup PlugInstall
       autocmd!
       autocmd VimEnter * lua vim.cmd('PlugInstall --sync | source $MYVIMRC')
     augroup END
-  ]]
+  ]])
 end
 
 -- Vim Plugins
-local Plug = vim.fn['plug#']
-vim.call('plug#begin')
+local Plug = vim.fn["plug#"]
+vim.call("plug#begin")
 
-Plug 'tpope/vim-commentary'
+Plug("tpope/vim-commentary")
 
-vim.call('plug#end')
-
+vim.call("plug#end")
 
 -- Setup configuration options
 require("config.options")
@@ -45,7 +49,7 @@ require("config.autocmds")
 require("lazy").setup({
   spec = {
     {
-      import = "plugins"
+      import = "plugins",
     },
   },
 })
