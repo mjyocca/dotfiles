@@ -33,12 +33,10 @@ if vim.fn.empty(vim.fn.glob(data_dir .. "/autoload/plug.vim")) == 1 then
 end
 
 -- Vim Plugins
-local Plug = vim.fn["plug#"]
-vim.call("plug#begin")
-
-Plug("tpope/vim-commentary")
-
-vim.call("plug#end")
+-- local Plug = vim.fn["plug#"]
+-- vim.call("plug#begin")
+-- # plugins go here #
+-- vim.call("plug#end")
 
 -- Setup configuration options
 require("config.options")

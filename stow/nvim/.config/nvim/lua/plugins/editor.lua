@@ -298,6 +298,15 @@ return {
 		},
 	},
 
+	-- Git plugin to interact with git ex: `:Git diff`
+	{
+		"tpope/vim-fugitive",
+	},
+
+	{
+		"tpope/vim-commentary",
+	},
+
 	-- NOTE: this is an example note
 	-- Highlight todo, notes, etc in comments
 	{
