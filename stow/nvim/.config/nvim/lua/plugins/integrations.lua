@@ -1,6 +1,7 @@
 return {
 	{
 		"alexghergh/nvim-tmux-navigation",
+    lazy = true,
 		config = function()
 			require("nvim-tmux-navigation").setup({})
 			vim.keymap.set("n", "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", {})
@@ -13,6 +14,7 @@ return {
 	-- LazyGit integration with Telescope
 	{
 		"kdheepak/lazygit.nvim",
+    -- event = "VeryLazy",
 		lazy = true,
 		keys = {
 			{
@@ -31,6 +33,8 @@ return {
 	--
 	{
 		"kristijanhusak/vim-dadbod-ui",
+    -- event = "VeryLazy",
+    lazy = true,
 		dependencies = {
 			{ "tpope/vim-dadbod", lazy = true },
 			{ "kristijanhusak/vim-dadbod-completion", ft = { "sql", "mysql", "plsql" }, lazy = true },

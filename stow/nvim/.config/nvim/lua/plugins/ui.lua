@@ -33,6 +33,7 @@ return {
 	{
 		"akinsho/bufferline.nvim",
 		event = "VeryLazy",
+    lazy = true,
 		version = "*",
 		dependencies = {
 			"nvim-tree/nvim-web-devicons", -- Optional for file icons
@@ -73,6 +74,7 @@ return {
 	{
 		"nvim-lualine/lualine.nvim",
 		event = "VeryLazy",
+    lazy = true,
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		init = function()
 			vim.g.lualine_laststatus = vim.o.laststatus
@@ -174,6 +176,7 @@ return {
 	{ -- Add indentation guides even on blank lines
 		"lukas-reineke/indent-blankline.nvim",
 		event = "VeryLazy",
+    lazy = true,
 		-- Enable `lukas-reineke/indent-blankline.nvim`
 		-- See `:help ibl`
 		main = "ibl",
