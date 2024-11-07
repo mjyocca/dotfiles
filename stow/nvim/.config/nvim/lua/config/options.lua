@@ -16,15 +16,15 @@ vim.opt.swapfile = false
 
 vim.wo.number = true
 
+-- Enable mouse mode, can be useful for resizing splits for example!
+vim.opt.mouse = 'a'
+
 -- Enable break indent
 vim.opt.breakindent = true
 
 vim.o.fillchars = "eob: "
 
 vim.opt.termguicolors = true
-
--- Show which line your cursor is on
-vim.opt.cursorline = true
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
