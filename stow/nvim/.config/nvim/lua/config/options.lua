@@ -1,4 +1,3 @@
-
 vim.cmd("set expandtab")
 vim.cmd("set tabstop=2")
 vim.cmd("set softtabstop=2")
@@ -17,7 +16,7 @@ vim.opt.swapfile = false
 vim.wo.number = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
+vim.opt.mouse = "a"
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -31,7 +30,7 @@ vim.opt.termguicolors = true
 vim.opt.timeoutlen = 300
 
 -- Preview substitutions live, as you type!
-vim.opt.inccommand = 'split'
+vim.opt.inccommand = "split"
 
 -- Show which line your cursor is on
 vim.opt.cursorline = true
