@@ -63,6 +63,9 @@ cask 'tower'
 cask 'gitbutler'
 cask 'orbstack'
 
+# Fonts
+cask 'font-fira-code-nerd-font'
+
 ###############
 # Mac App Store
 mas "system-color-picker", id: 1545870783
