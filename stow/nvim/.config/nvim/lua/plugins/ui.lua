@@ -101,6 +101,7 @@ return {
 	},
 
 	-- filename
+  -- https://github.com/b0o/incline.nvim
 	{
 		"b0o/incline.nvim",
 		dependencies = {},
@@ -118,12 +119,11 @@ return {
 					local ft_icon, ft_color = require("nvim-web-devicons").get_icon_color(filename)
 					local modified = vim.bo[props.buf].modified
 					local buffer = {
-						ft_icon and { " ", ft_icon, " ", guibg = ft_color, guifg = helpers.contrast_color(ft_color) }
-							or "",
+            { (ft_icon or '') .. ' ', guifg = ft_color, guibg = 'none' },
+            --TODO: remove hardcoded reference to hex color
+            { filename .. ' ', gui = modified and 'bold,italic' or 'bold', guifg = '#c9d1d9' },
 						" ",
-						{ filename, gui = modified and "bold,italic" or "bold" },
-						" ",
-						guibg = "#363944",
+						guibg = "none",
 					}
 					return buffer
 				end,
