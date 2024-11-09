@@ -120,6 +120,8 @@ return {
 					local modified = vim.bo[props.buf].modified
 					local buffer = {
             { (ft_icon or '') .. ' ', guifg = ft_color, guibg = 'none' },
+            -- ft_icon and { " ", ft_icon, " ", guibg = ft_color, guifg = helpers.contrast_color(ft_color) },
+            -- " ",
             --TODO: remove hardcoded reference to hex color
             { filename .. ' ', gui = modified and 'bold,italic' or 'bold', guifg = '#c9d1d9' },
 						" ",
