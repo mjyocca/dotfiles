@@ -34,3 +34,7 @@ vim.opt.inccommand = "split"
 
 -- Show which line your cursor is on
 vim.opt.cursorline = true
+
+vim.cmd([[
+  autocmd BufRead,BufNewFile .env,.envrc set filetype=sh
+]])
