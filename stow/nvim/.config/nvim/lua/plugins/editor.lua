@@ -173,12 +173,14 @@ return {
 			-- Document existing key chains
 			spec = {
 				{ "<leader>c", group = "[C]ode", mode = { "n", "x" } },
-				{ "<leader>d", group = "[D]ocument" },
+				{ "<leader>d", group = "[D]ocument/[D]ebug" },
 				{ "<leader>r", group = "[R]ename" },
 				{ "<leader>s", group = "[S]earch" },
 				{ "<leader>w", group = "[W]orkspace" },
 				{ "<leader>t", group = "[T]oggle" },
 				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
+        -- subgroups
+        { "<leader>dg", group = "[D]ebug [G]o" },
 			},
 		},
 	},
@@ -248,8 +250,8 @@ return {
 			-- vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left<CR>', {
 			--   desc = 'NeoTree reveal', silent = true
 			-- })
-			vim.keymap.set("n", "<leader>bf", ":Neotree buffers reveal float<CR>", {
-				desc = "NeoTree Buffer Reveal",
+			vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal float<CR>", {
+				desc = "[N]eoTree [B]uffer Reveal",
 				silent = true,
 			})
 		end,
