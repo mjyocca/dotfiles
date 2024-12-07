@@ -38,3 +38,11 @@ vim.opt.cursorline = true
 vim.cmd([[
   autocmd BufRead,BufNewFile .env,.envrc set filetype=sh
 ]])
+
+-- Set Neovim's folding options
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldlevel = 99
+vim.opt.fillchars:append({
+  fold = " ",
+})
