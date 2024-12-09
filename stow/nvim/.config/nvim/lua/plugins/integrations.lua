@@ -11,22 +11,22 @@ return {
 	},
 
 	-- LazyGit integration with Telescope
-	{
-		"kdheepak/lazygit.nvim",
-		lazy = true,
-		keys = {
-			{
-				";c",
-				":LazyGit<Return>",
-				silent = true,
-				noremap = true,
-			},
-		},
-		-- optional for floating window border decoration
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
-	},
+	-- {
+	-- 	"kdheepak/lazygit.nvim",
+	-- 	lazy = true,
+	-- 	keys = {
+	-- 		{
+	-- 			";c",
+	-- 			":LazyGit<Return>",
+	-- 			silent = true,
+	-- 			noremap = true,
+	-- 		},
+	-- 	},
+	-- 	-- optional for floating window border decoration
+	-- 	dependencies = {
+	-- 		"nvim-lua/plenary.nvim",
+	-- 	},
+	-- },
 
 	--
 	{

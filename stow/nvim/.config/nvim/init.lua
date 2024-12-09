@@ -33,3 +33,5 @@ require("lazy").setup({
 		},
 	},
 })
+
+keymaps.plugins()
