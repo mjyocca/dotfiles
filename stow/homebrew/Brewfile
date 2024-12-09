@@ -15,6 +15,7 @@ brew 'direnv'
 brew 'fzf'
 brew 'figlet' # ascii art
 brew 'git'
+brew 'gh'
 brew 'htop'
 brew 'lazygit'
 brew 'lazydocker'
