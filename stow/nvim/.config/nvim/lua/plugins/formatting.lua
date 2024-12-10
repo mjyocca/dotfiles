@@ -27,6 +27,15 @@ return {
           null_ls.builtins.formatting.yamlfmt,
         },
         on_attach = function(client, bufnr)
+          -- Specify filetypes where formatting should be disabled
+          local disabled_filetypes = { "ruby" }
+
+          -- Check if current filetype is in the disabled list
+          local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+          if vim.tbl_contains(disabled_filetypes, filetype) then
+            return
+          end
+
           if client.supports_method("textDocument/formatting") then
             vim.api.nvim_clear_autocmds({
               group = augroup,
