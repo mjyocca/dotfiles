@@ -15,9 +15,9 @@ setup_osx() {
 	launchctl enable gui/$(id -u)/com.openssh.ssh-agent
 
 	info "Remapping Caps to Esc"
-	cp "$HOME/dotfiles/osx/com.local.remap_caps_lock.plist" "$HOME/Library/LaunchAgents/"
-	launchctl unload "$HOME/Library/LaunchAgents/com.local.remap_caps_lock.plist"
-	launchctl load "$HOME/Library/LaunchAgents/com.local.remap_caps_lock.plist"
+	cp "$HOME/dotfiles/osx/com.local.remap_caps_lock.plist" "$HOME/library/launchagents/"
+	launchctl unload "$HOME/library/launchagents/com.local.remap_caps_lock.plist"
+	launchctl load "$HOME/library/launchagents/com.local.remap_caps_lock.plist"
 	launchctl enable gui/$(id -u)/com.local.remap_caps_lock
 }
 
