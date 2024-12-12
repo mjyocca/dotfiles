@@ -31,7 +31,7 @@ return {
           local disabled_filetypes = { "ruby" }
 
           -- Check if current filetype is in the disabled list
-          local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+          local filetype = vim.bo.filetype -- vim.api.nvim_buf_get_option(bufnr, "filetype")
           if vim.tbl_contains(disabled_filetypes, filetype) then
             return
           end
