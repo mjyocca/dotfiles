@@ -156,4 +156,34 @@ function M.snacks(options)
   end, {})
 end
 
+M.plugins = function()
+  -- Ember Cmd util for finding related files
+  vim.api.nvim_create_user_command("FindEmberRelated", function()
+    local actions = require("telescope.actions")
+    local finders = require("telescope.finders")
+    local pickers = require("telescope.pickers")
+    local sorters = require("telescope.sorters")
+
+    local current_file = vim.fn.expand("%:t:r")
+    local related_patterns = { "component", "controller", "route", "template", "model", "service", "helper" }
+
+    pickers
+        .new({}, {
+          prompt_title = "Find Related Ember Files",
+          finder = finders.new_oneshot_job({
+            "rg",
+            "--files",
+            "--glob",
+            "**/*" .. current_file .. "*",
+          }),
+          sorter = sorters.get_fuzzy_file(),
+          attach_mappings = function(_, map)
+            map("i", "<CR>", actions.select_default)
+            return true
+          end,
+        })
+        :find()
+  end, {})
+end
+
 return M

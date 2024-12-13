@@ -11,6 +11,7 @@ local language_files = {
   "terraform",
   "bash",
   "markdown",
+  "ember",
 }
 
 local server_mappings = {}

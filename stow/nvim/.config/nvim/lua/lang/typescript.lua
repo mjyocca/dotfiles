@@ -1,6 +1,8 @@
 local typescript = {
   server_name = "ts_ls",
-  lspconfig = {},
+  lspconfig = {
+    filetypes = { "javascript", "typescript" },
+  },
 }
 
 return typescript

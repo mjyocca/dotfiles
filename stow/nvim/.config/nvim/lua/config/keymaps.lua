@@ -104,6 +104,11 @@ function M.plugins()
     -- UserCommand created in config/autocmds.lua
     vim.cmd("ShowDiags")
   end, "[;] Diagnostics")
+
+  map(";e", function()
+    -- UserCommand created in config/autocmds.lua
+    vim.cmd("FindEmberRelated")
+  end, "[;] Ember")
 end
 
 return M
