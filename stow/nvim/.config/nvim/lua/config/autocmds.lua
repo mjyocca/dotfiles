@@ -1,5 +1,6 @@
 local M = {}
 
+local d = {}
 local function augroup(name)
   return vim.api.nvim_create_augroup(name, { clear = true })
 end
@@ -57,6 +58,102 @@ function M.lsp(options)
       end
     end,
   })
+end
+
+-- Snacks Plugin autocommands
+function M.snacks(options)
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "VeryLazy",
+    callback = function()
+      require("snacks").toggle.diagnostics():map("<leader>ud")
+    end,
+  })
+
+  -- Diagnostic Window Util to scroll to correlated diagnostic line
+  vim.api.nvim_create_user_command("ShowDiags", function()
+    -- Current Window with diags
+    local current_win = vim.api.nvim_get_current_win()
+    -- Current Buffer
+    local diagnostics = vim.diagnostic.get(0)
+
+    if #diagnostics == 0 then
+      vim.notify("No diagnostics found", vim.log.levels.INFO)
+      return
+    end
+
+    local utils = require("config.utils")
+
+    -- Prepare diagnostic entries
+    local diag_res = utils.get_diagnostics(diagnostics)
+    local lines = diag_res.lines
+    local entries = diag_res.entries
+
+    -- No file, temporary
+    local diags_buf = vim.api.nvim_create_buf(false, true)
+    -- Set buffer lines
+    vim.api.nvim_buf_set_lines(diags_buf, 0, -1, false, lines)
+
+    local width = vim.o.columns
+    local height = vim.o.lines
+    local row_offset = 5
+
+    local win = Snacks.win({
+      buf = diags_buf,
+      relative = "editor",
+      position = "float",
+      height = 0.2,
+      width = 0.4,
+      row = 2, -- height - 0.2 - row_offset, -- Adjust if too close to bottom
+      col = width - 40,
+      fixbuf = true,
+      minimal = false,
+      border = "rounded",
+      ---@diagnostic disable-next-line: missing-fields
+      wo = {
+        cursorline = true,
+        cursorcolumn = false,
+        signcolumn = "yes",
+      },
+      actions = {
+        -- Callback function for selecting a line
+        select = function()
+          local cursor = vim.api.nvim_win_get_cursor(0)
+          local line_number = cursor[1]
+          local line_text = vim.api.nvim_buf_get_lines(diags_buf, line_number - 1, line_number, false)[1]
+
+          for _, diagnostic in ipairs(entries) do
+            if diagnostic.text == line_text then
+              utils.window_scroll_to(current_win, diagnostic.lnum)
+              return
+            end
+          end
+
+          print("Diagnostic not found for:", line_text)
+        end,
+      },
+      keys = {
+        -- register keymap for custom action
+        ["<C-y>"] = "select",
+        -- default close action
+        ["<Esc>"] = "close",
+      },
+    })
+
+    vim.api.nvim_win_set_config(win.win, {
+      border = "rounded",
+      title = "Diagnostics",
+      footer = "Press <Esc> to close | <C-y> to select",
+    })
+
+    -- Create an autocommand to close on window leave
+    vim.api.nvim_create_autocmd({ "WinLeave" }, {
+      buffer = diags_buf,
+      once = true, -- Trigger only once
+      callback = function()
+        win.close(win)
+      end,
+    })
+  end, {})
 end
 
 return M
