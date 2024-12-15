@@ -44,5 +44,10 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldlevel = 99
 vim.opt.fillchars:append({
-  fold = " ",
+	fold = " ",
+})
+
+-- Disable virtual_text since it's redundant due to lsp_lines.
+vim.diagnostic.config({
+	virtual_text = false,
 })

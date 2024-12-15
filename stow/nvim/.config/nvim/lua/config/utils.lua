@@ -1,5 +1,21 @@
 local M = {}
 
+local print_table = function(tbl, indent)
+  indent = indent or 0
+  local indent_str = string.rep("  ", indent)
+
+  for key, value in pairs(tbl) do
+    if type(value) == "table" then
+      print(string.format("%s%s:", indent_str, tostring(key)))
+      print_table(value, indent + 1)
+    else
+      print(string.format("%s%s: %s", indent_str, tostring(key), tostring(value)))
+    end
+  end
+end
+
+M.print_table = print_table
+
 M.window_scroll_to = function(target_win, line)
   line = math.max(1, line)
   vim.api.nvim_win_call(target_win, function()

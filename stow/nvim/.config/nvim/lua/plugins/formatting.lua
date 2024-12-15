@@ -28,7 +28,7 @@ return {
         },
         on_attach = function(client, bufnr)
           -- Specify filetypes where formatting should be disabled
-          local disabled_filetypes = { "ruby" }
+          local disabled_filetypes = { "ruby", "markdown" }
 
           -- Check if current filetype is in the disabled list
           local filetype = vim.bo.filetype -- vim.api.nvim_buf_get_option(bufnr, "filetype")
