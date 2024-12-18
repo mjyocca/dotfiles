@@ -174,6 +174,10 @@ M.plugins = function()
 		if relative_path:match("^.*/app/controllers/") then
 			related_file = relative_path:gsub("^.*/app/controllers/", "/app/routes/")
 			table.insert(search_patterns, "**/*" .. related_file .. "")
+
+			local template_file = relative_path:gsub("^.*/app/controllers/", "/app/templates/")
+			template_file = template_file:gsub("(.+)(%.js)$", "%1.hbs")
+			table.insert(search_patterns, "**/*" .. template_file .. "*")
 			-- test file glob
 			local test_file = relative_path:gsub("^.*/app/controllers/", "/tests/acceptance/")
 			test_file = test_file:gsub("(.+)(%.js)$", "%1-test%2")
@@ -182,6 +186,11 @@ M.plugins = function()
 		elseif relative_path:match("^.*/app/routes/") then
 			related_file = relative_path:gsub("^.*/app/routes/", "/app/controllers/")
 			table.insert(search_patterns, "**/*" .. related_file .. "")
+
+			local template_file = relative_path:gsub("^.*/app/routes/", "/app/templates/")
+			template_file = template_file:gsub("(.+)(%.js)$", "%1.hbs")
+			table.insert(search_patterns, "**/*" .. template_file .. "*")
+
 			-- test file glob
 			local test_file = relative_path:gsub("^.*/app/routes/", "/tests/acceptance/")
 			test_file = test_file:gsub("(.+)(%.js)$", "%1-test%2")
