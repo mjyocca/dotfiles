@@ -57,10 +57,10 @@ cask 'screen-studio'
 cask 'keycastr'
 
 # Development Tools
-cask 'visual-studio-code'
+cask 'ghostty'
 cask 'warp'
+cask 'visual-studio-code'
 # NOTE: cask not supported on apple silicon `cask 'zed'`
-cask 'alacritty'
 cask 'tower'
 cask 'gitbutler'
 cask 'orbstack'
