@@ -43,12 +43,17 @@ install_xcode() {
 
 install_homebrew() {
 	export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-	if hash brew &>/dev/null; then
+	if command -v brew >/dev/null 2>&1; then
 		warn "Homebrew already installed"
 	else
 		info "Installing homebrew..."
 		sudo --validate # reset `sudo` timeout to use Homebrew install in noninteractive mode
-		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Add Homebrew to PATH for Apple Silicon
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    echo "Homebrew installation completed."
 	fi
 }
 
