@@ -3,4 +3,9 @@ font-size = 16
 theme = GitHub Dark
 background-opacity = 0.85
 background-blur-radius = 25
-
+window-padding-x = 4,4
+window-padding-y = 4,4
+# macos-titlebar-style = tabs
+shell-integration = zsh
+# window-title-font-family = FiraCode Nerd Font
+confirm-close-surface = false
