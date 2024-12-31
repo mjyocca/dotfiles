@@ -45,9 +45,11 @@ install_common_tools:
 bootstrap_osx: bootstrap pre_install_osx install_osx_tools
 
 apply_defaults_osx:
+	@echo "Applying OSX default settings ..."
 	apply-user-defaults ./osx/defaults.yml
 
 apply_app_defaults_osx:
+	@echo "Applying OSX Application default settings ..."
 	apply-user-defaults ./osx/defaults.apps.yml
 
 pre_install_osx:
