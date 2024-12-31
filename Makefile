@@ -31,6 +31,15 @@ dotfiles:
 	@echo "Stowing Dotfile Packages..."
 	@bash ./scripts/stow.sh
 
+apply_settings: 
+ifeq ($(PLATFORM), "OSX")
+	$(MAKE) apply_defaults_osx 
+	$(MAKE) apply_app_defaults_osx
+else
+	@echo "Unsupported OS: $(OS)"
+	@echo "Platform $(PLATFORM)"
+endif
+
 # Common tasks
 bootstrap: update_packages install_common_tools
 
@@ -42,8 +51,8 @@ install_common_tools:
 	@echo "Installing common tools on $(PLATFORM)..."
 
 # NOTE: OSX - specific tasks
-bootstrap_osx: bootstrap pre_install_osx install_osx_tools
 
+## Settings Script
 apply_defaults_osx:
 	@echo "Applying OSX default settings ..."
 	apply-user-defaults ./osx/defaults.yml
@@ -51,6 +60,9 @@ apply_defaults_osx:
 apply_app_defaults_osx:
 	@echo "Applying OSX Application default settings ..."
 	apply-user-defaults ./osx/defaults.apps.yml
+
+## Bootstrapping instance
+bootstrap_osx: bootstrap pre_install_osx install_osx_tools
 
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
