@@ -1,7 +1,18 @@
-OS := $(shell uname -s)
+#                    __              ____         ___             
+#  /'\_/`\          /\ \            /\  _`\   __ /\_ \            
+# /\      \     __  \ \ \/'\      __\ \ \L\_\/\_\\//\ \      __   
+# \ \ \__\ \  /'__`\ \ \ , <    /'__`\ \  _\/\/\ \ \ \ \   /'__`\ 
+#  \ \ \_/\ \/\ \L\.\_\ \ \\`\ /\  __/\ \ \/  \ \ \ \_\ \_/\  __/ 
+#   \ \_\\ \_\ \__/.\_\\ \_\ \_\ \____\\ \_\   \ \_\/\____\ \____\
+#    \/_/ \/_/\/__/\/_/ \/_/\/_/\/____/ \/_/    \/_/\/____/\/____/
+                                                               
+                                                                
 
 # Determine current platform, package manager, and distro.
 # Purpose: Detect the operating system and run appropriate target(s)
+#
+OS := $(shell uname -s)
+
 ifeq ($(OS), Darwin)
 	PLATFORM := "OSX"
 	PKG_MANAGER := brew
