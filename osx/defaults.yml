@@ -17,7 +17,3 @@ com.apple.finder:
   # defaults write com.apple.finder "AppleShowAllFiles" -bool true
   AppleShowAllFiles: true
 
-com.microsoft.VSCode:
-  # defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false 	
-  ApplePressAndHoldEnabled: false
-

@@ -47,6 +47,9 @@ bootstrap_osx: bootstrap pre_install_osx install_osx_tools
 apply_defaults_osx:
 	apply-user-defaults ./osx/defaults.yml
 
+apply_app_defaults_osx:
+	apply-user-defaults ./osx/defaults.apps.yml
+
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
 	@bash ./osx/core-utils.sh
