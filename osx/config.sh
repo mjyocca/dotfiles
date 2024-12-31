@@ -2,11 +2,8 @@
 
 . $PWD/scripts/utils.sh
 
-setup_osx() {
-	info "Configuring MacOS default settings"
-
- 	# Show hidden files inside the finder
-	defaults write com.apple.finder "AppleShowAllFiles" -bool true
+setup_osx_launchctl() {
+	info "Configuring MacOS launchagents"
 
 	info "Enabling ssh agent on setup"
 	cp "$HOME/dotfiles/osx/com.openssh.ssh-agent.plist" "$HOME/Library/LaunchAgents/"
@@ -43,5 +40,5 @@ remap_keyboard_shortcut() {
 # Check if the script is being run directly or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	# Script is being run directly, so call the function
-	setup_osx
+  setup_osx_launchctl
 fi
