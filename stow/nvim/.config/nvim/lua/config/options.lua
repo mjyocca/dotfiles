@@ -51,3 +51,9 @@ vim.opt.fillchars:append({
 vim.diagnostic.config({
 	virtual_text = false,
 })
+
+vim.filetype.add({
+	extension = {
+		tsx = "typescriptreact",
+	},
+})
