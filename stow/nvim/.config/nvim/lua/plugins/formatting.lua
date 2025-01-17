@@ -47,7 +47,7 @@ return {
 							callback = function()
 								vim.lsp.buf.format({
 									bufnr = bufnr,
-									timeout_ms = 3000, -- LSP formatting was timing out, default is `1000`.
+									timeout_ms = 5000, -- LSP formatting was timing out, default is `1000`.
 								})
 							end,
 						})
