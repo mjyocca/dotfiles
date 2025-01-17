@@ -44,13 +44,17 @@ return {
       require("bufferline").setup({
         options = {
           -- Add your options here
+          always_show_bufferline = false,
           show_buffer_close_icons = true,
           show_close_icon = true,
-          -- separator_style = "thick",
+          show_tab_indicators = true,
+          separator_style = "thick",
+          diagnostics = "nvim_lsp",
           offsets = {
             {
               filetype = "neo-tree",
               text = "Neo-tree",
+              highlight = "Directory",
               padding = 2,
             },
           },
