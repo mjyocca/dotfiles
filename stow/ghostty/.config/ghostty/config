@@ -21,9 +21,16 @@ window-padding-y = 16,16
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
 
 # Vim Style Navigation for ghostty splits
-keybind = cmd+shift+h=goto_split:left
-keybind = cmd+shift+j=goto_split:bottom
-keybind = cmd+shift+k=goto_split:top
-keybind = cmd+shift+l=goto_split:right
+# keybind = cmd+shift+h=goto_split:left
+# keybind = cmd+shift+j=goto_split:bottom
+# keybind = cmd+shift+k=goto_split:top
+# keybind = cmd+shift+l=goto_split:right
+
+# NOTE: Testing out tmux style trigger sequence
+# instead of: `ctrl+s>h`, trying: `shift+s`.
+keybind = shift+s>h=goto_split:left
+keybind = shift+s>j=goto_split:bottom
+keybind = shift+s>k=goto_split:top
+keybind = shift+s>l=goto_split:right
 
 keybind = cmd+shift+r=reload_config
