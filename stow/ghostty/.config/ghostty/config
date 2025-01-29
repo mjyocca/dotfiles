@@ -34,12 +34,12 @@ keybind = shift+s>k=goto_split:top
 keybind = shift+s>l=goto_split:right
 
 # Tmux style management for adding,removing,navigating splits
-keybind = shift+s>shift+5=new_split:down # `%`
-keybind = shift+s>shift+'=new_split:right
+keybind = shift+s>shift+5=new_split:right
+keybind = shift+s>shift+'=new_split:down
 keybind = shift+s>c=new_tab
 keybind = shift+s>n=next_tab
 keybind = shift+s>p=previous_tab
-keybind = shift+s>shift+7=close_surface # `"`
+keybind = shift+s>shift+7=close_surface
 
 # Reload Config
 keybind = cmd+shift+r=reload_config
