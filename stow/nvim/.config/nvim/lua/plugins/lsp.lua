@@ -21,6 +21,7 @@ return {
       }, -- NOTE: Must be loaded before dependants
       "williamboman/mason-lspconfig.nvim",
       "WhoIsSethDaniel/mason-tool-installer.nvim",
+      "jay-babu/mason-null-ls.nvim",
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -48,10 +49,16 @@ return {
       local servers = require("lang.base").lsp_servers
       local ensure_installed = vim.tbl_keys(servers or {})
 
+      -- NOTE: Something changed, instead using mason-null-ls to automate installing stylua
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
-      vim.list_extend(ensure_installed, {
-        "stylua", -- Used to format Lua code
+      -- vim.list_extend(ensure_installed, {
+      --   -- "stylua", -- Used to format Lua code
+      -- })
+
+      require("mason-null-ls").setup({
+        ensure_installed = { "stylua" }, -- Ensures stylua is installed
+        automatic_installation = {},
       })
 
       --  NOTE: You can press `g?` for help in this menu.
@@ -62,6 +69,7 @@ return {
       })
 
       require("mason-lspconfig").setup({
+        ensure_installed = ensure_installed,
         automatic_installation = true,
         handlers = {
           function(server_name)
