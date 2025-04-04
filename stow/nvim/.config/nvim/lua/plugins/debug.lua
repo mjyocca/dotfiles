@@ -72,6 +72,11 @@ return {
     local dap = require("dap")
     local dapui = require("dapui")
 
+    -- vim.keymap.set("n", "<leader>dh", function()
+    --   require("dap.ui.widgets").hover()
+    --   require("dapui").refresh()
+    -- end, { desc = "Show debugger hover info and refresh UI" })
+
     require("mason-nvim-dap").setup({
       -- Makes a best effort to setup the various debuggers with
       -- reasonable debug configurations
