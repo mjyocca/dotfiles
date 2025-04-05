@@ -13,6 +13,16 @@ return {
         },
         groups = {
           all = {
+            -- Set FloatBorder color (e.g., to light blue)
+            FloatBorder = { fg = "#5fafff" },
+            -- Optionally, set the NormalFloat background for floating windows
+            NormalFloat = { fg = "#5fafff" },
+            WinSeparator = { fg = "#89929b", bg = "NONE" },
+
+            SnacksIndent = { fg = "#21262d" },
+            NeoTreeIndentMarker = { fg = "#21262d" },
+            NeoTreeWinSeparator = { fg = "#21262d" },
+
             -- BufferLine transparent fix after upgrade to nvim v0.11.0
             TabLineFill = { bg = "NONE" },
             -- Lualine transparent fix after upgrade to nvim v0.11.0
@@ -23,16 +33,6 @@ return {
       })
 
       vim.cmd("colorscheme github_dark_default")
-      -- Set FloatBorder color (e.g., to light blue)
-      vim.cmd("highlight FloatBorder guifg=#5fafff")
-      -- Optionally, set the NormalFloat background for floating windows
-      vim.cmd("highlight NormalFloat guifg=#5fafff")
-
-      vim.cmd("highlight WinSeparator guifg=#89929b guibg=NONE")
-
-      vim.cmd("highlight NeoTreeWinSeparator guifg=#21262d")
-      vim.cmd("highlight NeoTreeIndentMarker guifg=#21262d")
-      vim.cmd("highlight SnacksIndent guifg=#21262d")
 
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "dapui_scopes", "dapui_breakpoints", "dapui_stacks", "dapui_watches", "dapui_repl" },
