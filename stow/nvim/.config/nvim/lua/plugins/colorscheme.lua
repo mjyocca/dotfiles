@@ -13,7 +13,11 @@ return {
         },
         groups = {
           all = {
+            -- BufferLine transparent fix after upgrade to nvim v0.11.0
             TabLineFill = { bg = "NONE" },
+            -- Lualine transparent fix after upgrade to nvim v0.11.0
+            StatusLine = { bg = "NONE" },
+            StatusLineNC = { bg = "NONE" },
           },
         },
       })
