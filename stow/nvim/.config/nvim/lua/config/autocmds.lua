@@ -228,6 +228,14 @@ M.plugins = function()
 			previewer = true, -- This enables the default Telescope previewer
 		})
 	end, {})
+  -- Lualine transparent fix after upgrade to nvim v0.11.0
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    pattern = "*",
+    callback = function()
+      vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
+      vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE" })
+    end,
+  })
 end
 
 return M

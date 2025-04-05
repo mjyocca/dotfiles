@@ -1,34 +1,4 @@
 return {
-  -- notify
-  --
-  -- {
-  --   "rcarriga/nvim-notify",
-  --   event = "VeryLazy",
-  --   lazy = true,
-  --   keys = {
-  --     {
-  --       "<leader>un",
-  --       function()
-  --         require("notify").dismiss({ silent = true, pending = true })
-  --       end,
-  --       desc = "Dismiss All Notifications",
-  --     },
-  --   },
-  --   opts = {
-  --     stages = "static",
-  --     timeout = 3000,
-  --     max_height = function()
-  --       return math.floor(vim.o.lines * 0.75)
-  --     end,
-  --     max_width = function()
-  --       return math.floor(vim.o.columns * 0.75)
-  --     end,
-  --     on_open = function(win)
-  --       vim.api.nvim_win_set_config(win, { zindex = 100 })
-  --     end,
-  --   },
-  -- },
-
   -- bufferline
   {
     "akinsho/bufferline.nvim",
@@ -43,8 +13,9 @@ return {
     config = function()
       require("bufferline").setup({
         options = {
+          -- themable = true,
           -- Add your options here
-          always_show_bufferline = false,
+          always_show_bufferline = true,
           show_buffer_close_icons = true,
           show_close_icon = true,
           show_tab_indicators = true,
@@ -52,8 +23,11 @@ return {
           offsets = {
             {
               filetype = "neo-tree",
-              text = "Neo-tree",
               highlight = "Directory",
+              text = "File Explorer",
+              -- text = function()
+              --   return vim.fn.getcwd()
+              -- end,
               padding = 2,
             },
           },
@@ -93,10 +67,9 @@ return {
     config = function()
       require("lualine").setup({
         options = {
-          -- theme = 'dracula' -- 'dracula' -- 'horizon'
           theme = "github-dark", -- Your custom theme name
           icons_enabled = true,
-          component_separators = " ",
+          component_separators = "|",
           section_separators = { left = "", right = "" },
           disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter" } },
         },
