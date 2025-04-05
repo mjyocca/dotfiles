@@ -19,6 +19,7 @@ fi
 # =================================================================
 # ASDF 📦 Package Manager (see https://asdf-vm.com/guide/getting-started.html)
 # =================================================================
+export PATH="$HOME/bin:$PATH"
 export ASDF_DATA_DIR="$HOME/.asdf"
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
