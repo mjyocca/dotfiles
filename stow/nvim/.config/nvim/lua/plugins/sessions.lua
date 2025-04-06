@@ -6,6 +6,7 @@ return {
     { "<leader>wr", "<cmd>SessionSearch<CR>",         desc = "Session search" },
     { "<leader>ws", "<cmd>SessionSave<CR>",           desc = "Save session" },
     { "<leader>wa", "<cmd>SessionToggleAutoSave<CR>", desc = "Toggle autosave" },
+    { "<leader>wd", "<cmd>SessionDelete<CR>",         desc = "Session Delete" },
   },
   opts = {
     log_level = "error",
@@ -16,6 +17,12 @@ return {
       load_on_setup = true,
       theme_conf = { border = true },
       previewer = false,
+      mappings = {
+        -- Mode can be a string or a table, e.g. {"i", "n"} for both insert and normal mode
+        delete_session = { "i", "<C-D>" },
+        alternate_session = { "i", "<C-S>" },
+        copy_session = { "i", "<C-Y>" },
+      },
     },
 
     cwd_change_handling = true,
