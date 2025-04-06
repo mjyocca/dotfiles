@@ -229,14 +229,15 @@ M.plugins = function()
     })
   end, {})
 
-  -- -- Lualine transparent fix after upgrade to nvim v0.11.0
-  -- vim.api.nvim_create_autocmd("ColorScheme", {
-  --   pattern = "*",
-  --   callback = function()
-  --     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
-  --     vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE" })
-  --   end,
-  -- })
+  -- Send OSC 7 escape sequence to update Ghostty's working directory awareness
+  vim.api.nvim_create_autocmd("DirChanged", {
+    callback = function()
+      local cwd = vim.fn.getcwd()
+      local uri = "file://" .. vim.fn.hostname() .. cwd
+      local esc_seq = "\x1b]7;" .. uri .. "\x07"
+      vim.api.nvim_chan_send(vim.v.stderr, esc_seq)
+    end,
+  })
 end
 
 return M
