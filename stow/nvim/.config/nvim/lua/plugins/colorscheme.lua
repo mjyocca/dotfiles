@@ -34,6 +34,9 @@ return {
             -- Lualine transparent fix after upgrade to nvim v0.11.0
             StatusLine = { bg = "NONE" },
             StatusLineNC = { bg = "NONE" },
+            -- nvim-cmp transparent highlight group
+            CmpPopupMenuTransparent = { bg = "NONE" },
+            CmpPopupMenuBorder = { fg = palette.fg.default },
           },
         },
       })
