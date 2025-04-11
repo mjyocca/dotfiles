@@ -234,8 +234,8 @@ return {
         },
         default_component_configs = {
           icon = {
-            folder_closed = "",
-            folder_open = "",
+            folder_closed = "", -- "",
+            folder_open = "", --"",
             folder_empty = "",
             default = "",
             highlight = "NeoTreeFileIcon",
@@ -266,10 +266,6 @@ return {
         },
         auto_expand = true,
       })
-
-      -- vim.api.nvim_set_hl(0, "NeoTreeFolderIcon", { fg = "#42A5F5" })
-      -- vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { fg = "#90CAF9" })
-      -- vim.api.nvim_set_hl(0, "NeoTreeExpander", { fg = "#82B1FF" })
 
       vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal float<CR>", {
         desc = "[N]eoTree [B]uffer Reveal",
