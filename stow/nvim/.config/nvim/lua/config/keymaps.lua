@@ -79,6 +79,8 @@ function M.lsp(event)
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
     end, "[T]oggle Inlay [H]ints")
   end
+
+  map("<leader>tl", require("lsp_lines").toggle, "[T]oggle [L]spLines")
 end
 
 function M.plugins()
@@ -103,8 +105,7 @@ function M.plugins()
   end, "[;] GitBrowse", "v")
 
   map(";d", function()
-    -- UserCommand created in config/autocmds.lua
-    vim.cmd("ShowDiags")
+    require("snacks").picker.diagnostics()
   end, "[;] Diagnostics")
 
   map(";e", function()
