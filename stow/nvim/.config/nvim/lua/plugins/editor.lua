@@ -203,54 +203,74 @@ return {
       require("neo-tree").setup({
         sources = { "filesystem", "buffers", "git_status" },
         open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
-        -- close_if_last_window = false,
         enable_git_status = true,
         popup_border_style = "rounded",
         filesystem = {
           bind_to_cwd = true,
           follow_current_file = {
-            enabled = true,   -- This will find and focus the file in the active buffer every time
-            --               -- the current file is changed while the tree is open.
-            leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+            enabled = true,
+            leave_dirs_open = true,
             use_libuv_file_watcher = true,
           },
-          -- follow_current_file = { enabled = true }, -- This ensures that Neo-tree will expand to show the current file
-          group_empty_dirs = false,          -- Set to true to group empty directories together
-          hijack_netrw_behavior = "open_default", -- Replace netrw with Neo-tree
-          use_libuv_file_watcher = true,     -- Automatically updates the tree when files change
+          use_libuv_file_watcher = true,
+          group_empty_dirs = false,
+          hijack_netrw_behavior = "open_default",
           window = {
             position = "left",
-            width = 35,
             mappings = {
-              -- Add a custom mapping to expand all directories recursively
-              -- ["E"] = "expand_all_nodes", -- Press 'E' to expand all nodes under the current one
               ["Z"] = "expand_all_nodes",
               ["z"] = "close_all_nodes",
               ["\\"] = "close_window",
             },
           },
-          default_component_configs = {
-            indent = {
-              with_expanders = true, -- if nil and file nesting is enabled, will enable expanders
-              expander_collapsed = "",
-              expander_expanded = "",
-              expander_highlight = "NeoTreeExpander",
-            },
-          },
+          close_if_last_window = true,
+          enable_git_status = true,
+          enable_diagnostics = true,
           filtered_items = {
-            visible = true, -- when true, they will just be displayed differently than normal items
+            visible = true,
             hide_dotfiles = false,
-            hide_by_pattern = {
-              ".git",
+            hide_by_pattern = { ".git" },
+          },
+        },
+        default_component_configs = {
+          icon = {
+            folder_closed = "",
+            folder_open = "",
+            folder_empty = "",
+            default = "",
+            highlight = "NeoTreeFileIcon",
+            folder_empty_open = "",
+          },
+          git_status = {
+            symbols = {
+              added = "✚",
+              modified = "",
+              deleted = "✖",
+              renamed = "➜",
+              untracked = "★",
+              ignored = "◌",
+              -- unstaged = "✗",
+              staged = "✓",
+              conflict = "",
             },
           },
-          -- Automatically expand all folders
-          auto_expand = true,
+          indent = {
+            with_markers = true,
+            with_expanders = true,
+            indent_marker = "│",
+            last_indent_marker = "└",
+            expander_collapsed = "",
+            expander_expanded = "",
+            expander_highlight = "NeoTreeExpander",
+          },
         },
+        auto_expand = true,
       })
-      -- vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal left<CR>', {
-      --   desc = 'NeoTree reveal', silent = true
-      -- })
+
+      -- vim.api.nvim_set_hl(0, "NeoTreeFolderIcon", { fg = "#42A5F5" })
+      -- vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { fg = "#90CAF9" })
+      -- vim.api.nvim_set_hl(0, "NeoTreeExpander", { fg = "#82B1FF" })
+
       vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal float<CR>", {
         desc = "[N]eoTree [B]uffer Reveal",
         silent = true,
