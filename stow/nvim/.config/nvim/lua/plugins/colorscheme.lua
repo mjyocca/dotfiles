@@ -28,6 +28,9 @@ return {
             SnacksIndent = { fg = palette.border.muted },
             NeoTreeIndentMarker = { fg = palette.border.muted },
             NeoTreeWinSeparator = { fg = palette.border.muted },
+            NeoTreeExpander = { fg = palette.fg.muted },
+            -- NeoTreeFileIcon = { bg = palette.accent.subtle },
+            NeoTreeDirectoryIcon = { fg = palette.fg.muted },
 
             -- BufferLine transparent fix after upgrade to nvim v0.11.0
             TabLineFill = { bg = "NONE" },
