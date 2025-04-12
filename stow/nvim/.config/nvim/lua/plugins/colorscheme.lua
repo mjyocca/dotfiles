@@ -8,9 +8,6 @@ return {
       local theme = "github_dark_default"
       local palette = require("github-theme.palette").load(theme)
 
-      -- Reference
-      -- print(vim.inspect(palette))
-
       require("github-theme").setup({
         options = {
           transparent = true,
