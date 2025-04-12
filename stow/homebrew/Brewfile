@@ -56,6 +56,8 @@ cask 'raycast'
 cask 'cleanshot'
 cask 'screen-studio'
 cask 'keycastr'
+cask 'notchnook'
+# cask 'jordanbaird-ice' # Macos toolbar
 
 # Development Tools
 cask 'ghostty'
