@@ -200,6 +200,8 @@ return {
       { "\\", ":Neotree reveal<CR>", desc = "NeoTree reveal", silent = true },
     },
     config = function()
+      local fc = require("neo-tree.sources.filesystem.components")
+
       require("neo-tree").setup({
         sources = { "filesystem", "buffers", "git_status" },
         open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
@@ -230,6 +232,16 @@ return {
             visible = true,
             hide_dotfiles = false,
             hide_by_pattern = { ".git" },
+          },
+          -- NOTE: Sourced from https://github.com/nvim-neo-tree/neo-tree.nvim/discussions/681#discussioncomment-5429393
+          components = {
+            name = function(config, node, state)
+              local result = fc.name(config, node, state)
+              if node:get_depth() == 1 and node.type ~= "message" then
+                result.text = vim.fn.fnamemodify(node.path, ":t")
+              end
+              return result
+            end,
           },
         },
         default_component_configs = {
