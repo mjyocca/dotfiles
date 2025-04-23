@@ -96,6 +96,35 @@ return {
             :find()
       end, { desc = "[S]earch [M]odified files" })
 
+      vim.keymap.set("n", "<leader>sa", function()
+        local previewers = require("telescope.previewers")
+        local pickers = require("telescope.pickers")
+        local sorters = require("telescope.sorters")
+        local finders = require("telescope.finders")
+        pickers
+            .new({}, {
+              results_title = "Modified in current branch",
+              finder = finders.new_oneshot_job({
+                "git",
+                "ls-files",
+                "--others",
+                "--exclude-standard",
+              }, {}),
+              sorter = sorters.get_fuzzy_file(),
+              previewer = previewers.new_termopen_previewer({
+                get_command = function(entry)
+                  return {
+                    "git",
+                    "ls-files",
+                    "--others",
+                    "--exclude-standard",
+                  }
+                end,
+              }),
+            })
+            :find()
+      end, { desc = "[S]earch [A]dded files" })
+
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set("n", "<leader>/", function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
