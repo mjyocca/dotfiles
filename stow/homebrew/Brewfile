@@ -5,6 +5,7 @@ tap "homebrew/bundle"
 ##############
 # Binaries & Tools
 brew 'asdf'
+brew 'autoconf'
 brew 'bat'
 brew 'btop'
 brew 'cmake'
@@ -17,9 +18,11 @@ brew 'figlet' # ascii art
 brew 'git'
 brew 'gh'
 brew 'gcc'
+brew 'gmp'
 brew 'htop'
 brew 'lazygit'
 brew 'lazydocker'
+brew 'libyaml'
 brew 'lsd'
 brew 'jq'
 brew 'make'
@@ -28,6 +31,7 @@ brew 'neovim'
 brew 'neofetch'
 brew 'pv'
 brew 'ripgrep' # required for telescope
+brew 'readline'
 brew 'sqlite'
 brew 'stow'
 brew 'starship'
