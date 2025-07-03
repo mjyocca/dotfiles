@@ -262,26 +262,12 @@ return {
       require("dap-go").debug_last()
     end, { desc = "[D]ebug [G]o [L]ast test" })
 
-    local cwd = vim.fn.getcwd()
-    local ruby_config = {
-      type = "ruby",
-      request = "attach",
-      name = "Rails Debug",
-      port = 12345,
-      server = "0.0.0.0",
-      sourceMaps = true,
-      localfsMap = "/app/app:" .. cwd .. "/app,/app/lib:" .. cwd .. "/app/lib",
-      waiting = 1000,
-    }
+    local relative_config_path = os.getenv("NVIM_PROJECT_DAP_CONFIG") or "/.nvim/dap.lua"
+    local project_dap_config = vim.fn.getcwd() .. relative_config_path
+    if vim.fn.filereadable(project_dap_config) == 1 then
+      dofile(project_dap_config)
+    end
 
-    dap.configurations.ruby = {
-      ruby_config,
-    }
-    dap.adapters.ruby = {
-      type = "server",
-      host = "127.0.0.1", -- Use the container IP if necessary
-      port = 12345,
-    }
     require("dap").set_log_level("TRACE")
   end,
 }
