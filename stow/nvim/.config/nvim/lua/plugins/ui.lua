@@ -1,52 +1,52 @@
 return {
   -- bufferline
-  {
-    "akinsho/bufferline.nvim",
-    event = "VeryLazy",
-    lazy = true,
-    version = "*",
-    dependencies = {
-      "nvim-tree/nvim-web-devicons", -- Optional for file icons
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-    },
-    config = function()
-      require("bufferline").setup({
-        options = {
-          -- themable = true,
-          -- Add your options here
-          always_show_bufferline = true,
-          show_buffer_close_icons = true,
-          show_close_icon = true,
-          show_tab_indicators = true,
-          diagnostics = "nvim_lsp",
-          offsets = {
-            {
-              filetype = "neo-tree",
-              highlight = "Directory",
-              text = "File Explorer",
-              -- text = function()
-              --   return vim.fn.getcwd()
-              -- end,
-              padding = 2,
-            },
-          },
-        },
-        -- sections
-      })
-      -- Fix bufferline when restoring a session
-      vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
-        callback = function()
-          vim.schedule(function()
-            pcall(nvim_bufferline)
-          end)
-        end,
-      })
-
-      vim.api.nvim_set_keymap("n", "<Tab>", ":bnext<CR>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap("n", "<S-Tab>", ":bprevious<CR>", { noremap = true, silent = true })
-    end,
-  },
+  -- {
+  --   "akinsho/bufferline.nvim",
+  --   event = "VeryLazy",
+  --   lazy = true,
+  --   version = "*",
+  --   dependencies = {
+  --     "nvim-tree/nvim-web-devicons", -- Optional for file icons
+  --     "nvim-lua/plenary.nvim",
+  --     "MunifTanjim/nui.nvim",
+  --   },
+  --   config = function()
+  --     require("bufferline").setup({
+  --       options = {
+  --         -- themable = true,
+  --         -- Add your options here
+  --         always_show_bufferline = true,
+  --         show_buffer_close_icons = true,
+  --         show_close_icon = true,
+  --         show_tab_indicators = true,
+  --         diagnostics = "nvim_lsp",
+  --         offsets = {
+  --           {
+  --             filetype = "neo-tree",
+  --             highlight = "Directory",
+  --             text = "File Explorer",
+  --             -- text = function()
+  --             --   return vim.fn.getcwd()
+  --             -- end,
+  --             padding = 2,
+  --           },
+  --         },
+  --       },
+  --       -- sections
+  --     })
+  --     -- Fix bufferline when restoring a session
+  --     vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
+  --       callback = function()
+  --         vim.schedule(function()
+  --           pcall(nvim_bufferline)
+  --         end)
+  --       end,
+  --     })
+  --
+  --     vim.api.nvim_set_keymap("n", "<Tab>", ":bnext<CR>", { noremap = true, silent = true })
+  --     vim.api.nvim_set_keymap("n", "<S-Tab>", ":bprevious<CR>", { noremap = true, silent = true })
+  --   end,
+  -- },
 
   -- lualine
   {
