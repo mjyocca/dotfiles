@@ -9,5 +9,9 @@ if [ -f .tool-versions ]; then
   while read lang ver; do
     export ASDF_$(echo $lang | tr '[:lower:]' '[:upper:]')_VERSION=$ver
   done < .tool-versions
+elif [ -f .go-version ]; then
+  while read ver; do
+    version=$(asdf current golang | cut -d' ' -f2)
+    export ASDF_GOLANG_VERSION=$version
+  done < .go-version
 fi
-
