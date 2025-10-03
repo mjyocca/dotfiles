@@ -46,21 +46,57 @@ return {
   lazy = false,
   opts = {
     picker = {
+      icons = {
+        files = {
+          dir = "",
+          dir_open = "",
+        },
+        ui = {
+          live = "󰐰 ",
+          hidden = "h",
+          ignored = "i",
+          follow = "f",
+          selected = "● ",
+          unselected = "○ ",
+          -- selected = " ",
+        },
+      },
       sources = {
         explorer = {
           hidden = true,
           ignored = true,
+          layout = {
+            -- sidebar
+            preview = false,
+            layout = {
+              backdrop = true,
+              width = 40,
+              min_width = 40,
+              height = 0,
+              position = "left",
+              border = "none",
+              box = "vertical",
+              {
+                win = "input",
+                height = 1,
+                border = "rounded",
+                title = "{title} {live} {flags}",
+                title_pos = "center",
+              },
+              { win = "list",    border = "none" },
+              { win = "preview", title = "{preview}", height = 0.4, border = "top" },
+            },
+          },
         },
       },
     },
     explorer = {
+      enabled = true,
+      supports_live = true,
+      live = true,
       replace_netrw = true,
       git_status_open = true,
       auto_close = true,
-
-      -- your explorer configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
     },
     notifier = { enabled = true },
     dashboard = dashboard,
@@ -99,10 +135,29 @@ return {
       end,
       desc = "File Explorer",
     },
+    {
+      "<leader>sb",
+      function()
+        Snacks.picker.buffers()
+      end,
+      desc = "[S]earch Open [B]uffers",
+    },
+    {
+      "<leader>sF",
+      function()
+        Snacks.picker.smart()
+      end,
+      desc = "[S]mart Find",
+    },
+    {
+      "<leader>sC",
+      function()
+        Snacks.picker.colorschemes()
+      end,
+      desc = "[S]earch [C]olorschemes",
+    },
   },
   init = function()
     require("config.autocmds").snacks({})
-
-    -- vim.
   end,
 }
