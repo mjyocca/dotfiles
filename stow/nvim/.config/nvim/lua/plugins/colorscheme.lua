@@ -39,6 +39,8 @@ return {
             CmpPopupMenuBorder = { fg = palette.fg.default },
             -- snacks.nvim explorer
             Directory = { fg = palette.fg.default },
+            SnacksPickerFile = { fg = palette.fg.subtle },
+            SnacksPickerDirectory = { fg = palette.fg.muted },
           },
         },
       })
