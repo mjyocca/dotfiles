@@ -5,8 +5,8 @@ confirm-close-surface = false
 
 # Font
 font-size = 16
-font-style-bold = true
-font-style-bold-italic = false
+# font-style-bold = true
+# font-style-bold-italic = false
 font-family = "FiraCode Nerd Font"
 window-title-font-family = "FiraCode Nerd Font"
 
@@ -14,8 +14,8 @@ window-title-font-family = "FiraCode Nerd Font"
 theme = GitHub Dark
 background-opacity = 0.85
 background-blur-radius = 30
-window-padding-x = 16,16
-window-padding-y = 16,16
+window-padding-x = 14,14
+window-padding-y = 14,14
 
 # Quick Terminal
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
