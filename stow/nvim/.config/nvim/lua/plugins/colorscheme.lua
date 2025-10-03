@@ -37,6 +37,8 @@ return {
             -- nvim-cmp transparent highlight group
             CmpPopupMenuTransparent = { bg = "NONE" },
             CmpPopupMenuBorder = { fg = palette.fg.default },
+            -- snacks.nvim explorer
+            Directory = { fg = palette.fg.default },
           },
         },
       })

@@ -216,104 +216,113 @@ return {
   },
 
   -- File Explorer
-  {
-    "nvim-neo-tree/neo-tree.nvim",
-    version = "*",
-    cmd = "Neotree",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
-      "MunifTanjim/nui.nvim",
-    },
-    keys = {
-      { "\\", ":Neotree reveal<CR>", desc = "NeoTree reveal", silent = true },
-    },
-    config = function()
-      local fc = require("neo-tree.sources.filesystem.components")
-
-      require("neo-tree").setup({
-        sources = { "filesystem", "buffers", "git_status" },
-        open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
-        enable_git_status = true,
-        popup_border_style = "rounded",
-        filesystem = {
-          bind_to_cwd = true,
-          follow_current_file = {
-            enabled = true,
-            leave_dirs_open = true,
-            use_libuv_file_watcher = true,
-          },
-          use_libuv_file_watcher = true,
-          group_empty_dirs = false,
-          hijack_netrw_behavior = "open_default",
-          window = {
-            position = "left",
-            mappings = {
-              ["Z"] = "expand_all_nodes",
-              ["z"] = "close_all_nodes",
-              ["\\"] = "close_window",
-            },
-          },
-          close_if_last_window = true,
-          enable_git_status = true,
-          enable_diagnostics = true,
-          filtered_items = {
-            visible = true,
-            hide_dotfiles = false,
-            hide_by_pattern = { ".git" },
-          },
-          -- NOTE: Sourced from https://github.com/nvim-neo-tree/neo-tree.nvim/discussions/681#discussioncomment-5429393
-          components = {
-            name = function(config, node, state)
-              local result = fc.name(config, node, state)
-              if node:get_depth() == 1 and node.type ~= "message" then
-                result.text = vim.fn.fnamemodify(node.path, ":t")
-              end
-              return result
-            end,
-          },
-        },
-        default_component_configs = {
-          icon = {
-            folder_closed = "", -- "",
-            folder_open = "", --"",
-            folder_empty = "",
-            default = "",
-            highlight = "NeoTreeFileIcon",
-            folder_empty_open = "",
-          },
-          git_status = {
-            symbols = {
-              added = "✚",
-              modified = "",
-              deleted = "✖",
-              renamed = "➜",
-              untracked = "★",
-              ignored = "◌",
-              -- unstaged = "✗",
-              staged = "✓",
-              conflict = "",
-            },
-          },
-          indent = {
-            with_markers = true,
-            with_expanders = true,
-            indent_marker = "│",
-            last_indent_marker = "└",
-            expander_collapsed = "",
-            expander_expanded = "",
-            expander_highlight = "NeoTreeExpander",
-          },
-        },
-        auto_expand = true,
-      })
-
-      vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal float<CR>", {
-        desc = "[N]eoTree [B]uffer Reveal",
-        silent = true,
-      })
-    end,
-  },
+  -- {
+  --   "nvim-neo-tree/neo-tree.nvim",
+  --   version = "*",
+  --   cmd = "Neotree",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-tree/nvim-web-devicons",
+  --     "MunifTanjim/nui.nvim",
+  --   },
+  --   keys = {
+  --     { "\\", ":Neotree reveal<CR>", desc = "NeoTree reveal", silent = true },
+  --   },
+  --   config = function()
+  --     local fc = require("neo-tree.sources.filesystem.components")
+  --
+  --     require("neo-tree").setup({
+  --       sources = { "filesystem", "buffers", "git_status" },
+  --       open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
+  --       enable_git_status = true,
+  --       popup_border_style = "rounded",
+  --       close_if_last_window = false,
+  --       filesystem = {
+  --         use_libuv_file_watcher = true,
+  --         bind_to_cwd = true,
+  --         follow_current_file = {
+  --           enabled = true,
+  --           leave_dirs_open = true,
+  --           -- use_libuv_file_watcher = true,
+  --         },
+  --         group_empty_dirs = false,
+  --         hijack_netrw_behavior = "open_default",
+  --         window = {
+  --           position = "left",
+  --           mappings = {
+  --             ["Z"] = "expand_all_nodes",
+  --             ["z"] = "close_all_nodes",
+  --             ["\\"] = "close_window",
+  --             ["<space>"] = "none",
+  --             ["Y"] = {
+  --               function(state)
+  --                 local node = state.tree:get_node()
+  --                 local path = node:get_id()
+  --                 vim.fn.setreg("+", path, "c")
+  --               end,
+  --               desc = "Copy Path to Clipboard",
+  --             },
+  --           },
+  --         },
+  --         enable_git_status = true,
+  --         enable_diagnostics = true,
+  --         filtered_items = {
+  --           visible = true,
+  --           hide_dotfiles = false,
+  --           -- hide_by_pattern = { ".git" },
+  --         },
+  --         -- NOTE: Sourced from https://github.com/nvim-neo-tree/neo-tree.nvim/discussions/681#discussioncomment-5429393
+  --         components = {
+  --           name = function(config, node, state)
+  --             local result = fc.name(config, node, state)
+  --             if node:get_depth() == 1 and node.type ~= "message" then
+  --               result.text = vim.fn.fnamemodify(node.path, ":t")
+  --             end
+  --             return result
+  --           end,
+  --         },
+  --       },
+  --       default_component_configs = {
+  --         icon = {
+  --           folder_closed = "", -- "",
+  --           folder_open = "", --"",
+  --           folder_empty = "",
+  --           default = "",
+  --           highlight = "NeoTreeFileIcon",
+  --           folder_empty_open = "",
+  --         },
+  --         git_status = {
+  --           symbols = {
+  --             added = "✚",
+  --             modified = "",
+  --             deleted = "✖",
+  --             renamed = "➜",
+  --             untracked = "★",
+  --             ignored = "◌",
+  --             unstaged = "✗",
+  --             staged = "✓",
+  --             conflict = "",
+  --           },
+  --         },
+  --         indent = {
+  --           with_markers = true,
+  --           with_expanders = true,
+  --           indent_marker = "│",
+  --           last_indent_marker = "└",
+  --           expander_collapsed = "",
+  --           expander_expanded = "",
+  --           expander_highlight = "NeoTreeExpander",
+  --         },
+  --       },
+  --       auto_expand = true,
+  --     })
+  --
+  --     vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal float<CR>", {
+  --       desc = "[N]eoTree [B]uffer Reveal",
+  --       silent = true,
+  --     })
+  --   end,
+  -- },
 
   -- OIL
   {
