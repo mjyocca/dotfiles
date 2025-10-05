@@ -376,27 +376,28 @@ return {
 
         -- Actions
         -- Normal mode
-        map("n", "<leader>gs", gitsigns.stage_hunk, { desc = "[G]it [S]tage Hunk"})
-        map("n", "<leader>gS", gitsigns.stage_buffer, { desc = "[G]it [S]tage Buffer"})
-        map("n", "<leader>gr", gitsigns.reset_hunk, { desc = "[G]it [R]eset hunk"})
-        map("n", "<leader>gR", gitsigns.reset_buffer, { desc = "[G]it [R]eset Buffer"})
-        map("n", "<leader>gu", gitsigns.stage_hunk, { desc = "[G]it [U]ndo Stage Hunk" })
-        map("n", "<leader>gP", gitsigns.preview_hunk, { desc = "[G]it [P]review Hunk"})
+        map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "Git [s]tage Hunk"})
+        map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "Git [S]tage Buffer"})
+        map("n", "<leader>hr", gitsigns.reset_hunk, { desc = "Git [r]eset hunk"})
+        map("n", "<leader>hR", gitsigns.reset_buffer, { desc = "Git [R]eset Buffer"})
+        map("n", "<leader>hu", gitsigns.stage_hunk, { desc = "Git [u]ndo Stage Hunk" })
+        map("n", "<leader>hp", gitsigns.preview_hunk, { desc = "Git [p]review Hunk"})
+        map("n", "<leader>hd", gitsigns.diffthis, { desc = "Git [d]iff against index" })
 
-        map("n", "<leader>gD", function()
+        map("n", "<leader>hD", function()
           gitsigns.diffthis('@')
-        end, { desc = "[G]it [D]iff against last commit" })
+        end, { desc = "Git [D]iff against last commit" })
 
-        map("n", "<leader>gbl", function() gitsigns.blame_line({ full = true }) end, { desc = "[G]it [B]lame [L]ine"})
+        map("n", "<leader>hb", function() gitsigns.blame_line({ full = true }) end, { desc = "Git [B]lame Line"})
 
         -- Visual Mode
-        map("v", "<leader>gs", function()
+        map("v", "<leader>hs", function()
           gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-        end,  { desc = "[G]it [S]tage Hunk"})
+        end,  { desc = "Git [s]tage Hunk"})
 
-        map("v", "<leader>gr", function()
+        map("v", "<leader>hr", function()
           gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-        end, { desc = "" })
+        end, { desc = "Git [r]eset Hunk" })
 
         -- Toggles
         map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[T]oggle Git Show [B]lame Line"})
