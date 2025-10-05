@@ -176,6 +176,13 @@ return {
       desc = "[S]earch Open [B]uffers",
     },
     {
+      "<leader>bd",
+      function()
+        Snacks.bufdelete()
+      end,
+      desc = "[B]uffer [D]elete or Close (Confirm)"
+    },
+    {
       "<leader>sF",
       function()
         Snacks.picker.smart()
