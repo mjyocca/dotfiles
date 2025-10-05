@@ -156,13 +156,6 @@ return {
   },
   keys = {
     {
-      "<leader>e",
-      function()
-        Snacks.explorer()
-      end,
-      desc = "File Explorer",
-    },
-    {
       "\\",
       function()
         Snacks.explorer()
@@ -170,16 +163,11 @@ return {
       desc = "File Explorer",
     },
     {
-      "<leader>sb",
-      function()
-        Snacks.picker.buffers()
-      end,
-      desc = "[S]earch Open [B]uffers",
-    },
-    {
       "<leader><leader>",
       function()
-        Snacks.picker.buffers()
+        Snacks.picker.buffers({
+          layout = "ivy"
+        })
       end,
       desc = "[S]earch Open [B]uffers",
     },
@@ -193,16 +181,97 @@ return {
     {
       "<leader>sf",
       function()
-        Snacks.picker.files()
+        Snacks.picker.files({
+          layout = "ivy"
+        })
       end,
       desc = "[S]earch Files",
     },
     {
       "<leader>sg",
       function()
-        Snacks.picker.grep()
+        Snacks.picker.grep({
+          layout = "ivy"
+        })
       end,
       desc = "[S]earch by [G]rep"
+    },
+    {
+
+      "<leader>/",
+      function()
+        Snacks.picker.lines({
+          layout = "ivy"
+        })
+      end,
+      desc = "[/] Search Lines in current buffer"
+    },
+    {
+      "<leader>s/",
+      function()
+        Snacks.picker.grep_buffers({
+          layout = "ivy"
+        })
+      end,
+      desc = "Search [/] in Open Files (buffers)"
+    },
+    {
+      "<leader>sm",
+      function()
+        Snacks.picker.git_status({
+          layout = "ivy"
+        })
+      end,
+      desc = "[S]earch Git [M]odified"
+    },
+    {
+      "<leader>sG",
+      function()
+        Snacks.picker.git_diff()
+      end,
+      desc = "[S]earch [G]it [D]iff Hunks"
+    },
+    {
+      "<leader>s.",
+      function()
+        Snacks.picker.recent()
+      end,
+      desc = '[S]earch Recent Files ("." for repeat)'
+    },
+    {
+      "<leader>sw",
+      function()
+        Snacks.picker.grep_word()
+      end,
+      desc = "[S]earch current [W]ord"
+    },
+    {
+      "<leader>sr",
+      function()
+        Snacks.picker.resume()
+      end,
+      desc = "[S]earch [R]esume"
+    },
+    {
+      "<leader>sd",
+      function()
+        Snacks.picker.diagnostics()
+      end,
+      desc = "[S]earch [D]iagnostics"
+    },
+    {
+      "<leader>sk",
+      function()
+        Snacks.picker.keymaps()
+      end,
+      desc = "[S]earch [K]eymaps"
+    },
+    {
+      "<leader>sh",
+      function()
+        Snacks.picker.help()
+      end,
+      desc = "[S]earch [H]elp"
     },
     {
       "<leader>sC",
