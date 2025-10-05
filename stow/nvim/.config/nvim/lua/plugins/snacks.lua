@@ -166,7 +166,11 @@ return {
       "<leader><leader>",
       function()
         Snacks.picker.buffers({
-          layout = "ivy"
+          layout = "ivy",
+          -- Automatically switch to normal mode
+          on_show = function()
+            vim.cmd.stopinsert()
+          end,
         })
       end,
       desc = "[S]earch Open [B]uffers",
