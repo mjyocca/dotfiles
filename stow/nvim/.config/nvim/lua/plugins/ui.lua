@@ -65,7 +65,9 @@ return {
       end
     end,
     config = function()
-      require("lualine").setup({
+      local lualine = require("lualine")
+
+      lualine.setup({
         options = {
           theme = "github-dark", -- Your custom theme name
           icons_enabled = true,
@@ -89,10 +91,16 @@ return {
       require("incline").setup({
         window = {
           padding = 0,
-          margin = { horizontal = 0 },
+          margin = {
+            horizontal = 0,
+            vertical = 0,
+          },
         },
         render = function(props)
-          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
+          local bufname = vim.api.nvim_buf_get_name(props.buf)
+          local filename = vim.fn.fnamemodify(bufname, ":t")
+          if filename == '' then filename = '[No Name]' end
+
           local ft_icon, ft_color = require("nvim-web-devicons").get_icon_color(filename)
           local modified = vim.bo[props.buf].modified
           local buffer = {
@@ -101,6 +109,7 @@ return {
             -- " ",
             --TODO: remove hardcoded reference to hex color
             { filename .. " ",        gui = modified and "bold,italic" or "bold", guifg = "#c9d1d9" },
+            modified and { " [+]", guifg = "#ff9e64" } or "",
             " ",
             guibg = "none",
           }
