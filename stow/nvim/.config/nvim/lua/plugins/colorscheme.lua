@@ -26,6 +26,7 @@ return {
             WinSeparator = { fg = palette.fg.subtle, bg = "NONE" },
 
             Directory = { fg = palette.white.base },
+
             -- NeoTreeIndentMarker = { fg = palette.border.muted },
             -- NeoTreeWinSeparator = { fg = palette.border.muted },
             -- NeoTreeExpander = { fg = palette.fg.muted },

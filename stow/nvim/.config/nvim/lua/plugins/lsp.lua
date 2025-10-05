@@ -16,6 +16,10 @@ return {
         "williamboman/mason.nvim",
         config = true,
         opts = {
+          ui = {
+            border = "single",
+            backdrop = 40,
+          },
           ensure_installed = { "goimports", "gofumpt" },
         },
       }, -- NOTE: Must be loaded before dependants
