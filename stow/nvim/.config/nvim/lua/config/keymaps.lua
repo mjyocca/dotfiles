@@ -10,14 +10,19 @@ function M.general()
     vim.api.nvim_set_keymap(mode, lhs, rhs, options)
   end
 
-  -- vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
   map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
-  -- -- Navigate vim panes better
+  -- Navigate vim panes better
   map("n", "<c-k>", ":wincmd k<CR>")
   map("n", "<c-j>", ":wincmd j<CR>")
   map("n", "<c-h>", ":wincmd h<CR>")
   map("n", "<c-l>", ":wincmd l<CR>")
+
+  -- Move splits with <c-w>h/j/k/l
+  map("n", "<c-w>h", "<c-w>H")
+  map("n", "<c-w>j", "<c-w>J")
+  map("n", "<c-w>k", "<c-w>K")
+  map("n", "<c-w>l", "<c-w>L")
 
   -- -- Remap visual mode indenting to keep the selection active
   map("v", ">", ">gv", { noremap = true, silent = true })
