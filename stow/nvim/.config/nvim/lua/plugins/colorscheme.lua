@@ -49,8 +49,8 @@ return {
             SnacksPickerFile = { fg = palette.fg.subtle },
             SnacksPickerDirectory = { fg = palette.fg.muted },
             SnacksPickerTree = { fg = palette.border.muted, bg = "NONE"},
-            -- SnacksPicker = { bg = palette.black.base, blend = 5 },
-            -- SnacksPickerBorder = { bg = palette.black.base, blend = 0 },
+            -- SnacksPicker = { bg = palette.black.base, blend = 40, transparent = true },
+            -- SnacksPickerBorder = { bg = palette.black.base, blend = 40, transparent = true },
           },
         },
       })

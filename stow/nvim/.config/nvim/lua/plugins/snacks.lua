@@ -76,6 +76,14 @@ return {
         files = {
           hidden = true,
           ignored = true,
+          layout = {
+            layout = {
+              backdrop = {
+                transparency = true,
+                blend = 40,
+              },
+            }
+          }
         },
         grep = {
           hidden = true,
@@ -88,7 +96,14 @@ return {
             -- sidebar
             preview = false,
             layout = {
-              backdrop = true,
+              layout = {
+                layout = {
+                  backdrop = {
+                    transparency = true,
+                    blend = 40,
+                  },
+                }
+              },
               width = 40,
               min_width = 40,
               height = 0,
@@ -110,6 +125,14 @@ return {
       },
     },
     explorer = {
+      layout = {
+        layout = {
+          backdrop = {
+            transparent = true,
+            blend = 80,
+          },
+        }
+      },
       enabled = true,
       supports_live = true,
       live = true,
