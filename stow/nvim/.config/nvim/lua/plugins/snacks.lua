@@ -304,7 +304,28 @@ return {
         Snacks.picker.highlights()
       end,
       desc = "[S]earch [H]ighlights",
-    }
+    },
+    {
+      "<leader>gpl",
+      function()
+        Snacks.lazygit.log()
+      end,
+      desc = "[G]it [P]icker [L]og (LazyGit)"
+    },
+    {
+      "<leader>gps",
+      function()
+        Snacks.picker.git_stash({ layout = "select" })
+      end,
+      desc = "[G]it [P]icker [S]tash",
+    },
+    {
+      "<leader>gpb",
+      function()
+        Snacks.picker.git_branches({ layout = "select" })
+      end,
+      desc = "[G]it [P]icker [B]ranches (Switcher)",
+    },
   },
   init = function()
     require("config.autocmds").snacks({})
