@@ -15,32 +15,41 @@ return {
           dev = true,
         },
         groups = {
-          all = {
+          github_dark_default = {
             -- Set FloatBorder color (e.g., to light blue)
-            FloatBorder = { fg = palette.blue.base },
+            -- FloatBorder = { fg = palette.blue.base },
+            FloatBorder = { fg = palette.fg.subtle },
             -- Optionally, set the NormalFloat background for floating windows
+            Normal = { fg = palette.white.base },
+            -- NormalNC = { fg = palette.white.base },
             NormalFloat = { fg = palette.blue.base },
-            WinSeparator = { fg = palette.fg.default, bg = "NONE" },
+            WinSeparator = { fg = palette.fg.subtle, bg = "NONE" },
 
-            SnacksIndent = { fg = palette.border.muted },
-            NeoTreeIndentMarker = { fg = palette.border.muted },
-            NeoTreeWinSeparator = { fg = palette.border.muted },
-            NeoTreeExpander = { fg = palette.fg.muted },
-            -- NeoTreeFileIcon = { bg = palette.accent.subtle },
-            NeoTreeDirectoryIcon = { fg = palette.fg.muted },
+            Directory = { fg = palette.white.base },
+            -- NeoTreeIndentMarker = { fg = palette.border.muted },
+            -- NeoTreeWinSeparator = { fg = palette.border.muted },
+            -- NeoTreeExpander = { fg = palette.fg.muted },
+            -- -- NeoTreeFileIcon = { bg = palette.accent.subtle },
+            -- NeoTreeDirectoryIcon = { fg = palette.fg.muted },
 
             -- BufferLine transparent fix after upgrade to nvim v0.11.0
-            TabLineFill = { bg = "NONE" },
+            -- TabLineFill = { bg = "NONE" },
             -- Lualine transparent fix after upgrade to nvim v0.11.0
             StatusLine = { bg = "NONE" },
             StatusLineNC = { bg = "NONE" },
+
             -- nvim-cmp transparent highlight group
             CmpPopupMenuTransparent = { bg = "NONE" },
             CmpPopupMenuBorder = { fg = palette.fg.default },
+
             -- snacks.nvim explorer
-            Directory = { fg = palette.fg.default },
+            SnacksIndent = { fg = palette.border.muted },
+            -- Directory = { fg = palette.fg.subtle },
             SnacksPickerFile = { fg = palette.fg.subtle },
             SnacksPickerDirectory = { fg = palette.fg.muted },
+            SnacksPickerTree = { fg = palette.border.muted, bg = "NONE"},
+            -- SnacksPicker = { bg = palette.black.base, blend = 5 },
+            -- SnacksPickerBorder = { bg = palette.black.base, blend = 0 },
           },
         },
       })
