@@ -294,6 +294,20 @@ return {
       desc = "[S]earch [D]iagnostics"
     },
     {
+      "<leader>ss",
+      function ()
+        Snacks.picker.lsp_symbols()
+      end,
+      desc = "[S]earch Document Symbols"
+    },
+    {
+      "<leader>sS",
+      function ()
+        Snacks.picker.lsp_workspace_symbols()
+      end,
+      desc = "[S]earch Workspace Symbols"
+    },
+    {
       "<leader>sk",
       function()
         Snacks.picker.keymaps()
