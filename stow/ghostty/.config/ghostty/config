@@ -11,11 +11,11 @@ font-family = "FiraCode Nerd Font"
 window-title-font-family = "FiraCode Nerd Font"
 
 # Theming
-theme = GitHub Dark
-background-opacity = 0.85
-background-blur-radius = 30
-window-padding-x = 14,14
-window-padding-y = 14,14
+theme = GitHub Dark Default
+background-opacity = 0.88
+background-blur-radius = 65
+window-padding-x = 8,8
+window-padding-y = 8,8
 
 # Quick Terminal
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
