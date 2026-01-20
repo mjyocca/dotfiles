@@ -78,6 +78,10 @@ cask 'orbstack'
 # Fonts
 cask 'font-fira-code-nerd-font'
 
+## AI Tools
+cask 'claude-code'
+brew 'opencode'
+
 ###############
 # Mac App Store
 mas "system-color-picker", id: 1545870783
