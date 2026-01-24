@@ -13,9 +13,12 @@ brew 'curl'
 brew 'coreutils'
 brew 'cmatrix'
 brew 'direnv'
-brew 'fd'
+brew 'fd' # file searching
+brew 'ffmpeg' # video thumbnails
 brew 'fzf'
 brew 'figlet' # ascii art
+brew 'font-symbols-only-nerd-font'
+brew 'glow'
 brew 'git'
 brew 'gh'
 brew 'gcc'
@@ -33,6 +36,7 @@ brew 'neofetch'
 brew 'pv'
 brew 'ripgrep' # required for telescope
 brew 'readline'
+brew 'rg' # file content searching
 brew 'sqlite'
 brew 'stow'
 brew 'starship'
@@ -44,13 +48,15 @@ brew 'tree'
 brew 'openssl'
 brew 'unzip'
 brew 'wget'
+brew 'yazi'
 brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
+brew 'zoxide'
 
 ###############
 # Applications
 # Misc.
-cask 'zen-browser'
+cask 'zen'
 cask 'slack'
 cask 'spotify'
 cask 'notion'
