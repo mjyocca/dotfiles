@@ -27,9 +27,15 @@ asdf_plugins() {
 	fi
 }
 
+gh_cli_extensions() {
+  info "Installing gh cli extensions..."
+  gh extension install dlvhdr/gh-dash
+}
+
 # Check if the script is being run directly or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	# Script is being run directly, so call the function
 	tmux_plugin_manager
 	asdf_plugins
+  gh_cli_extensions
 fi
