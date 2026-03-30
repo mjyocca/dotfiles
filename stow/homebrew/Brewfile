@@ -79,8 +79,7 @@ cask 'orbstack'
 cask 'font-fira-code-nerd-font'
 
 ## AI Tools
-cask 'claude-code'
-brew 'opencode'
+brew 'anomalyco/tap/opencode'
 
 ###############
 # Mac App Store
