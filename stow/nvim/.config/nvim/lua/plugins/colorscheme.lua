@@ -51,6 +51,8 @@ return {
             SnacksPickerTree = { fg = palette.border.muted, bg = "NONE"},
             -- SnacksPicker = { bg = palette.black.base, blend = 40, transparent = true },
             -- SnacksPickerBorder = { bg = palette.black.base, blend = 40, transparent = true },
+            -- vim.api.nvim_set_hl(0, "GitSignsPreviewBorder", { fg = "#89B4FA" })  -- blue border
+            GitSignsPreviewBorder = { fg = palette.fg.default },
           },
         },
       })
