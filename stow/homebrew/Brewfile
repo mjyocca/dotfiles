@@ -74,6 +74,14 @@ cask 'visual-studio-code'
 cask 'tower'
 cask 'gitbutler'
 cask 'orbstack'
+cask 'podman-desktop'
+
+brew 'docker'
+brew 'podman'
+brew 'lima'
+brew 'qemu'
+
+brew 'kubernetes-cli'
 
 # Fonts
 cask 'font-fira-code-nerd-font'
