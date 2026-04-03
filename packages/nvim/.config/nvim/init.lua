@@ -29,6 +29,16 @@ keymaps.general()
 -- Load plugin keymaps
 keymaps.plugins()
 
+-- FIXES mdx errors
+-- Patch vim.glob to handle single-item brace patterns like **/*.{mdx}
+-- that mdx_analyzer sends and Neovim 0.12 rejects
+local orig_to_lpeg = vim.glob.to_lpeg
+vim.glob.to_lpeg = function(pattern)
+  -- Collapse {single} → single (no comma = not real brace expansion)
+  local fixed = pattern:gsub('{(%w+)}', '%1')
+  return orig_to_lpeg(fixed)
+end
+
 -- Initialize Lazy
 require("lazy").setup({
   spec = {
