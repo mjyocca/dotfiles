@@ -124,6 +124,7 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     main = "nvim-treesitter",
+    branch = "main",
     init = function()
       local ensureInstalled = {
         "bash",
