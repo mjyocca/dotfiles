@@ -159,15 +159,18 @@ return {
         :totable()
       require('nvim-treesitter').install(parsersToInstall)
     end,
-    config = function(_, opts)
-      require("nvim-treesitter").setup(opts)
-      -- MDX
-      vim.filetype.add({
-        extension = {
-          mdx = "mdx",
-        },
-      })
+    config = function(_, _)
+      -- Register mdx filetype for .mdx files
+      vim.filetype.add({ extension = { mdx = "mdx" } })
+      -- Tell treesitter to use the markdown parser for mdx buffers
       vim.treesitter.language.register("markdown", "mdx")
+      -- start treesitter to use the markdown parser for mdx buffers
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'mdx',
+        callback = function()
+          vim.treesitter.start()
+        end,
+      })
     end
   },
 
