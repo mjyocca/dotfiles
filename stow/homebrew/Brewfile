@@ -46,11 +46,12 @@ brew 'unzip'
 brew 'wget'
 brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
+brew '1password-cli'
 
 ###############
 # Applications
 # Misc.
-cask 'zen-browser'
+cask 'zen'
 cask 'slack'
 cask 'spotify'
 cask 'notion'
@@ -63,7 +64,6 @@ cask 'raycast'
 cask 'cleanshot'
 cask 'screen-studio'
 cask 'keycastr'
-cask 'notchnook'
 # cask 'jordanbaird-ice' # Macos toolbar
 
 # Development Tools
@@ -87,7 +87,8 @@ brew 'kubernetes-cli'
 cask 'font-fira-code-nerd-font'
 
 ## AI Tools
-brew 'anomalyco/tap/opencode'
+tap 'anomalyco/tap'
+brew 'opencode'
 
 ###############
 # Mac App Store
