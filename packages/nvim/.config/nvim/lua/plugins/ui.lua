@@ -123,9 +123,9 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    main = "nvim-treesitter.configs",
-    opts = {
-      ensure_installed = {
+    main = "nvim-treesitter",
+    init = function()
+      local ensureInstalled = {
         "bash",
         "c",
         "diff",
@@ -149,25 +149,17 @@ return {
         "zig",
         "rust",
         "terraform",
-      },
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { "ruby" },
-      },
-      indent = { enable = true, disable = { "ruby" } },
-      incremental_selection = {
-        enable = true,
-      },
-      folding = {
-        enable = true,
-      },
-    },
+      }
+      local alreadyInstalled = require('nvim-treesitter').get_installed()
+      local parsersToInstall = vim.iter(ensureInstalled)
+        :filter(function(parser)
+          return not vim.tbl_contains(alreadyInstalled, parser)
+        end)
+        :totable()
+      require('nvim-treesitter').install(parsersToInstall)
+    end,
     config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+      require("nvim-treesitter").setup(opts)
       -- MDX
       vim.filetype.add({
         extension = {
