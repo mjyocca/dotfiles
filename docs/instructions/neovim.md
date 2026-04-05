@@ -1,0 +1,405 @@
+# Neovim & Lua Agent Instructions
+
+Instructions and best practices for configuring Neovim 0.12+. This config uses
+[LazyVim](https://www.lazyvim.org/) as a base with [lazy.nvim](https://github.com/folke/lazy.nvim)
+as the plugin manager. All Lua lives under `packages/nvim/.config/nvim/`.
+
+---
+
+## Config Structure
+
+```
+packages/nvim/.config/nvim/
+  init.lua              # Entry point: bootstraps lazy.nvim, loads config modules
+  lua/
+    config/
+      options.lua       # vim.opt, vim.g, vim.o settings
+      keymaps.lua       # Keymap definitions (general, lsp, plugins)
+      autocmds.lua      # Autocommand definitions (general, lsp, plugins)
+      utils.lua         # Shared utility functions
+    lang/               # Per-language LSP config files
+    plugins/            # lazy.nvim plugin specs — one file per editor concern (see below)
+    lualine/            # lualine component overrides
+```
+
+### `lua/plugins/` — concern-based layout
+
+Each file groups plugins by the editor concern they address, not by plugin name.
+When adding or modifying a plugin, place it in the file whose concern it belongs
+to. Do not create new files unless a genuinely new concern is being introduced.
+
+| File | Concern | Key plugins |
+|---|---|---|
+| `ai.lua` | AI / copilot integration | `folke/sidekick.nvim` |
+| `coding.lua` | Completion, snippets, language-aware editing | `nvim-cmp`, `LuaSnip`, `nvim-autopairs`, `gopher.nvim` |
+| `colorscheme.lua` | Color theme | `github-nvim-theme` |
+| `debug.lua` | DAP debugger UI and adapters | `nvim-dap`, `nvim-dap-ui`, `mason-nvim-dap`, Go/Ruby adapters |
+| `editor.lua` | Core editing experience | `telescope.nvim`, `which-key.nvim`, `gitsigns.nvim`, `Comment.nvim`, `todo-comments.nvim`, `nvim-colorizer.lua`, `render-markdown.nvim` |
+| `formatting.lua` | Code formatting | `none-ls.nvim` (null-ls fork) |
+| `integrations.lua` | External tool integrations | `nvim-tmux-navigation`, `vim-dadbod` + UI |
+| `linting.lua` | Linting | `nvim-lint` |
+| `lsp.lua` | LSP client, Mason, capabilities | `nvim-lspconfig`, `mason.nvim`, `mason-lspconfig.nvim`, `fidget.nvim`, `lsp_lines.nvim`, `lazydev.nvim` |
+| `sessions.lua` | Session save/restore | `auto-session` |
+| `snacks.lua` | Snacks.nvim — picker, lazygit, git browse, notifications, diagnostics | `folke/snacks.nvim` |
+| `testing.lua` | Test runners | *(empty — reserved for neotest etc.)* |
+| `ui.lua` | Visual chrome | `lualine.nvim`, `incline.nvim`, `noice.nvim`, `nvim-treesitter` (highlight/indent) |
+
+---
+
+## Lua API Conventions
+
+### Always prefer high-level Lua APIs over Vimscript
+
+| Avoid | Prefer |
+|---|---|
+| `vim.cmd("set foo=bar")` | `vim.opt.foo = bar` |
+| `vim.cmd("set expandtab")` | `vim.opt.expandtab = true` |
+| `vim.api.nvim_set_keymap(...)` | `vim.keymap.set(...)` |
+| `vim.cmd("autocmd ...")` | `vim.api.nvim_create_autocmd(...)` |
+| `vim.cmd("hi MyGroup ...")` | `vim.api.nvim_set_hl(0, "MyGroup", {})` |
+| `autocmd BufRead + set ft=` | `vim.filetype.add({ filename = {...} })` |
+| `nvim_treesitter#foldexpr()` | `v:lua.vim.treesitter.foldexpr()` |
+
+### Keymaps
+
+Use `vim.keymap.set` — it accepts Lua functions directly, supports `desc`, and
+is the idiomatic 0.10+ API. Do not use `vim.api.nvim_set_keymap` for new code.
+
+```lua
+-- Correct
+vim.keymap.set("n", "<leader>ff", function()
+  require("snacks").picker.files()
+end, { desc = "Find Files" })
+
+-- Avoid
+vim.api.nvim_set_keymap("n", "<leader>ff", ":Telescope find_files<CR>", { noremap = true, silent = true })
+```
+
+### Options
+
+```lua
+-- Correct
+vim.opt.tabstop     = 2
+vim.opt.shiftwidth  = 2
+vim.opt.expandtab   = true
+
+-- Avoid
+vim.cmd("set tabstop=2")
+vim.cmd("set shiftwidth=2")
+vim.cmd("set expandtab")
+```
+
+### Filetype detection
+
+Use `vim.filetype.add` — do not create `BufRead`/`BufNewFile` autocmds just to
+set a filetype.
+
+```lua
+vim.filetype.add({
+  extension = { tsx = "typescriptreact" },
+  filename  = { [".env"] = "sh", [".envrc"] = "sh" },
+  pattern   = { ["%.env%..+"] = "sh" },
+})
+```
+
+### Autocommands
+
+Always assign autocommands to a named augroup with `clear = true` to prevent
+duplication on re-source.
+
+```lua
+local group = vim.api.nvim_create_augroup("my-feature", { clear = true })
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group    = group,
+  pattern  = "*.lua",
+  callback = function() end,
+})
+```
+
+---
+
+## Diagnostics (0.10+ API — required in 0.12)
+
+`vim.diagnostic.disable()` was **removed** in 0.12. Use the unified `enable()`
+API with a boolean first argument.
+
+```lua
+-- Enable diagnostics for current buffer
+vim.diagnostic.enable(true, { bufnr = 0 })
+
+-- Disable diagnostics for current buffer
+vim.diagnostic.enable(false, { bufnr = 0 })
+
+-- Configure signs through vim.diagnostic.config only
+-- (sign_define / :sign-define for diagnostic signs was removed in 0.12)
+vim.diagnostic.config({
+  virtual_text  = false,
+  virtual_lines = true,
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "",
+      [vim.diagnostic.severity.WARN]  = "",
+      [vim.diagnostic.severity.INFO]  = "",
+      [vim.diagnostic.severity.HINT]  = "",
+    },
+  },
+})
+```
+
+---
+
+## LSP
+
+### Config pattern (vim.lsp.Config)
+
+In 0.10+ (and required in 0.12), per-server config lives in `lua/lang/<lang>.lua`
+and is merged through `lang/base.lua`. Capabilities are built once and spread
+across all servers.
+
+```lua
+-- Correct capability setup
+local capabilities = vim.tbl_deep_extend(
+  "force",
+  vim.lsp.protocol.make_client_capabilities(),
+  require("cmp_nvim_lsp").default_capabilities()
+)
+```
+
+### Semantic tokens
+
+`semantic_tokens.start()`/`stop()` were renamed to `enable()` in 0.12.
+
+```lua
+vim.lsp.semantic_tokens.enable(true,  bufnr, client_id)
+vim.lsp.semantic_tokens.enable(false, bufnr, client_id)
+```
+
+### JSON null values
+
+In 0.12, JSON `"null"` from LSP messages is represented as `vim.NIL`, not `nil`.
+Missing fields are still `nil`. When inspecting LSP response tables, check
+explicitly:
+
+```lua
+if value == vim.NIL then
+  -- field was explicitly null in JSON
+end
+```
+
+### Built-in LSP keymaps (0.12 defaults — do not remap unless needed)
+
+| Key | Action |
+|---|---|
+| `grn` | `vim.lsp.buf.rename()` |
+| `grr` | `vim.lsp.buf.references()` |
+| `gri` | `vim.lsp.buf.implementation()` |
+| `gra` | `vim.lsp.buf.code_action()` |
+| `grt` | `vim.lsp.buf.type_definition()` *(new in 0.12)* |
+| `grx` | `vim.lsp.codelens.run()` *(new in 0.12)* |
+| `K`   | `vim.lsp.buf.hover()` |
+
+Avoid re-defining these in `LspAttach` unless overriding with a picker (e.g.
+Snacks or Telescope). Remove any custom mappings that duplicate the defaults.
+
+### `:lsp` command (new in 0.12)
+
+Use `:lsp` to interactively inspect and manage active LSP clients. Prefer this
+over `:LspInfo` (mason-lspconfig) for debugging attach issues.
+
+### `:checkhealth vim.lsp` (new in 0.12)
+
+Runs a health check showing which LSP features are attached to which buffers.
+Use before filing LSP-related bug reports.
+
+---
+
+## Treesitter
+
+### Folding
+
+Use the native Lua foldexpr — no plugin dependency required.
+
+```lua
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr   = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevel  = 99
+```
+
+Do **not** use `nvim_treesitter#foldexpr()` (Vimscript shim from nvim-treesitter).
+
+### Query linting
+
+`ft-query-plugin` no longer enables `vim.treesitter.query.lint()` by default in
+0.12. Enable it explicitly if needed:
+
+```lua
+vim.api.nvim_create_autocmd("FileType", {
+  pattern  = "query",
+  callback = function(ev)
+    vim.treesitter.query.lint(ev.buf)
+  end,
+})
+```
+
+### `Query:iter_matches()` — "all" option removed
+
+The transitional `all = true` option on `Query:iter_matches()` was removed in
+0.12. Remove it from any custom treesitter query code.
+
+---
+
+## Lua Standard Library (0.12 additions)
+
+### `vim.text.diff` (renamed from `vim.diff`)
+
+```lua
+-- 0.12+
+local result = vim.text.diff(a, b, { result_type = "unified" })
+```
+
+### HTTP requests — `vim.net.request()`
+
+```lua
+-- No external curl wrappers needed
+local response = vim.net.request("https://example.com/api/data")
+```
+
+### Iterator enhancements
+
+```lua
+-- :take() and :skip() now accept predicates in addition to counts
+vim.iter({ 1, 2, 3, 4, 5 }):take(function(v) return v < 4 end):totable()
+-- { 1, 2, 3 }
+
+-- :unique() deduplicates
+vim.iter({ 1, 1, 2, 3, 3 }):unique():totable()
+-- { 1, 2, 3 }
+
+-- vim.list.bisect() for binary search on sorted lists
+local idx = vim.list.bisect({ 1, 3, 5, 7 }, 5)
+```
+
+### JSON improvements
+
+```lua
+-- Pretty-print with indent
+vim.json.encode(data, { indent = 2, sort_keys = true })
+
+-- Decode JSON with comments (e.g. JSONC / tsconfig)
+vim.json.decode(text, { skip_comments = true })
+```
+
+### `vim.tbl_extend` function behavior
+
+```lua
+-- behavior can now be a function for custom merge logic
+vim.tbl_deep_extend(function(key, a_val, b_val)
+  -- return merged value
+  return b_val
+end, table_a, table_b)
+```
+
+### `vim.fs` additions
+
+```lua
+-- Get the last file extension
+vim.fs.ext("foo.test.ts")  -- "ts"
+
+-- Equal-priority root markers via nested lists
+vim.fs.root(buf, { { "package.json", "Cargo.toml" }, ".git" })
+```
+
+### `vim.hl.range()` — timed highlights
+
+```lua
+vim.hl.range(bufnr, ns, "IncSearch", { 0, 0 }, { 0, 10 }, { timeout = 500 })
+```
+
+---
+
+## Options Added in 0.12
+
+| Option | Purpose |
+|---|---|
+| `'autocomplete'` | Enable native insert-mode auto-completion |
+| `'pumborder'` | Border around popup menu |
+| `'pummaxwidth'` | Maximum popup menu width |
+| `'winborder'` | Default window border style (e.g. `"single"`, `"bold"`) |
+| `'busy'` | Mark a buffer as "busy" (shown in statusline) |
+| `'chistory'` / `'lhistory'` | Quickfix/loclist stack size |
+| `'diffopt' inline:` | Inline diff highlighting within changed lines |
+| `'completeopt' nearest` | Sort completions by distance to cursor |
+
+```lua
+-- Example: consistent border globally (replaces per-plugin border opts)
+vim.opt.winborder = "single"
+```
+
+---
+
+## Highlight Groups Added in 0.12
+
+| Group | Purpose |
+|---|---|
+| `hl-DiffTextAdd` | Added text within a changed diff line |
+| `hl-SnippetTabstopActive` | Currently active snippet tabstop |
+| `hl-PmenuBorder` | Popup menu border |
+| `hl-PmenuShadow` | Popup menu shadow |
+| `hl-OkMsg` | Success messages |
+| `hl-StderrMsg` / `hl-StdoutMsg` | stderr/stdout message differentiation |
+
+---
+
+## New Events in 0.12
+
+| Event | Trigger |
+|---|---|
+| `MarkSet` | After user sets a mark |
+| `SessionLoadPre` | Before loading a session file |
+| `TabClosedPre` | Before a tabpage is closed |
+| `CmdlineLeavePre` | Before leaving command-line mode |
+| `Progress` | When a progress message is created or updated |
+
+```lua
+-- Example: hook into session load
+vim.api.nvim_create_autocmd("SessionLoadPre", {
+  callback = function()
+    -- save state before session overwrites it
+  end,
+})
+```
+
+---
+
+## Known Workarounds in This Config
+
+### `init.lua` — mdx-analyzer single-brace glob patch
+
+The mdx language server sends glob patterns like `**/*.{mdx}` (single item in
+braces), which Neovim 0.12's stricter `vim.glob.to_lpeg` rejects. The patch in
+`init.lua` collapses `{single}` → `single` before passing to the original
+function.
+
+```lua
+-- init.lua (keep until mdx-analyzer is fixed upstream)
+local orig_to_lpeg = vim.glob.to_lpeg
+vim.glob.to_lpeg = function(pattern)
+  local fixed = pattern:gsub('{(%w+)}', '%1')
+  return orig_to_lpeg(fixed)
+end
+```
+
+Remove this patch once the mdx-analyzer LSP sends valid glob patterns.
+
+---
+
+## Anti-Patterns to Avoid
+
+- Do not call `vim.cmd(...)` for anything that has a `vim.opt` / `vim.keymap.set` / `vim.api` equivalent.
+- Do not use `vim.diagnostic.disable()` — removed in 0.12.
+- Do not configure diagnostic signs with `:sign-define` or `sign_define()` — removed in 0.12.
+- Do not use `nvim_treesitter#foldexpr()` — use `v:lua.vim.treesitter.foldexpr()`.
+- Do not use `vim.diff(...)` — renamed to `vim.text.diff(...)` in 0.12.
+- Do not re-define default LSP keymaps (`grn`, `grr`, `gri`, `gra`, `grt`, `grx`, `K`) unless intentionally overriding with a picker.
+- Do not add `Query:iter_matches()` calls with `all = true` — removed in 0.12.
+- Do not use `vim.loop` — prefer `vim.uv` (alias established in 0.10, `vim.loop` deprecated).

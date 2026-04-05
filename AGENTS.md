@@ -50,6 +50,8 @@ Primary editor config located at `packages/nvim/.config/nvim/`. Key areas:
 - `lua/plugins/` — plugin definitions (lsp, ai, coding, editor, ui, etc.)
 - `lua/lang/` — LSP configuration per language (each file configures a language server: typescript, ruby, golang, rust, lua, bash, markdown, mdx, terraform, c, sorbet, ember, ember_glint, base)
 
+When working on any Neovim or Lua config task, load: @docs/instructions/neovim.md
+
 ### Platform Support
 
 - **macOS** — fully supported (`osx/` defaults, Homebrew bootstrap)
