@@ -142,6 +142,8 @@ return {
         "css",
         "javascript",
         "typescript",
+        "jsx",
+        "tsx",
         "ruby",
         "go",
         "gomod",
@@ -158,6 +160,15 @@ return {
         end)
         :totable()
       require('nvim-treesitter').install(parsersToInstall)
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback =function ()
+          -- Enable treesitter highlighting and disable regex syntax
+          pcall(vim.treesitter.start)
+          -- Enable treesitter-based indentation
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      })
     end,
     config = function(_, _)
       -- Register mdx filetype for .mdx files
