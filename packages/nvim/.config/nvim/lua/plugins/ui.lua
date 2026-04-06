@@ -126,6 +126,7 @@ return {
     main = "nvim-treesitter",
     branch = "main",
     init = function()
+      -- For a full list, see: https://github.com/nvim-treesitter/nvim-treesitter/blob/main/SUPPORTED_LANGUAGES.md
       local ensureInstalled = {
         "bash",
         "c",
@@ -183,6 +184,11 @@ return {
         end,
       })
     end
+  },
+
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
   },
 
   -- indent-blankline
