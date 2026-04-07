@@ -43,25 +43,17 @@ return {
         end,
       })
 
-      -- LSP servers and clients are able to communicate to each other what features they support.
-      --  By default, Neovim doesn't support everything that is in the LSP specification.
-      --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
-      --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+      -- Broadcast cmp_nvim_lsp capabilities to all servers globally.
+      -- Replaces the old per-server capabilities merge that was done via mason-lspconfig handlers.
+      vim.lsp.config("*", {
+        capabilities = vim.tbl_deep_extend(
+          "force",
+          vim.lsp.protocol.make_client_capabilities(),
+          require("cmp_nvim_lsp").default_capabilities()
+        ),
+      })
 
--- require('config.utils').print_table(vim.tbl_keys(vim.lsp._enabled_configs))
-      -- local servers = require("lang.base").lsp_servers
-      -- local ensure_installed = vim.tbl_keys(servers or {})
-
-      local ensure_installed = vim.tbl_keys(vim.lsp._enabled_configs)
-
-      -- NOTE: Something changed, instead using mason-null-ls to automate installing stylua
-      -- You can add other tools here that you want Mason to install
-      -- for you, so that they are available from within Neovim.
-      -- vim.list_extend(ensure_installed, {
-      --   -- "stylua", -- Used to format Lua code
-      -- })
+      local ensure_installed = require("config.utils").lsp_servers()
 
       require("mason-null-ls").setup({
         ensure_installed = { "stylua" }, -- Ensures stylua is installed
@@ -79,16 +71,6 @@ return {
         ensure_installed = ensure_installed,
         automatic_installation = true,
         automatic_enable = true,
-        -- handlers = {
-        --   function(server_name)
-        --     -- local server = servers[server_name] or {}
-        --     -- This handles overriding only values explicitly passed
-        --     -- by the server configuration above. Useful when disabling
-        --     -- certain features of an LSP (for example, turning off formatting for ts_ls)
-        --     server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-        --     require("lspconfig")[server_name].setup(server)
-        --   end,
-        -- },
       })
     end,
   },

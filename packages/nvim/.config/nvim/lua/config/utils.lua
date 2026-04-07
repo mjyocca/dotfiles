@@ -50,4 +50,22 @@ M.get_diagnostics = function(diagnostics)
   }
 end
 
+--- Returns a list of LSP server names derived from files in `nvim/lsp/*.lua`,
+--- filtered to only those known to mason-lspconfig (i.e. mason-installable).
+---@return string[]
+M.lsp_servers = function()
+  local lsp_dir = vim.fn.stdpath("config") .. "/lsp"
+  local mason_map = require("mason-lspconfig.mappings").get_mason_map().lspconfig_to_package
+  local servers = {}
+  for name, type in vim.fs.dir(lsp_dir) do
+    if type == "file" and name:match("%.lua$") then
+      local server = (name:gsub("%.lua$", ""))
+      if mason_map[server] then
+        table.insert(servers, server)
+      end
+    end
+  end
+  return servers
+end
+
 return M
