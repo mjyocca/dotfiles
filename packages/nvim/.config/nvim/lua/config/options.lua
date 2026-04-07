@@ -25,6 +25,9 @@ vim.o.fillchars = "eob: "
 
 vim.opt.termguicolors = true
 
+-- Enable exrc option to auto load .nvim.lua files (Neovim will prompt on first open)
+vim.opt.exrc = true
+
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
 vim.opt.timeoutlen = 300
