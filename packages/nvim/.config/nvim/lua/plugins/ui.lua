@@ -141,10 +141,15 @@ return {
         "vimdoc",
         "html",
         "css",
+        "regex",
         "javascript",
         "typescript",
+        "glimmer",
+        "glimmer_javascript",
+        "glimmer_typescript",
         "jsx",
         "tsx",
+        "jsdoc",
         "ruby",
         "go",
         "gomod",
@@ -162,12 +167,19 @@ return {
         :totable()
       require('nvim-treesitter').install(parsersToInstall)
 
+      vim.treesitter.language.register('glimmer_javascript', 'gjs')
+      vim.treesitter.language.register('glimmer_typescript', 'gts')
+      vim.treesitter.language.register('glimmer', 'hbs')
+
       vim.api.nvim_create_autocmd('FileType', {
         callback =function ()
           -- Enable treesitter highlighting and disable regex syntax
           pcall(vim.treesitter.start)
           -- Enable treesitter-based indentation
           vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          -- Folding
+          vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+          vim.wo[0][0].foldmethod = 'expr'
         end
       })
     end,

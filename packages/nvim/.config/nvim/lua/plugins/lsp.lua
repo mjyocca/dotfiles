@@ -50,8 +50,11 @@ return {
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
-      local servers = require("lang.base").lsp_servers
-      local ensure_installed = vim.tbl_keys(servers or {})
+-- require('config.utils').print_table(vim.tbl_keys(vim.lsp._enabled_configs))
+      -- local servers = require("lang.base").lsp_servers
+      -- local ensure_installed = vim.tbl_keys(servers or {})
+
+      local ensure_installed = vim.tbl_keys(vim.lsp._enabled_configs)
 
       -- NOTE: Something changed, instead using mason-null-ls to automate installing stylua
       -- You can add other tools here that you want Mason to install
@@ -75,16 +78,17 @@ return {
       require("mason-lspconfig").setup({
         ensure_installed = ensure_installed,
         automatic_installation = true,
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-            require("lspconfig")[server_name].setup(server)
-          end,
-        },
+        automatic_enable = true,
+        -- handlers = {
+        --   function(server_name)
+        --     -- local server = servers[server_name] or {}
+        --     -- This handles overriding only values explicitly passed
+        --     -- by the server configuration above. Useful when disabling
+        --     -- certain features of an LSP (for example, turning off formatting for ts_ls)
+        --     server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+        --     require("lspconfig")[server_name].setup(server)
+        --   end,
+        -- },
       })
     end,
   },

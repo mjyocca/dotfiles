@@ -1,19 +1,18 @@
 local M = {}
 
+-- require('config.utils').print_table(vim.tbl_keys(vim.lsp._enabled_configs))
+
 local language_files = {
 	"lua",
 	"c",
 	"rust",
 	"golang",
-	"typescript",
 	"ruby",
 	"sorbet",
 	"terraform",
 	"bash",
 	"markdown",
   "mdx",
-	"ember",
-	"ember_glint",
 }
 
 local server_mappings = {}
