@@ -1,7 +1,5 @@
-local M = {}
-
-M.server_name = "lua_ls"
-M.lspconfig = {
+---@type vim.lsp.Config
+return {
   settings = {
     Lua = {
       completion = {
@@ -10,5 +8,3 @@ M.lspconfig = {
     },
   },
 }
-
-return M

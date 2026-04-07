@@ -1,6 +1,5 @@
+---@type vim.lsp.Config
 return {
-  server_name = "gopls",
-  lspconfig = {
     cmd = { "gopls" },
     filetypes = { "go", "gomod", "gowork", "gotmpl" },
     settings = {
@@ -36,5 +35,4 @@ return {
         },
       },
     },
-  },
 }
