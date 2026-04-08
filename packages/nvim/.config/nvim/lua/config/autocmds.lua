@@ -83,7 +83,15 @@ function M.local_config()
     if not env then return end
     local path = vim.fn.fnamemodify(env, ":p") -- expand relative to cwd
     if vim.uv.fs_stat(path) then
-      vim.secure.source(path)
+      local source = vim.secure.read(path)
+      if source then
+        local chunk, err = loadstring(source, "@" .. path)
+        if chunk then
+          chunk()
+        else
+          vim.notify("NVIM_LOCAL_CONFIG: " .. err, vim.log.levels.ERROR)
+        end
+      end
     end
   end
 
