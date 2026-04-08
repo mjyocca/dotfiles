@@ -1,0 +1,67 @@
+{
+  "sig void": {
+    "prefix": "sigv",
+    "body": ["sig { void }"],
+    "description": "Sorbet void signature"
+  },
+  "sig returns": {
+    "prefix": "sigr",
+    "body": ["sig { returns(${1:Type}) }"],
+    "description": "Sorbet returns signature"
+  },
+  "sig params returns": {
+    "prefix": "sigpr",
+    "body": ["sig { params(${1:name}: ${2:Type}).returns(${3:Type}) }"],
+    "description": "Sorbet params + returns signature"
+  },
+  "sig params void": {
+    "prefix": "sigpv",
+    "body": ["sig { params(${1:name}: ${2:Type}).void }"],
+    "description": "Sorbet params + void signature"
+  },
+  "typed strict": {
+    "prefix": "typedstrict",
+    "body": ["# typed: strict"],
+    "description": "Sorbet strict typecheck comment"
+  },
+  "typed true": {
+    "prefix": "typedtrue",
+    "body": ["# typed: true"],
+    "description": "Sorbet true typecheck comment"
+  },
+  "typed false": {
+    "prefix": "typedfalse",
+    "body": ["# typed: false"],
+    "description": "Sorbet false typecheck comment"
+  },
+  "T.nilable": {
+    "prefix": "tnil",
+    "body": ["T.nilable(${1:Type})"],
+    "description": "Sorbet nilable type"
+  },
+  "T::Array": {
+    "prefix": "tarr",
+    "body": ["T::Array[${1:Type}]"],
+    "description": "Sorbet typed array"
+  },
+  "T::Hash": {
+    "prefix": "thash",
+    "body": ["T::Hash[${1:KeyType}, ${2:ValueType}]"],
+    "description": "Sorbet typed hash"
+  },
+  "T.let": {
+    "prefix": "tlet",
+    "body": ["T.let(${1:value}, ${2:Type})"],
+    "description": "Sorbet T.let type annotation"
+  },
+  "T.cast": {
+    "prefix": "tcast",
+    "body": ["T.cast(${1:value}, ${2:Type})"],
+    "description": "Sorbet T.cast"
+  },
+  "T.must": {
+    "prefix": "tmust",
+    "body": ["T.must(${1:value})"],
+    "description": "Sorbet T.must non-nil assertion"
+  }
+}
