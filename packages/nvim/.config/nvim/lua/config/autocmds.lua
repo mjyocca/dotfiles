@@ -83,7 +83,7 @@ function M.local_config()
     if not env then return end
     local path = vim.fn.fnamemodify(env, ":p") -- expand relative to cwd
     if vim.uv.fs_stat(path) then
-      vim.secure.read(path)
+      vim.secure.source(path)
     end
   end
 
