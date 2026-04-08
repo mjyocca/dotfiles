@@ -108,6 +108,8 @@ return {
           ["<C-h>"] = cmp.mapping(function()
             if luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
+            else
+              vim.notify("not jumpable")
             end
           end, { "i", "s" }),
 
