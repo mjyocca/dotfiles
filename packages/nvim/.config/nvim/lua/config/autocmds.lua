@@ -70,6 +70,33 @@ function M.snacks(options)
   })
 end
 
+-- Sources a local Neovim config file pointed to by $NVIM_LOCAL_CONFIG in .envrc.
+-- Provides the same behavior as exrc/.nvim.lua for projects where committing or
+-- gitignoring .nvim.lua at the root is not practical.
+--
+-- Usage in project .envrc:
+--   export NVIM_LOCAL_CONFIG=".config/nvim.lua"  -- relative to project root
+--   export NVIM_LOCAL_CONFIG="/abs/path/nvim.lua" -- or absolute
+function M.local_config()
+  local function load()
+    local env = vim.env.NVIM_LOCAL_CONFIG
+    if not env then return end
+    local path = vim.fn.fnamemodify(env, ":p") -- expand relative to cwd
+    if vim.uv.fs_stat(path) then
+      vim.secure.read(path)
+    end
+  end
+
+  -- Load on startup for the initial cwd
+  load()
+
+  -- Reload when changing directories (e.g. cd in terminal, session restore)
+  vim.api.nvim_create_autocmd("DirChanged", {
+    group = augroup("local-config"),
+    callback = load,
+  })
+end
+
 M.plugins = function()
   -- Ember Cmd util for finding related files
   vim.api.nvim_create_user_command("FindEmberRelated", function()

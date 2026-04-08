@@ -516,6 +516,61 @@ to your global gitignore.
 If both define the same prefix for the same filetype, both appear in the
 completion menu.
 
+---
+
+## Per-project Config
+
+### `.nvim.lua` — standard approach
+
+`vim.opt.exrc = true` (set in `options.lua`) causes Neovim to automatically
+source a `.nvim.lua` file at the project root after lazy.nvim and all plugins
+have loaded. Neovim prompts to trust the file on first open.
+
+Use `:trust` to re-evaluate trust for the current file.
+
+### `NVIM_LOCAL_CONFIG` — alternative for restricted projects
+
+For projects where committing or gitignoring `.nvim.lua` at the root is not
+practical, set `NVIM_LOCAL_CONFIG` in the project's `.envrc` to point to any
+Lua file. It is sourced at the same point in startup as `.nvim.lua` and uses
+the same `vim.secure.read` trust prompt.
+
+```bash
+# .envrc
+export NVIM_LOCAL_CONFIG=".config/nvim.lua"   # relative to project root
+export NVIM_LOCAL_CONFIG="/abs/path/nvim.lua"  # or absolute
+```
+
+The file itself follows the same conventions as `.nvim.lua` — see the template
+for documented examples.
+
+### `nvim-project-init` — scaffold both files from templates
+
+Run `nvim-project-init` from any project root to copy the template files:
+
+```bash
+nvim-project-init
+# wrote .envrc
+# wrote .nvim.lua
+```
+
+Existing files are skipped. Templates live at:
+
+```
+packages/nvim/.config/nvim/templates/
+  .envrc.template     ← direnv env vars including NVIM_LOCAL_CONFIG
+  .nvim.lua.template  ← LSP overrides, snippets, keymaps, DAP configs
+```
+
+Both templates are fully commented — uncomment and adapt the sections relevant
+to the project. After generating:
+
+```bash
+direnv allow       # load the .envrc
+# edit .envrc      # uncomment env vars for this project
+# edit .nvim.lua   # uncomment overrides for this project
+```
+
 ### Snippet navigation keymaps
 
 | Key | Action |

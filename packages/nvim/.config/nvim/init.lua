@@ -24,8 +24,6 @@ local keymaps = require("config.keymaps")
 autocmds.general()
 -- Load plugin autocmds
 autocmds.plugins()
--- Source per-project config from $NVIM_LOCAL_CONFIG (set in .envrc)
-autocmds.local_config()
 -- Load general keymaps globally
 keymaps.general()
 -- Load plugin keymaps
@@ -56,3 +54,7 @@ require("lazy").setup({
     }
   }
 })
+
+-- Source per-project config from $NVIM_LOCAL_CONFIG (set in .envrc).
+-- Placed after lazy.setup so plugins are available, matching exrc/.nvim.lua timing.
+autocmds.local_config()

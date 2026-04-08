@@ -9,3 +9,12 @@
 
 # Load DAP + DAP UI for this project
 # export NVIM_DAP_ENABLED=1
+
+# ---------------------------------------------------------------------------
+# Per-project Neovim config (alternative to .nvim.lua)
+# Use when committing or gitignoring .nvim.lua at the project root is not
+# practical. Point to any Lua file — relative paths resolve from project root.
+# Sourced automatically on startup and on directory change.
+# ---------------------------------------------------------------------------
+
+# export NVIM_LOCAL_CONFIG=".config/nvim.lua"
