@@ -24,6 +24,8 @@ local keymaps = require("config.keymaps")
 autocmds.general()
 -- Load plugin autocmds
 autocmds.plugins()
+-- Source per-project config from $NVIM_LOCAL_CONFIG (set in .envrc)
+autocmds.local_config()
 -- Load general keymaps globally
 keymaps.general()
 -- Load plugin keymaps

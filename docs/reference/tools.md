@@ -140,6 +140,12 @@ Open-source machine emulator and virtualizer. Full hardware emulation — can ru
 - [Docs](https://www.qemu.org/docs/master/)
 - [Wiki](https://wiki.qemu.org/)
 
+### UTM
+GUI-first VM app for macOS and iOS built on QEMU. Operates in two distinct modes: **virtualization** (uses Apple's Hypervisor framework for near-native speed when the guest architecture matches the host) and **emulation** (full QEMU emulation for foreign architectures, e.g. running x86 on Apple Silicon). The only tool in this list that runs on iPhone and iPad. Best choice when you want a polished, point-and-click VM experience rather than a CLI-driven workflow.
+
+- [Docs](https://docs.getutm.app/)
+- [GitHub](https://github.com/utmapp/UTM)
+
 ---
 
 # DevOps & Infrastructure
