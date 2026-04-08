@@ -1,0 +1,11 @@
+# .envrc — direnv project environment
+# Copy to project root, uncomment as needed, then run: direnv allow
+
+# ---------------------------------------------------------------------------
+# Plugin gating (opt-in)
+# These control whether heavy plugins are loaded at all.
+# Must be set before Neovim starts — direnv handles this automatically.
+# ---------------------------------------------------------------------------
+
+# Load DAP + DAP UI for this project
+# export NVIM_DAP_ENABLED=1

@@ -1,0 +1,31 @@
+# ~/.local/bin/nvim-project-init
+#!/usr/bin/env bash
+
+template_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/templates"
+errors=0
+
+for file in .envrc .nvim.lua; do
+  template="${template_dir}/${file}.template"
+  dest="${PWD}/${file}"
+
+  if [[ ! -f "$template" ]]; then
+    echo "nvim-project-init: template not found: $template" >&2
+    (( errors++ ))
+    continue
+  fi
+
+  if [[ -f "$dest" ]]; then
+    echo "  skip  ${file} (already exists)"
+  else
+    cp "$template" "$dest"
+    echo "  wrote ${file}"
+  fi
+done
+
+(( errors > 0 )) && exit 1
+
+echo ""
+echo "Next steps:"
+[[ -f "${PWD}/.envrc" ]] && echo "  direnv allow    # if using direnv"
+echo "  edit .envrc     # uncomment env vars for this project"
+echo "  edit .nvim.lua  # uncomment overrides for this project"

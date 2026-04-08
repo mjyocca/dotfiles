@@ -16,6 +16,9 @@ else
 EOF
 fi
 
+# Add .local/bin to path
+export PATH="$HOME/.local/bin:$PATH"
+
 # =================================================================
 # ASDF 📦 Package Manager (see https://asdf-vm.com/guide/getting-started.html)
 # =================================================================

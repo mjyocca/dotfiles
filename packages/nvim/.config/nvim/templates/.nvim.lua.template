@@ -1,0 +1,108 @@
+-- .nvim.lua — per-project Neovim config
+-- (i)gnore, (v)iew, or (d)eny
+-- Run cmd `:trust` to run the .nvim.lua file
+
+-- Sourced automatically when vim.o.exrc = true (set in init.lua)
+-- Runs AFTER lazy.nvim and all plugins have loaded.
+-- Copy to project root and uncomment / adapt as needed.
+
+-- ---------------------------------------------------------------------------
+-- LSP overrides
+-- vim.lsp.config() merges into the server config declared in lsp/*.lua
+-- Safe to call unconditionally — no plugin dependency.
+-- ---------------------------------------------------------------------------
+
+-- vim.lsp.config("pyright", {
+--   settings = {
+--     python = {
+--       pythonPath = vim.env.NVIM_PYTHON or ".venv/bin/python",
+--     },
+--   },
+-- })
+
+-- vim.lsp.config("ts_ls", {
+--   settings = {
+--     typescript = {
+--       preferences = { importModuleSpecifier = "relative" },
+--     },
+--   },
+-- })
+
+-- ---------------------------------------------------------------------------
+-- Formatter override (conform.nvim)
+-- Re-calling setup() merges with the global config.
+-- ---------------------------------------------------------------------------
+
+-- local ok_conform, conform = pcall(require, "conform")
+-- if ok_conform then
+--   conform.setup({
+--     formatters_by_ft = {
+--       python = { vim.env.NVIM_FORMATTER or "ruff_format" },
+--       -- typescript = { "prettier" },
+--     },
+--     format_on_save = vim.g.disable_autofmt and nil or { timeout_ms = 500 },
+--   })
+-- end
+
+-- ---------------------------------------------------------------------------
+-- DAP launch configurations
+-- Only applied if NVIM_DAP_ENABLED=1 was set in .envrc (plugin must be loaded).
+-- ---------------------------------------------------------------------------
+
+-- if vim.env.NVIM_DAP_ENABLED == "1" then
+--   local ok_dap, dap = pcall(require, "dap")
+--   if ok_dap then
+--     dap.configurations.python = {
+--       {
+--         type = "python",
+--         request = "launch",
+--         name = "Launch app",
+--         program = "${workspaceFolder}/src/main.py",
+--         env = { APP_ENV = vim.env.NVIM_ENV or "development" },
+--       },
+--     }
+--
+--     -- dap.configurations.go = {
+--     --   {
+--     --     type = "go",
+--     --     request = "launch",
+--     --     name = "Launch service",
+--     --     program = "./cmd/api",
+--     --     args = { "--config", "dev.yaml" },
+--     --   },
+--     -- }
+--   end
+-- end
+
+-- ---------------------------------------------------------------------------
+-- Project-local snippets
+-- Loads VSCode-style snippets from .nvim/snippets/ in the project root.
+-- Create files like .nvim/snippets/python.json following VS Code snippet format.
+-- ---------------------------------------------------------------------------
+
+-- local ok_luasnip, luasnip_loader = pcall(require, "luasnip.loaders.from_vscode")
+-- if ok_luasnip then
+--   luasnip_loader.lazy_load({
+--     paths = { vim.fn.getcwd() .. "/.nvim/snippets" },
+--   })
+-- end
+
+-- ---------------------------------------------------------------------------
+-- Project-local keymaps
+-- Use buffer = false to make these global for the session, or buffer = 0 to
+-- scope them to the current buffer only.
+-- ---------------------------------------------------------------------------
+
+-- vim.keymap.set("n", "<leader>rr", "<cmd>!./scripts/run.sh<cr>",
+--   { desc = "Run project", silent = true })
+
+-- vim.keymap.set("n", "<leader>rt", "<cmd>!./scripts/test.sh<cr>",
+--   { desc = "Run tests", silent = true })
+
+-- ---------------------------------------------------------------------------
+-- Runtime behavior flags
+-- Set vim.g flags here that your plugin configs check at use-time.
+-- Only effective for plugins that are loaded lazily (event/ft/cmd triggers).
+-- ---------------------------------------------------------------------------
+
+-- vim.g.disable_autofmt = true   -- suppress format-on-save for this project
