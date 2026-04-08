@@ -80,6 +80,7 @@ cask 'podman-desktop'
 brew 'docker'
 brew 'podman'
 brew 'lima'
+brew 'colima'
 brew 'qemu'
 
 brew 'kubernetes-cli'
