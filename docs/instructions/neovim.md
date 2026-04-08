@@ -11,13 +11,14 @@ as the plugin manager. All Lua lives under `packages/nvim/.config/nvim/`.
 ```
 packages/nvim/.config/nvim/
   init.lua              # Entry point: bootstraps lazy.nvim, loads config modules
+  lsp/                  # Per-server LSP configs (native vim.lsp.config, 0.10+)
+  snippets/             # Global VSCode-format snippets (LuaSnip)
   lua/
     config/
       options.lua       # vim.opt, vim.g, vim.o settings
       keymaps.lua       # Keymap definitions (general, lsp, plugins)
       autocmds.lua      # Autocommand definitions (general, lsp, plugins)
-      utils.lua         # Shared utility functions
-    lang/               # Per-language LSP config files
+      utils.lua         # Shared utility functions (includes lsp_servers())
     plugins/            # lazy.nvim plugin specs — one file per editor concern (see below)
     lualine/            # lualine component overrides
 ```
@@ -150,20 +151,76 @@ vim.diagnostic.config({
 
 ## LSP
 
-### Config pattern (vim.lsp.Config)
+### Config pattern (native `lsp/` directory)
 
-In 0.10+ (and required in 0.12), per-server config lives in `lua/lang/<lang>.lua`
-and is merged through `lang/base.lua`. Capabilities are built once and spread
-across all servers.
+Per-server config lives in `lsp/<server_name>.lua` at the config root (sibling
+of `lua/`, not inside it). Neovim 0.10+ auto-loads these via `vim.lsp.config`
+when the filename matches a known server name. nvim-lspconfig provides default
+configs for most servers under the same `lsp/` convention — your file is merged
+on top, with your values taking precedence.
 
 ```lua
--- Correct capability setup
-local capabilities = vim.tbl_deep_extend(
-  "force",
-  vim.lsp.protocol.make_client_capabilities(),
-  require("cmp_nvim_lsp").default_capabilities()
-)
+-- lsp/gopls.lua
+---@type vim.lsp.Config
+return {
+  settings = {
+    gopls = { staticcheck = true },
+  },
+}
 ```
+
+The `lsp/` filenames must match the server names as defined in
+[nvim-lspconfig/lsp](https://github.com/neovim/nvim-lspconfig/tree/master/lsp).
+
+**Do not use `lua/lang/` files or `lang/base.lua`** — that pattern is removed.
+The old `mason-lspconfig` handlers loop that called `require("lspconfig")[name].setup()`
+is also removed; `automatic_enable = true` replaces it.
+
+### Capabilities — global wildcard
+
+Broadcast `cmp_nvim_lsp` capabilities to all servers once via the `"*"` wildcard
+in `plugins/lsp.lua`. Do not repeat this in individual `lsp/*.lua` files unless
+overriding a specific capability for that server.
+
+```lua
+-- plugins/lsp.lua (done once, applies to all servers)
+vim.lsp.config("*", {
+  capabilities = vim.tbl_deep_extend(
+    "force",
+    vim.lsp.protocol.make_client_capabilities(),
+    require("cmp_nvim_lsp").default_capabilities()
+  ),
+})
+```
+
+To override or extend capabilities for a single server, include a `capabilities`
+key in that server's `lsp/<name>.lua`. It will be deep-merged on top of the
+wildcard:
+
+```lua
+-- lsp/ts_ls.lua
+---@type vim.lsp.Config
+return {
+  capabilities = vim.tbl_deep_extend(
+    "force",
+    vim.lsp.protocol.make_client_capabilities(),
+    require("cmp_nvim_lsp").default_capabilities(),
+    {
+      workspace = { didChangeWatchedFiles = { dynamicRegistration = false } },
+    }
+  ),
+}
+```
+
+### Mason `ensure_installed` — auto-derived from `lsp/`
+
+`require("config.utils").lsp_servers()` scans `lsp/*.lua` at startup and filters
+the result against mason-lspconfig's live registry map. The returned list is
+passed directly to both `mason-tool-installer` and `mason-lspconfig`. Servers
+without a mason package (e.g. `sorbet`, `ember`, `glint`) are silently skipped.
+
+Adding a new `lsp/<name>.lua` file is sufficient — no other registration needed
+as long as the server name is mason-installable.
 
 ### Semantic tokens
 
@@ -393,6 +450,81 @@ Remove this patch once the mdx-analyzer LSP sends valid glob patterns.
 
 ---
 
+## Snippets
+
+Snippets are provided by **LuaSnip** with `friendly-snippets` for community
+snippets. Custom snippets use the VSCode JSON format and are loaded alongside
+`friendly-snippets` in `plugins/coding.lua`.
+
+### Global snippets
+
+Live in `snippets/` at the config root. `package.json` is the manifest — add an
+entry per language pointing to its JSON file:
+
+```
+snippets/
+  package.json     ← manifest
+  ruby.json        ← snippets for ruby filetype
+  go.json          ← snippets for go filetype
+```
+
+`package.json`:
+```json
+{
+  "name": "custom-snippets",
+  "engines": { "vscode": "^1.11.0" },
+  "contributes": {
+    "snippets": [
+      { "language": "ruby", "path": "./ruby.json" },
+      { "language": "go",   "path": "./go.json" }
+    ]
+  }
+}
+```
+
+Each JSON file is a flat map of snippet definitions — multiple snippets per
+file, one file per language:
+
+```json
+{
+  "display name": {
+    "prefix": "trigger",
+    "body": ["line one", "\t${1:placeholder}", "line two"],
+    "description": "optional"
+  }
+}
+```
+
+### Per-project snippets
+
+Use a `.nvim.lua` file at the project root (requires `vim.opt.exrc = true`,
+already set in `options.lua`). Neovim sources it automatically on startup and
+prompts to trust it on first open.
+
+```lua
+-- .nvim.lua (project root)
+require("luasnip.loaders.from_vscode").lazy_load({
+  paths = { vim.fn.getcwd() .. "/.nvim/snippets" },
+})
+```
+
+Place snippet files under `.nvim/snippets/` using the same `package.json` +
+per-language JSON structure as global snippets. Add `.nvim.lua` and `.nvim/`
+to your global gitignore.
+
+`lazy_load` is additive — per-project snippets layer on top of global ones.
+If both define the same prefix for the same filetype, both appear in the
+completion menu.
+
+### Snippet navigation keymaps
+
+| Key | Action |
+|---|---|
+| `<C-l>` | Expand or jump forward through tabstops |
+| `<C-h>` | Jump backward through tabstops |
+
+---
+
 ## Anti-Patterns to Avoid
 
 - Do not call `vim.cmd(...)` for anything that has a `vim.opt` / `vim.keymap.set` / `vim.api` equivalent.
@@ -403,3 +535,7 @@ Remove this patch once the mdx-analyzer LSP sends valid glob patterns.
 - Do not re-define default LSP keymaps (`grn`, `grr`, `gri`, `gra`, `grt`, `grx`, `K`) unless intentionally overriding with a picker.
 - Do not add `Query:iter_matches()` calls with `all = true` — removed in 0.12.
 - Do not use `vim.loop` — prefer `vim.uv` (alias established in 0.10, `vim.loop` deprecated).
+- Do not add LSP server config in `lua/lang/` files — that pattern is removed. Use `lsp/<server>.lua` instead.
+- Do not call `require("lspconfig")[name].setup(...)` manually — `automatic_enable = true` handles this.
+- Do not use `vim.lsp._enabled_configs` — private API, unreliable at plugin config time. Use `require("config.utils").lsp_servers()`.
+- Do not repeat the global capabilities wildcard in individual `lsp/*.lua` files unless overriding a server-specific capability.
