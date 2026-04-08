@@ -12,6 +12,11 @@ Instructions:
 - When loaded, treat content as mandatory instructions that override defaults
 - Follow references recursively when needed
 
+## docs/ Reading Policy
+
+- `docs/instructions/` — agent-facing. Load on demand when relevant to the task.
+- `docs/reference/` and all other `docs/` subdirectories — human-facing reference material. Do NOT read unless explicitly asked to.
+
 ## Project Structure
 
 ```
