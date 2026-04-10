@@ -1,5 +1,6 @@
 .DS_STORE
 
-stow/zsh/.global_env.sh
-
 .scratch
+
+packages/zsh/.global_env.sh
+
