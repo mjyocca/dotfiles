@@ -78,6 +78,8 @@ cask 'orbstack'
 cask 'podman-desktop'
 
 brew 'docker'
+brew 'docker-compose'
+brew 'docker-buildx'
 brew 'podman'
 brew 'lima'
 brew 'colima'
