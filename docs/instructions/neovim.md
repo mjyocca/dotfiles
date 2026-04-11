@@ -594,3 +594,4 @@ direnv allow       # load the .envrc
 - Do not call `require("lspconfig")[name].setup(...)` manually — `automatic_enable = true` handles this.
 - Do not use `vim.lsp._enabled_configs` — private API, unreliable at plugin config time. Use `require("config.utils").lsp_servers()`.
 - Do not repeat the global capabilities wildcard in individual `lsp/*.lua` files unless overriding a server-specific capability.
+- Do not use `dofile` to source trusted project config — it bypasses the `vim.secure` trust check entirely. Use `NVIM_LOCAL_CONFIG` in `.envrc` and let `autocmds.local_config()` handle sourcing via `vim.secure.read`.
