@@ -1,4 +1,188 @@
 {
+  "Sig — no params, void return": {
+    "prefix": "sig-void",
+    "body": ["sig { void }", "def ${1:method_name}", "  $0", "end"],
+    "description": "Sorbet sig with no params and void return"
+  },
+
+  "Sig — no params, typed return": {
+    "prefix": "sig-return",
+    "body": [
+      "sig { returns(${1:String}) }",
+      "def ${2:method_name}",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with no params and a typed return"
+  },
+
+  "Sig — single param, void return": {
+    "prefix": "sig-param-void",
+    "body": [
+      "sig { params(${1:name}: ${2:String}).void }",
+      "def ${3:method_name}(${1:name})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with one param and void return"
+  },
+
+  "Sig — single param, typed return": {
+    "prefix": "sig-param-return",
+    "body": [
+      "sig { params(${1:name}: ${2:String}).returns(${3:Integer}) }",
+      "def ${4:method_name}(${1:name})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with one param and a typed return"
+  },
+
+  "Sig — multiple params, typed return": {
+    "prefix": "sig-params-return",
+    "body": [
+      "sig do",
+      "  params(",
+      "    ${1:first}: ${2:String},",
+      "    ${3:second}: ${4:Integer},",
+      "  ).returns(${5:Boolean})",
+      "end",
+      "def ${6:method_name}(${1:first}, ${3:second})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with multiple params and a typed return"
+  },
+
+  "Sig — multiple params, void return": {
+    "prefix": "sig-params-void",
+    "body": [
+      "sig do",
+      "  params(",
+      "    ${1:first}: ${2:String},",
+      "    ${3:second}: ${4:Integer},",
+      "  ).void",
+      "end",
+      "def ${5:method_name}(${1:first}, ${3:second})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with multiple params and void return"
+  },
+
+  "Sig — nilable param, nilable return": {
+    "prefix": "sig-nilable",
+    "body": [
+      "sig { params(${1:name}: T.nilable(${2:String})).returns(T.nilable(${3:String})) }",
+      "def ${4:method_name}(${1:name})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with nilable param and nilable return"
+  },
+
+  "Sig — keyword params, typed return": {
+    "prefix": "sig-kwargs-return",
+    "body": [
+      "sig do",
+      "  params(",
+      "    ${1:name}: ${2:String},",
+      "    ${3:count}: ${4:Integer},",
+      "  ).returns(${5:String})",
+      "end",
+      "def ${6:method_name}(${1:name}:, ${3:count}:)",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with keyword params and a typed return"
+  },
+
+  "Sig — abstract method": {
+    "prefix": "sig-abstract",
+    "body": [
+      "sig { abstract.params(${1:name}: ${2:String}).returns(${3:String}) }",
+      "def ${4:method_name}(${1:name}); end"
+    ],
+    "description": "Sorbet abstract sig — one-liner with semicolon"
+  },
+
+  "Sig — overridable method": {
+    "prefix": "sig-overridable",
+    "body": [
+      "sig { overridable.params(${1:name}: ${2:String}).returns(${3:String}) }",
+      "def ${4:method_name}(${1:name})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet overridable sig"
+  },
+
+  "Sig — override method": {
+    "prefix": "sig-override",
+    "body": [
+      "sig { override.params(${1:name}: ${2:String}).returns(${3:String}) }",
+      "def ${4:method_name}(${1:name})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet override sig"
+  },
+
+  "Sig — T::Array param, typed return": {
+    "prefix": "sig-array-param",
+    "body": [
+      "sig { params(${1:items}: T::Array[${2:String}]).returns(${3:Integer}) }",
+      "def ${4:method_name}(${1:items})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with T::Array param"
+  },
+
+  "Sig — T::Hash param, typed return": {
+    "prefix": "sig-hash-param",
+    "body": [
+      "sig { params(${1:data}: T::Hash[${2:Symbol}, ${3:String}]).returns(${4:T::Array[String]}) }",
+      "def ${5:method_name}(${1:data})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig with T::Hash param"
+  },
+
+  "Sig — T.any return": {
+    "prefix": "sig-any-return",
+    "body": [
+      "sig { params(${1:value}: ${2:String}).returns(T.any(${3:String}, ${4:Integer})) }",
+      "def ${5:method_name}(${1:value})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig returning T.any union type"
+  },
+
+  "Sig — initialize with params": {
+    "prefix": "sig-initialize",
+    "body": [
+      "sig { params(${1:name}: ${2:String}, ${3:count}: ${4:Integer}).void }",
+      "def initialize(${1:name}:, ${3:count}:)",
+      "  @${1:name} = ${1:name}",
+      "  @${3:count} = ${3:count}",
+      "end"
+    ],
+    "description": "Sorbet sig for initialize — always void"
+  },
+
+  "Sig — class method, typed return": {
+    "prefix": "sig-class-method",
+    "body": [
+      "sig { params(${1:name}: ${2:String}).returns(${3:T.attached_class}) }",
+      "def self.${4:method_name}(${1:name})",
+      "  $0",
+      "end"
+    ],
+    "description": "Sorbet sig for a class-level method returning T.attached_class"
+  },
   "sig void": {
     "prefix": "sigv",
     "body": ["sig { void }"],
