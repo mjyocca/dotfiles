@@ -10,6 +10,10 @@ font-size = 16
 font-family = "FiraCode Nerd Font"
 window-title-font-family = "FiraCode Nerd Font"
 
+# Behavior
+window-save-state = always
+macos-titlebar-style = tabs
+
 # Theming
 theme = GitHub Dark Default
 background-opacity = 0.88
