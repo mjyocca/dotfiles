@@ -1,0 +1,42 @@
+cpu: 4
+memory: 12
+disk: 100
+
+# Immutable after profile creation
+arch: host
+runtime: docker
+vmType: vz
+mountType: virtiofs
+# Immutable after profile creation
+
+modelRunner: docker
+autoActivate: true
+mountInotify: true
+
+network:
+  dnsHosts:
+    host.docker.internal: host.lima.internal
+
+docker:
+  features:
+    buildkit: true
+
+provision:
+  - mode: system
+    script: |
+      sysctl -w fs.inotify.max_user_watches=1048576
+      sysctl -w fs.inotify.max_queued_events=1048576
+      sysctl -w fs.inotify.max_user_instances=1024
+
+mounts:
+  - location: /Users
+    mountPoint: /Users
+    writable: true
+  - location: /Volumes
+    writable: true
+  - location: /opt/homebrew
+    writable: false
+  - location: /private
+    writable: true
+  - location: /var/folders
+    writable: true

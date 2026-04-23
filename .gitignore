@@ -2,5 +2,13 @@
 
 .scratch
 
+.env
+.envrc
+
 packages/zsh/.global_env.sh
 
+# Colima: ignore all runtime envs, keep tracked example config
+packages/colima/.colima/**
+!packages/colima/.colima/
+!packages/colima/.colima/_templates/
+!packages/colima/.colima/_templates/default.yaml
