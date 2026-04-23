@@ -1,5 +1,6 @@
 # Global .gitconfig
 [core]
+  pager = delta
 	excludesfile = ~/.config/git/.gitignore_global
 
 [init]
@@ -12,6 +13,18 @@
 [alias]
 	fza = "!git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add"
 	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  side-by-side = true
+  navigate = true  # use n and N to move between diff sections
+  dark = true      # or `light = true`, or omit for auto-detection
+
+[merge]
+  conflictStyle = zdiff3
+
 
 # Per parent directory settings
 ; [includeIf "gitdir:~/Projects/Development/work/"]
