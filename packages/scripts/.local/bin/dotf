@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# dotf — dotfiles toolbox dispatcher
+# Usage: dotf <command> [args...]
+#
+# Commands are resolved from scripts co-located with this binary
+# under the dotf/ subdirectory.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMANDS_DIR="${SCRIPT_DIR}/dotf.d"
+
+_usage() {
+  echo "Usage: dotf <command> [args...]"
+  echo ""
+  echo "Available commands:"
+  if [[ -d "$COMMANDS_DIR" ]]; then
+    for cmd in "$COMMANDS_DIR"/*; do
+      [[ -x "$cmd" ]] || continue
+      name="$(basename "$cmd")"
+      # Print first comment line after shebang as description
+      desc="$(awk 'NR>1 && /^#/ { sub(/^# */, ""); print; exit }' "$cmd")"
+      printf "  %-22s %s\n" "$name" "$desc"
+    done
+  fi
+  echo ""
+  echo "Run 'dotf <command> --help' for command-specific help."
+}
+
+CMD="${1:-}"
+
+if [[ -z "$CMD" || "$CMD" == "--help" || "$CMD" == "-h" ]]; then
+  _usage
+  exit 0
+fi
+
+COMMAND_FILE="${COMMANDS_DIR}/${CMD}"
+
+if [[ ! -f "$COMMAND_FILE" ]]; then
+  echo "dotf: unknown command '${CMD}'" >&2
+  echo "Run 'dotf --help' for available commands." >&2
+  exit 1
+fi
+
+if [[ ! -x "$COMMAND_FILE" ]]; then
+  echo "dotf: '${CMD}' is not executable" >&2
+  exit 1
+fi
+
+shift
+exec "$COMMAND_FILE" "$@"

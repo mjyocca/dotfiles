@@ -1,5 +1,19 @@
-# ~/.local/bin/nvim-project-init
 #!/usr/bin/env bash
+# Scaffold .envrc and .nvim.lua from Neovim project templates
+# Usage: dotf nvim-project-init
+
+set -euo pipefail
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  echo "Usage: dotf nvim-project-init"
+  echo ""
+  echo "Copies .envrc.template and .nvim.lua.template from the Neovim templates"
+  echo "directory into the current working directory."
+  echo ""
+  echo "Templates are read from:"
+  echo "  \${XDG_CONFIG_HOME:-\$HOME/.config}/nvim/templates/"
+  exit 0
+fi
 
 template_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/templates"
 errors=0
@@ -10,7 +24,7 @@ for file in .envrc .nvim.lua; do
 
   if [[ ! -f "$template" ]]; then
     echo "nvim-project-init: template not found: $template" >&2
-    (( errors++ ))
+    (( errors++ )) || true
     continue
   fi
 
@@ -22,7 +36,7 @@ for file in .envrc .nvim.lua; do
   fi
 done
 
-(( errors > 0 )) && exit 1
+(( errors > 0 )) && exit 1 || true
 
 echo ""
 echo "Next steps:"

@@ -1,0 +1,281 @@
+#!/usr/bin/env bash
+# Migrate docker volumes from one colima profile to another
+# Usage: dotf colima-migrate-volumes <src-profile> <dst-profile> [--all | --select]
+#
+# Exports volumes from the source colima context, then imports them into
+# the destination colima context. Archives are written to a temporary
+# directory and cleaned up on exit.
+#
+# Modes:
+#   --all      Migrate every volume (default when fzf is not available)
+#   --select   Interactively pick volumes with fzf (default when fzf is available)
+#
+# The source colima VM must be running. The destination will be started if needed.
+
+set -euo pipefail
+
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
+if [[ -f "${DOTFILES_ROOT}/scripts/utils.sh" ]]; then
+  source "${DOTFILES_ROOT}/scripts/utils.sh"
+else
+  info()    { echo "[INFO] $1"; }
+  warn()    { echo "[WARN] $1"; }
+  error()   { echo "[ERROR] $1" >&2; }
+  success() { echo "[OK] $1"; }
+fi
+
+# Path to the low-level export/import helpers (relative to this file)
+SCRIPTS_DIR="${DOTFILES_ROOT}/scripts/containers/migrate"
+
+_usage() {
+  echo "Usage: dotf colima-migrate-volumes <src-profile> <dst-profile> [--all | --select]"
+  echo ""
+  echo "Migrates docker volumes between two colima profiles."
+  echo ""
+  echo "Arguments:"
+  echo "  src-profile    Source colima profile name (e.g. 'default', 'arm')"
+  echo "  dst-profile    Destination colima profile name"
+  echo ""
+  echo "Options:"
+  echo "  --all          Migrate every volume from the source context"
+  echo "  --select       Interactively select volumes with fzf"
+  echo ""
+  echo "  If neither flag is given, --select is used when fzf is available,"
+  echo "  otherwise --all is used as a fallback."
+  echo ""
+  echo "Examples:"
+  echo "  dotf colima-migrate-volumes default arm"
+  echo "  dotf colima-migrate-volumes default arm --all"
+  echo "  dotf colima-migrate-volumes default arm --select"
+}
+
+# ── Argument parsing ──────────────────────────────────────────────────────
+SRC_PROFILE=""
+DST_PROFILE=""
+MODE=""  # "all" | "select" | "" (auto-detect)
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --all)    MODE="all";    shift ;;
+    --select) MODE="select"; shift ;;
+    --help|-h) _usage; exit 0 ;;
+    -*)
+      error "Unknown option: $1"
+      _usage >&2
+      exit 1
+      ;;
+    *)
+      if [[ -z "$SRC_PROFILE" ]]; then
+        SRC_PROFILE="$1"
+      elif [[ -z "$DST_PROFILE" ]]; then
+        DST_PROFILE="$1"
+      else
+        error "Unexpected argument: $1"
+        _usage >&2
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$SRC_PROFILE" || -z "$DST_PROFILE" ]]; then
+  error "Both src-profile and dst-profile are required."
+  _usage >&2
+  exit 1
+fi
+
+if [[ "$SRC_PROFILE" == "$DST_PROFILE" ]]; then
+  error "Source and destination profiles must be different."
+  exit 1
+fi
+
+# ── Derive docker context names ───────────────────────────────────────────
+_context_for_profile() {
+  local profile="$1"
+  if [[ "$profile" == "default" ]]; then
+    echo "colima"
+  else
+    echo "colima-${profile}"
+  fi
+}
+
+SRC_CONTEXT="$(_context_for_profile "$SRC_PROFILE")"
+DST_CONTEXT="$(_context_for_profile "$DST_PROFILE")"
+
+# ── Pre-flight checks ─────────────────────────────────────────────────────
+if ! command -v colima &>/dev/null; then
+  error "colima is not installed. Run: brew install colima"
+  exit 1
+fi
+
+if ! command -v docker &>/dev/null; then
+  error "docker is not installed."
+  exit 1
+fi
+
+# Verify source context is accessible
+if ! docker --context "${SRC_CONTEXT}" info &>/dev/null; then
+  error "Cannot connect to source docker context '${SRC_CONTEXT}'."
+  error "Is colima profile '${SRC_PROFILE}' running? Try: dotf colima-use ${SRC_PROFILE}"
+  exit 1
+fi
+
+# Ensure destination colima profile is running
+DST_STATUS="$(colima status "${DST_PROFILE}" 2>&1 || true)"
+if ! echo "$DST_STATUS" | grep -q "Running"; then
+  info "Starting destination colima profile '${DST_PROFILE}'..."
+  if [[ "$DST_PROFILE" == "default" ]]; then
+    colima start
+  else
+    colima start "${DST_PROFILE}"
+  fi
+fi
+
+# Verify destination context is accessible after start
+if ! docker --context "${DST_CONTEXT}" info &>/dev/null; then
+  error "Cannot connect to destination docker context '${DST_CONTEXT}' after start."
+  exit 1
+fi
+
+# ── Discover volumes in source context ───────────────────────────────────
+mapfile -t ALL_VOLUMES < <(
+  docker --context "${SRC_CONTEXT}" volume ls --format '{{.Name}}' 2>/dev/null
+)
+
+if [[ ${#ALL_VOLUMES[@]} -eq 0 ]]; then
+  warn "No volumes found in context '${SRC_CONTEXT}'."
+  exit 0
+fi
+
+info "Found ${#ALL_VOLUMES[@]} volume(s) in context '${SRC_CONTEXT}'"
+
+# ── Volume selection ──────────────────────────────────────────────────────
+# Auto-detect mode if not specified
+if [[ -z "$MODE" ]]; then
+  if command -v fzf &>/dev/null; then
+    MODE="select"
+  else
+    MODE="all"
+  fi
+fi
+
+SELECTED_VOLUMES=()
+
+if [[ "$MODE" == "select" ]]; then
+  if ! command -v fzf &>/dev/null; then
+    error "fzf is not installed. Use --all or install fzf: brew install fzf"
+    exit 1
+  fi
+
+  info "Select volumes to migrate (TAB to multi-select, ENTER to confirm):"
+  mapfile -t SELECTED_VOLUMES < <(
+    printf '%s\n' "${ALL_VOLUMES[@]}" \
+      | fzf --multi \
+            --prompt="Volumes to migrate > " \
+            --header="TAB=select  ENTER=confirm  Ctrl-A=select all" \
+            --bind "ctrl-a:select-all"
+  )
+
+  if [[ ${#SELECTED_VOLUMES[@]} -eq 0 ]]; then
+    warn "No volumes selected. Exiting."
+    exit 0
+  fi
+else
+  SELECTED_VOLUMES=("${ALL_VOLUMES[@]}")
+fi
+
+info "Migrating ${#SELECTED_VOLUMES[@]} volume(s): ${SELECTED_VOLUMES[*]}"
+
+# ── Temporary staging directory ───────────────────────────────────────────
+WORKDIR="$(mktemp -d)"
+trap 'rm -rf "$WORKDIR"' EXIT
+
+info "Staging archives in: ${WORKDIR}"
+
+# ── Export phase ──────────────────────────────────────────────────────────
+echo ""
+info "=== EXPORT (${SRC_CONTEXT}) ==="
+
+EXPORT_OK=()
+EXPORT_FAIL=()
+
+for vol in "${SELECTED_VOLUMES[@]}"; do
+  echo ""
+  info "Exporting '${vol}'..."
+  if (
+    cd "$WORKDIR"
+    "${SCRIPTS_DIR}/export_volume.sh" "${vol}" --context "${SRC_CONTEXT}"
+  ); then
+    EXPORT_OK+=("$vol")
+    success "  Exported: ${vol}"
+  else
+    warn "  Failed to export '${vol}' — skipping"
+    EXPORT_FAIL+=("$vol")
+  fi
+done
+
+if [[ ${#EXPORT_OK[@]} -eq 0 ]]; then
+  error "All exports failed. Nothing to import."
+  exit 1
+fi
+
+# ── Import phase ──────────────────────────────────────────────────────────
+echo ""
+info "=== IMPORT (${DST_CONTEXT}) ==="
+
+IMPORT_OK=()
+IMPORT_FAIL=()
+
+for vol in "${EXPORT_OK[@]}"; do
+  echo ""
+  info "Importing '${vol}'..."
+
+  # Check if volume already exists in destination
+  if docker --context "${DST_CONTEXT}" volume inspect "${vol}" &>/dev/null; then
+    warn "  Volume '${vol}' already exists in '${DST_CONTEXT}' — skipping"
+    IMPORT_FAIL+=("${vol} (already exists)")
+    continue
+  fi
+
+  if (
+    cd "$WORKDIR"
+    "${SCRIPTS_DIR}/import_volume.sh" "${vol}" --context "${DST_CONTEXT}"
+  ); then
+    IMPORT_OK+=("$vol")
+    success "  Imported: ${vol}"
+  else
+    warn "  Failed to import '${vol}'"
+    IMPORT_FAIL+=("$vol")
+  fi
+done
+
+# ── Summary ───────────────────────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+success "Migration complete"
+echo ""
+echo "  Source  : ${SRC_PROFILE} (${SRC_CONTEXT})"
+echo "  Dest    : ${DST_PROFILE} (${DST_CONTEXT})"
+echo ""
+
+if [[ ${#IMPORT_OK[@]} -gt 0 ]]; then
+  echo "  Migrated (${#IMPORT_OK[@]}):"
+  for v in "${IMPORT_OK[@]}"; do echo "    ✓ $v"; done
+fi
+
+if [[ ${#EXPORT_FAIL[@]} -gt 0 ]]; then
+  echo ""
+  echo "  Export failed (${#EXPORT_FAIL[@]}):"
+  for v in "${EXPORT_FAIL[@]}"; do echo "    ✗ $v"; done
+fi
+
+if [[ ${#IMPORT_FAIL[@]} -gt 0 ]]; then
+  echo ""
+  echo "  Import skipped/failed (${#IMPORT_FAIL[@]}):"
+  for v in "${IMPORT_FAIL[@]}"; do echo "    ✗ $v"; done
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+info "To switch to the destination profile: dotf colima-use ${DST_PROFILE}"

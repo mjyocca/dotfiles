@@ -544,12 +544,12 @@ export NVIM_LOCAL_CONFIG="/abs/path/nvim.lua"  # or absolute
 The file itself follows the same conventions as `.nvim.lua` — see the template
 for documented examples.
 
-### `nvim-project-init` — scaffold both files from templates
+### `dotf nvim-project-init` — scaffold both files from templates
 
-Run `nvim-project-init` from any project root to copy the template files:
+Run `dotf nvim-project-init` from any project root to copy the template files:
 
 ```bash
-nvim-project-init
+dotf nvim-project-init
 # wrote .envrc
 # wrote .nvim.lua
 ```

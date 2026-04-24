@@ -1,97 +1,138 @@
-# Switching Between OrbStack and Docker Desktop
+# Container / Volume Migration
 
-## Quick Reference
-
-| Action | Command |
-|--------|---------|
-| Switch to OrbStack | `docker context use orbstack` |
-| Switch to Docker Desktop | `docker context use desktop-linux` |
-| Check current context | `docker context ls` |
+Scripts for switching between colima profiles and migrating docker volumes.
 
 ---
 
-## Switching Contexts
+## Colima Profile Management (`dotf` commands)
 
-### → OrbStack
+These are accessed via the `dotf` dispatcher (`~/.local/bin/dotf`).
+
+### List profiles
+
 ```bash
-docker context use orbstack
+dotf colima-list
 ```
 
-### → Docker Desktop
+Shows every colima profile under `~/.colima/`, its run state, mapped docker
+context, and socket path. Marks the currently active context with `*`.
+
+### Switch active profile
+
 ```bash
-docker context use desktop-linux
+dotf colima-use <profile>
 ```
 
-### Verify active context
+1. Starts the colima VM if it is not already running
+2. Switches the active docker context (`docker context use colima[-<profile>]`)
+3. Relinks `/var/run/docker.sock` → `~/.colima/<profile>/docker.sock`
+
+**Requires `sudo`** for the socket relink step.
+
 ```bash
-docker context ls
+dotf colima-use default   # context: colima
+dotf colima-use arm       # context: colima-arm
+dotf colima-use k8s       # context: colima-k8s
 ```
-The active context will have a `*` next to it.
+
+#### Profile → context name mapping
+
+| Profile name | Docker context |
+|---|---|
+| `default` | `colima` |
+| `<name>` | `colima-<name>` |
+
+### Migrate volumes between profiles
+
+```bash
+dotf colima-migrate-volumes <src-profile> <dst-profile> [--all | --select]
+```
+
+Exports every selected volume from the source colima context and imports it
+into the destination context. Archives are written to a temp directory and
+deleted on exit.
+
+| Flag | Behaviour |
+|---|---|
+| `--select` | Opens fzf picker (TAB to multi-select). Default when fzf is installed. |
+| `--all` | Migrates all volumes without prompting. Default when fzf is absent. |
+
+```bash
+# Migrate all volumes from default → arm profile (auto-mode)
+dotf colima-migrate-volumes default arm
+
+# Interactively choose which volumes to move
+dotf colima-migrate-volumes default arm --select
+
+# Non-interactive: move everything
+dotf colima-migrate-volumes default arm --all
+```
+
+The destination profile is started automatically if it is not running.
+Volumes that already exist in the destination are skipped.
 
 ---
 
-## Migrating Volumes
+## Low-level scripts
 
-Use the scripts below to move volumes between engines. Both scripts assume the
-`.tar.gz` archive lives in the current working directory.
+### `export_volume.sh`
 
-### export_volume.sh — run while on OrbStack context
+Exports a single named volume to a `.tar.gz` in the current directory.
+
 ```bash
-#!/bin/bash
-set -e
+./export_volume.sh <volume_name> [--context <docker_context>]
 
-VOLUME_NAME="${1:?Usage: $0 <volume_name>}"
-DOCKER="docker --context orbstack"
-
-echo "Exporting '$VOLUME_NAME'..."
-$DOCKER run --rm \
-  -v "${VOLUME_NAME}:/data" \
-  -v "$(pwd):/backup" \
-  alpine tar czf "/backup/${VOLUME_NAME}.tar.gz" -C /data .
-
-echo "Done: $(pwd)/${VOLUME_NAME}.tar.gz"
+./export_volume.sh my_volume                       # active context
+./export_volume.sh my_volume --context colima      # explicit context
+./export_volume.sh my_volume --context colima-arm
 ```
 
-### import_volume.sh — run while on Docker Desktop context
+### `import_volume.sh`
+
+Creates a volume and populates it from a `.tar.gz` in the current directory.
+
 ```bash
-#!/bin/bash
-set -e
+./import_volume.sh <volume_name> [--context <docker_context>]
 
-VOLUME_NAME="${1:?Usage: $0 <volume_name>}"
-DOCKER="docker --context desktop-linux"
-ARCHIVE="$(pwd)/${VOLUME_NAME}.tar.gz"
-
-if [[ ! -f "$ARCHIVE" ]]; then
-  echo "Error: $ARCHIVE not found"
-  exit 1
-fi
-
-echo "Creating volume '$VOLUME_NAME'..."
-$DOCKER volume create "${VOLUME_NAME}"
-
-echo "Importing from $ARCHIVE..."
-$DOCKER run --rm \
-  -v "${VOLUME_NAME}:/data" \
-  -v "$(pwd):/backup" \
-  alpine tar xzf "/backup/${VOLUME_NAME}.tar.gz" -C /data
-
-echo "Done."
+./import_volume.sh my_volume
+./import_volume.sh my_volume --context colima-arm
 ```
 
-### Usage
-```bash
-chmod +x export_volume.sh import_volume.sh
+The archive `<volume_name>.tar.gz` must already exist in the current directory.
 
-./export_volume.sh my_volume   # exports my_volume.tar.gz to current dir
-./import_volume.sh my_volume   # creates volume and imports data
+---
+
+## Manual context switching (no scripts)
+
+```bash
+docker context ls                  # list contexts, active one has *
+docker context use colima          # switch to default colima profile
+docker context use colima-arm      # switch to arm colima profile
+docker context show                # print active context name
+```
+
+Re-link the socket manually after switching:
+
+```bash
+sudo ln -sf ~/.colima/<profile>/docker.sock /var/run/docker.sock
+
+# e.g.
+sudo ln -sf ~/.colima/default/docker.sock /var/run/docker.sock
+sudo ln -sf ~/.colima/arm/docker.sock     /var/run/docker.sock
+```
+
+Verify which socket is active:
+
+```bash
+ls -la /var/run/docker.sock
 ```
 
 ---
 
-## Using External Volumes in docker-compose
+## Using external volumes in docker-compose
 
-If a volume was created outside of Compose (e.g. migrated manually), declare it
-as `external` so Compose won't try to create or delete it:
+When a volume was created outside of Compose (e.g. migrated manually), declare
+it as `external` so Compose won't attempt to create or delete it:
 
 ```yaml
 services:
@@ -105,7 +146,7 @@ volumes:
     external: true
 ```
 
-If the volume name on disk differs from the name used inside the Compose file:
+If the on-disk name differs from the Compose name:
 
 ```yaml
 volumes:
@@ -118,23 +159,29 @@ volumes:
 
 ## Troubleshooting
 
-**`/var/run/docker.sock` errors after switching**
+**`Cannot connect to the Docker daemon` after switching**
 
-The socket may still be symlinked to the previous engine. Fix it by restarting
-Docker Desktop, or re-link manually:
-
-```bash
-sudo ln -sf /Users/$USER/Library/Containers/com.docker.docker/Data/docker.raw.sock /var/run/docker.sock
-```
-
-Alternatively, bypass the socket entirely by passing `--context` explicitly:
+The socket is likely still pointing to the previous engine. Run:
 
 ```bash
-docker --context desktop-linux volume ls
-docker --context orbstack ps
+dotf colima-use <profile>
 ```
 
-**Check which socket is active**
+or relink manually:
+
+```bash
+sudo ln -sf ~/.colima/<profile>/docker.sock /var/run/docker.sock
+```
+
+**Check socket target**
+
 ```bash
 ls -la /var/run/docker.sock
+```
+
+**Pass `--context` directly (bypass socket entirely)**
+
+```bash
+docker --context colima volume ls
+docker --context colima-arm ps
 ```

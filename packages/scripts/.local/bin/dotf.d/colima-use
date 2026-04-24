@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# Switch the active colima profile: set docker context and relink /var/run/docker.sock
+# Usage: dotf colima-use <profile>
+#
+# A colima profile named "default" maps to the docker context "colima".
+# Any other profile name maps to "colima-<profile>".
+#
+# The script will:
+#   1. Ensure the colima VM for the profile is running (starts it if not)
+#   2. Switch the active docker context
+#   3. Relink /var/run/docker.sock to the profile's socket
+
+set -euo pipefail
+
+# Resolve dotfiles root from this script's location:
+# packages/scripts/.local/bin/dotf.d/<cmd> → dotfiles root is 6 levels up
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
+# shellcheck source=../../../../../scripts/utils.sh
+if [[ -f "${DOTFILES_ROOT}/scripts/utils.sh" ]]; then
+  source "${DOTFILES_ROOT}/scripts/utils.sh"
+else
+  info()    { echo "[INFO] $1"; }
+  warn()    { echo "[WARN] $1"; }
+  error()   { echo "[ERROR] $1" >&2; }
+  success() { echo "[OK] $1"; }
+fi
+
+_usage() {
+  echo "Usage: dotf colima-use <profile>"
+  echo ""
+  echo "Switches the active colima profile, docker context, and /var/run/docker.sock."
+  echo ""
+  echo "Arguments:"
+  echo "  profile    Colima profile name (e.g. 'default', 'arm', 'k8s')"
+  echo ""
+  echo "Examples:"
+  echo "  dotf colima-use default"
+  echo "  dotf colima-use arm"
+}
+
+PROFILE="${1:-}"
+
+if [[ -z "$PROFILE" || "$PROFILE" == "--help" || "$PROFILE" == "-h" ]]; then
+  _usage
+  exit 0
+fi
+
+# Derive docker context name from profile name.
+# The "default" colima profile registers the context as plain "colima";
+# all other profiles register as "colima-<profile>".
+if [[ "$PROFILE" == "default" ]]; then
+  CONTEXT="colima"
+else
+  CONTEXT="colima-${PROFILE}"
+fi
+
+SOCKET="${HOME}/.colima/${PROFILE}/docker.sock"
+
+# ── 1. Ensure colima is installed ─────────────────────────────────────────
+if ! command -v colima &>/dev/null; then
+  error "colima is not installed. Run: brew install colima"
+  exit 1
+fi
+
+# ── 2. Start colima profile if not running ────────────────────────────────
+COLIMA_STATUS="$(colima status "${PROFILE}" 2>&1 || true)"
+
+if echo "$COLIMA_STATUS" | grep -q "Running"; then
+  info "colima profile '${PROFILE}' is already running"
+elif echo "$COLIMA_STATUS" | grep -q "Stopped"; then
+  info "Starting colima profile '${PROFILE}'..."
+  if [[ "$PROFILE" == "default" ]]; then
+    colima start
+  else
+    colima start "${PROFILE}"
+  fi
+else
+  warn "Could not determine status for profile '${PROFILE}'. Attempting to start..."
+  if [[ "$PROFILE" == "default" ]]; then
+    colima start
+  else
+    colima start "${PROFILE}"
+  fi
+fi
+
+# ── 3. Verify socket exists ───────────────────────────────────────────────
+if [[ ! -S "$SOCKET" ]]; then
+  error "Docker socket not found at ${SOCKET}"
+  error "Make sure colima profile '${PROFILE}' started successfully."
+  exit 1
+fi
+
+# ── 4. Switch docker context ─────────────────────────────────────────────
+if ! docker context inspect "${CONTEXT}" &>/dev/null; then
+  error "Docker context '${CONTEXT}' does not exist."
+  error "Available contexts:"
+  docker context ls 2>&1 | sed 's/^/  /' >&2
+  exit 1
+fi
+
+info "Switching docker context to '${CONTEXT}'..."
+docker context use "${CONTEXT}"
+
+# ── 5. Relink /var/run/docker.sock ───────────────────────────────────────
+info "Relinking /var/run/docker.sock → ${SOCKET}"
+sudo ln -sf "${SOCKET}" /var/run/docker.sock
+
+success "Active profile : ${PROFILE}"
+success "Docker context : ${CONTEXT}"
+success "Socket         : /var/run/docker.sock → ${SOCKET}"
