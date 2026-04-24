@@ -43,9 +43,26 @@ All commands run through the Makefile:
 
 | Command | Description |
 |---|---|
-| `make dotfiles` | Stow all packages (symlink to `$HOME`) |
+| `make dotfiles` | Stow all packages into `$HOME` (skips packages in `.stow-ignore.local`) |
+| `make stow PKG=<name>` | Stow a single package by name (e.g. `make stow PKG=nvim`) |
+| `make stow PKG="a b c"` | Stow multiple specific packages |
 | `make bootstrap` | Full machine provisioning (platform-aware) |
 | `make apply_settings` | Apply OS-level defaults (macOS only currently) |
+
+#### Per-machine package ignore list
+
+Create a `.stow-ignore.local` file at the repo root to skip packages on a
+specific machine. The file is git-ignored and never committed.
+
+```
+# .stow-ignore.local — example for a work machine
+# One package name per line. Blank lines and # comments are ignored.
+zsh
+homebrew
+```
+
+`make dotfiles` reads this file automatically and skips any listed packages.
+`make stow PKG=<name>` always bypasses the ignore list.
 
 ### Neovim
 

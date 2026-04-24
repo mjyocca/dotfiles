@@ -7,6 +7,9 @@
 
 packages/zsh/.global_env.sh
 
+# Per-machine stow ignore list — not committed
+.stow-ignore.local
+
 # Colima: ignore all runtime envs, keep tracked example config
 packages/colima/.colima/**
 !packages/colima/.colima/

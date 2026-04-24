@@ -45,11 +45,19 @@ endif
 # NOTE: Group of targets to continually execute after bootstrap/setup.
 
 # Target: dotfiles
-# Purpose: GNU Stow packages located within ./stow/** directory.
+# Purpose: GNU Stow all packages in ./packages/ into $HOME.
+#          Packages listed in .stow-ignore.local (git-ignored) are skipped.
 # Usage: Run `make dotfiles`.
 dotfiles:
 	@echo "Stowing Dotfile Packages..."
 	@bash ./scripts/stow.sh
+
+# Target: stow
+# Purpose: Stow one or more specific packages by name.
+# Usage: make stow PKG=<name>          — single package
+#        make stow PKG="nvim zsh tmux" — multiple packages
+stow:
+	@bash ./scripts/stow.sh $(PKG)
 
 # Target: apply_settings
 # Purpose: Apply operating system/GUI application settings that can configured through CLI/declarative means.
