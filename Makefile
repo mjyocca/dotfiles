@@ -111,6 +111,8 @@ install_osx_tools:
 	@brew bundle --file="~/Brewfile"
 	@bash ./scripts/plugins.sh
 
+brew_bundle:
+	@brew bundle --file="~/Brewfile"
 # ======================
 ## LINUX SPECIFIC TARGETs
 # ======================
