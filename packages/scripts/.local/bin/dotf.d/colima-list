@@ -4,15 +4,10 @@
 
 set -euo pipefail
 
-DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
-if [[ -f "${DOTFILES_ROOT}/scripts/utils.sh" ]]; then
-  source "${DOTFILES_ROOT}/scripts/utils.sh"
-else
-  info()    { echo "[INFO] $1"; }
-  warn()    { echo "[WARN] $1"; }
-  error()   { echo "[ERROR] $1" >&2; }
-  success() { echo "[OK] $1"; }
-fi
+info()    { echo "[INFO] $1"; }
+warn()    { echo "[WARN] $1"; }
+error()   { echo "[ERROR] $1" >&2; }
+success() { echo "[OK] $1"; }
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   echo "Usage: dotf colima-list"

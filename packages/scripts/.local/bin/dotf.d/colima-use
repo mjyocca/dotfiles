@@ -12,18 +12,10 @@
 
 set -euo pipefail
 
-# Resolve dotfiles root from this script's location:
-# packages/scripts/.local/bin/dotf.d/<cmd> → dotfiles root is 6 levels up
-DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
-# shellcheck source=../../../../../scripts/utils.sh
-if [[ -f "${DOTFILES_ROOT}/scripts/utils.sh" ]]; then
-  source "${DOTFILES_ROOT}/scripts/utils.sh"
-else
-  info()    { echo "[INFO] $1"; }
-  warn()    { echo "[WARN] $1"; }
-  error()   { echo "[ERROR] $1" >&2; }
-  success() { echo "[OK] $1"; }
-fi
+info()    { echo "[INFO] $1"; }
+warn()    { echo "[WARN] $1"; }
+error()   { echo "[ERROR] $1" >&2; }
+success() { echo "[OK] $1"; }
 
 _usage() {
   echo "Usage: dotf colima-use <profile>"

@@ -14,18 +14,31 @@
 
 set -euo pipefail
 
-DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
-if [[ -f "${DOTFILES_ROOT}/scripts/utils.sh" ]]; then
-  source "${DOTFILES_ROOT}/scripts/utils.sh"
-else
-  info()    { echo "[INFO] $1"; }
-  warn()    { echo "[WARN] $1"; }
-  error()   { echo "[ERROR] $1" >&2; }
-  success() { echo "[OK] $1"; }
-fi
+info()    { echo "[INFO] $1"; }
+warn()    { echo "[WARN] $1"; }
+error()   { echo "[ERROR] $1" >&2; }
+success() { echo "[OK] $1"; }
 
-# Path to the low-level export/import helpers (relative to this file)
-SCRIPTS_DIR="${DOTFILES_ROOT}/scripts/containers/migrate"
+# ── Inline volume export ──────────────────────────────────────────────────
+# Export a named volume to <workdir>/<name>.tar.gz via a temporary alpine container.
+_export_volume() {
+  local vol="$1" context="$2" workdir="$3"
+  docker --context "${context}" run --rm \
+    -v "${vol}:/data" \
+    -v "${workdir}:/backup" \
+    alpine tar czf "/backup/${vol}.tar.gz" -C /data .
+}
+
+# ── Inline volume import ──────────────────────────────────────────────────
+# Create a volume and populate it from <workdir>/<name>.tar.gz.
+_import_volume() {
+  local vol="$1" context="$2" workdir="$3"
+  docker --context "${context}" volume create "${vol}"
+  docker --context "${context}" run --rm \
+    -v "${vol}:/data" \
+    -v "${workdir}:/backup" \
+    alpine tar xzf "/backup/${vol}.tar.gz" -C /data
+}
 
 _usage() {
   echo "Usage: dotf colima-migrate-volumes <src-profile> <dst-profile> [--all | --select]"
@@ -56,8 +69,8 @@ MODE=""  # "all" | "select" | "" (auto-detect)
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --all)    MODE="all";    shift ;;
-    --select) MODE="select"; shift ;;
+    --all)     MODE="all";    shift ;;
+    --select)  MODE="select"; shift ;;
     --help|-h) _usage; exit 0 ;;
     -*)
       error "Unknown option: $1"
@@ -114,14 +127,12 @@ if ! command -v docker &>/dev/null; then
   exit 1
 fi
 
-# Verify source context is accessible
 if ! docker --context "${SRC_CONTEXT}" info &>/dev/null; then
   error "Cannot connect to source docker context '${SRC_CONTEXT}'."
   error "Is colima profile '${SRC_PROFILE}' running? Try: dotf colima-use ${SRC_PROFILE}"
   exit 1
 fi
 
-# Ensure destination colima profile is running
 DST_STATUS="$(colima status "${DST_PROFILE}" 2>&1 || true)"
 if ! echo "$DST_STATUS" | grep -q "Running"; then
   info "Starting destination colima profile '${DST_PROFILE}'..."
@@ -132,7 +143,6 @@ if ! echo "$DST_STATUS" | grep -q "Running"; then
   fi
 fi
 
-# Verify destination context is accessible after start
 if ! docker --context "${DST_CONTEXT}" info &>/dev/null; then
   error "Cannot connect to destination docker context '${DST_CONTEXT}' after start."
   exit 1
@@ -151,7 +161,6 @@ fi
 info "Found ${#ALL_VOLUMES[@]} volume(s) in context '${SRC_CONTEXT}'"
 
 # ── Volume selection ──────────────────────────────────────────────────────
-# Auto-detect mode if not specified
 if [[ -z "$MODE" ]]; then
   if command -v fzf &>/dev/null; then
     MODE="select"
@@ -203,10 +212,7 @@ EXPORT_FAIL=()
 for vol in "${SELECTED_VOLUMES[@]}"; do
   echo ""
   info "Exporting '${vol}'..."
-  if (
-    cd "$WORKDIR"
-    "${SCRIPTS_DIR}/export_volume.sh" "${vol}" --context "${SRC_CONTEXT}"
-  ); then
+  if _export_volume "${vol}" "${SRC_CONTEXT}" "${WORKDIR}"; then
     EXPORT_OK+=("$vol")
     success "  Exported: ${vol}"
   else
@@ -231,17 +237,13 @@ for vol in "${EXPORT_OK[@]}"; do
   echo ""
   info "Importing '${vol}'..."
 
-  # Check if volume already exists in destination
   if docker --context "${DST_CONTEXT}" volume inspect "${vol}" &>/dev/null; then
     warn "  Volume '${vol}' already exists in '${DST_CONTEXT}' — skipping"
     IMPORT_FAIL+=("${vol} (already exists)")
     continue
   fi
 
-  if (
-    cd "$WORKDIR"
-    "${SCRIPTS_DIR}/import_volume.sh" "${vol}" --context "${DST_CONTEXT}"
-  ); then
+  if _import_volume "${vol}" "${DST_CONTEXT}" "${WORKDIR}"; then
     IMPORT_OK+=("$vol")
     success "  Imported: ${vol}"
   else
@@ -261,19 +263,19 @@ echo ""
 
 if [[ ${#IMPORT_OK[@]} -gt 0 ]]; then
   echo "  Migrated (${#IMPORT_OK[@]}):"
-  for v in "${IMPORT_OK[@]}"; do echo "    ✓ $v"; done
+  for v in "${IMPORT_OK[@]}"; do echo "    + $v"; done
 fi
 
 if [[ ${#EXPORT_FAIL[@]} -gt 0 ]]; then
   echo ""
   echo "  Export failed (${#EXPORT_FAIL[@]}):"
-  for v in "${EXPORT_FAIL[@]}"; do echo "    ✗ $v"; done
+  for v in "${EXPORT_FAIL[@]}"; do echo "    x $v"; done
 fi
 
 if [[ ${#IMPORT_FAIL[@]} -gt 0 ]]; then
   echo ""
   echo "  Import skipped/failed (${#IMPORT_FAIL[@]}):"
-  for v in "${IMPORT_FAIL[@]}"; do echo "    ✗ $v"; done
+  for v in "${IMPORT_FAIL[@]}"; do echo "    x $v"; done
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
