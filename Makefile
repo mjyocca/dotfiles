@@ -130,3 +130,25 @@ install_linux_tools:
 	$(INSTALL_CMD) git
 	$(INSTALL_CMD) curl
 	$(INSTALL_CMD) vim
+
+# ======================
+## CONTAINERS / COLIMA HELPERS
+# ======================
+
+colima_profiles:
+	@bash ./scripts/containers/colima/profile.sh ls
+
+# Usage: make colima_start_profile PROFILE=exp-vz ARGS="--cpu 2 --memory 4"
+colima_start_profile:
+	@if [ -z "$(PROFILE)" ]; then echo "Usage: make colima_start_profile PROFILE=<name> [ARGS='--cpu 2 --memory 4']"; exit 1; fi
+	@bash ./scripts/containers/colima/profile.sh start "$(PROFILE)" $(ARGS)
+
+# Usage: make colima_switch_profile PROFILE=exp-vz
+colima_switch_profile:
+	@if [ -z "$(PROFILE)" ]; then echo "Usage: make colima_switch_profile PROFILE=<name>"; exit 1; fi
+	@bash ./scripts/containers/colima/profile.sh switch "$(PROFILE)"
+
+# Usage: make colima_delete_profile PROFILE=exp-vz
+colima_delete_profile:
+	@if [ -z "$(PROFILE)" ]; then echo "Usage: make colima_delete_profile PROFILE=<name>"; exit 1; fi
+	@bash ./scripts/containers/colima/profile.sh delete "$(PROFILE)"

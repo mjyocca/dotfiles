@@ -1,16 +1,48 @@
-# Switching Between OrbStack and Docker Desktop
+# Switching Docker Contexts and Migrating Volumes
 
 ## Quick Reference
 
 | Action | Command |
 |--------|---------|
-| Switch to OrbStack | `docker context use orbstack` |
-| Switch to Docker Desktop | `docker context use desktop-linux` |
-| Check current context | `docker context ls` |
+| Switch to Colima profile + relink socket | `scripts/containers/colima/profile.sh switch <profile>` |
+| Start Colima profile + activate it | `scripts/containers/colima/profile.sh start <profile>` |
+| Check active Docker context | `docker context show` |
 
 ---
 
-## Switching Contexts
+## Colima Profile Helpers
+
+Use the profile helper script to quickly switch context and relink `/var/run/docker.sock`.
+
+### Start and activate a profile
+```bash
+scripts/containers/colima/profile.sh start exp-vz --cpu 2 --memory 4
+```
+
+### Switch to an existing profile
+```bash
+scripts/containers/colima/profile.sh switch exp-vz
+```
+
+### Switch context only (skip socket symlink)
+```bash
+scripts/containers/colima/profile.sh switch exp-vz --skip-socket-link
+```
+
+### List profiles
+```bash
+scripts/containers/colima/profile.sh ls
+```
+
+### Stop/delete profile
+```bash
+scripts/containers/colima/profile.sh stop exp-vz
+scripts/containers/colima/profile.sh delete exp-vz
+```
+
+---
+
+## Manual Context Switching
 
 ### → OrbStack
 ```bash
@@ -32,58 +64,35 @@ The active context will have a `*` next to it.
 
 ## Migrating Volumes
 
-Use the scripts below to move volumes between engines. Both scripts assume the
-`.tar.gz` archive lives in the current working directory.
+Use the scripts below to move volumes between contexts (including Colima profiles).
 
-### export_volume.sh — run while on OrbStack context
+### export_volume.sh
 ```bash
-#!/bin/bash
-set -e
-
-VOLUME_NAME="${1:?Usage: $0 <volume_name>}"
-DOCKER="docker --context orbstack"
-
-echo "Exporting '$VOLUME_NAME'..."
-$DOCKER run --rm \
-  -v "${VOLUME_NAME}:/data" \
-  -v "$(pwd):/backup" \
-  alpine tar czf "/backup/${VOLUME_NAME}.tar.gz" -C /data .
-
-echo "Done: $(pwd)/${VOLUME_NAME}.tar.gz"
+scripts/containers/migrate/export_volume.sh <volume_name> [context] [output_dir]
 ```
 
-### import_volume.sh — run while on Docker Desktop context
+### import_volume.sh
 ```bash
-#!/bin/bash
-set -e
+scripts/containers/migrate/import_volume.sh <volume_name> [context] [archive_dir] [target_volume_name]
+```
 
-VOLUME_NAME="${1:?Usage: $0 <volume_name>}"
-DOCKER="docker --context desktop-linux"
-ARCHIVE="$(pwd)/${VOLUME_NAME}.tar.gz"
-
-if [[ ! -f "$ARCHIVE" ]]; then
-  echo "Error: $ARCHIVE not found"
-  exit 1
-fi
-
-echo "Creating volume '$VOLUME_NAME'..."
-$DOCKER volume create "${VOLUME_NAME}"
-
-echo "Importing from $ARCHIVE..."
-$DOCKER run --rm \
-  -v "${VOLUME_NAME}:/data" \
-  -v "$(pwd):/backup" \
-  alpine tar xzf "/backup/${VOLUME_NAME}.tar.gz" -C /data
-
-echo "Done."
+### transfer_volume.sh (export + import)
+```bash
+scripts/containers/migrate/transfer_volume.sh <volume_name> <source_context> <target_context> [archive_dir] [target_volume_name]
 ```
 
 ### Usage
 ```bash
 chmod +x export_volume.sh import_volume.sh
 
-./export_volume.sh my_volume   # exports my_volume.tar.gz to current dir
-./import_volume.sh my_volume   # creates volume and imports data
+# Copy from default Colima profile to experimental profile
+scripts/containers/migrate/transfer_volume.sh my_volume colima colima-exp
+
+# Export from current context into ./backups
+scripts/containers/migrate/export_volume.sh my_volume "$(docker context show)" ./backups
+
+# Import into a different target volume name
+scripts/containers/migrate/import_volume.sh my_volume colima-exp ./backups my_volume_clone
 ```
 
 ---
@@ -120,11 +129,16 @@ volumes:
 
 **`/var/run/docker.sock` errors after switching**
 
-The socket may still be symlinked to the previous engine. Fix it by restarting
-Docker Desktop, or re-link manually:
+The socket may still be symlinked to the previous engine. Re-link manually:
 
 ```bash
-sudo ln -sf /Users/$USER/Library/Containers/com.docker.docker/Data/docker.raw.sock /var/run/docker.sock
+sudo ln -sf ~/.colima/<profile>/docker.sock /var/run/docker.sock
+```
+
+or use:
+
+```bash
+scripts/containers/colima/profile.sh switch <profile>
 ```
 
 Alternatively, bypass the socket entirely by passing `--context` explicitly:
