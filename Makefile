@@ -53,11 +53,14 @@ dotfiles:
 	@bash ./scripts/stow.sh
 
 # Target: stow
-# Purpose: Stow one or more specific packages by name.
-# Usage: make stow PKG=<name>          — single package
-#        make stow PKG="nvim zsh tmux" — multiple packages
+# Purpose: Stow one or more specific packages by name, with optional stow flags.
+# Usage: make stow PKG=<name>                    — single package
+#        make stow PKG="nvim zsh tmux"           — multiple packages
+#        make stow PKG=zsh FLAGS=--adopt         — adopt existing files first
+#        make stow PKG=nvim FLAGS=--simulate     — dry-run
+#        make stow PKG=zsh FLAGS="--adopt --no-folding"
 stow:
-	@bash ./scripts/stow.sh $(PKG)
+	@bash ./scripts/stow.sh $(FLAGS) $(PKG)
 
 # Target: apply_settings
 # Purpose: Apply operating system/GUI application settings that can configured through CLI/declarative means.
