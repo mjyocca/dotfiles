@@ -29,9 +29,15 @@ provision:
       sysctl -w fs.inotify.max_user_instances=1024
 
 mounts:
-  - location: /Users
-    mountPoint: /Users
-    writable: true
+  # Scope mounts to specific directories rather than all of /Users.
+  # Mounting /Users grants every process in the VM read/write access to
+  # all home directories on the host, including ~/.ssh, ~/.aws, etc.
+  #
+  # Adjust these paths to match your actual project locations.
+  # Mounts are mutable — edit the profile config at ~/.colima/<profile>/colima.yaml
+  # after creation to add or change mount paths without recreating the VM.
+  # - location: ~/code
+  #   writable: true
   - location: /Volumes
     writable: true
   - location: /opt/homebrew
