@@ -26,6 +26,17 @@ case ":$PATH:" in
 esac
 
 # ================================================================
+# XDG Base Directories
+# ================================================================
+# Force XDG paths on macOS so tools default to ~/.config, ~/.local/share, etc.
+# rather than ~/Library/Application Support. Keeps config locations consistent
+# with Linux and makes stow packages portable across both platforms.
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+# ================================================================
 # Standard environment
 # ================================================================
 export EDITOR="nvim"
