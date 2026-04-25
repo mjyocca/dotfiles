@@ -16,6 +16,20 @@ function M.general()
       vim.highlight.on_yank()
     end,
   })
+
+  -- When Neovim is opened with a directory argument (e.g. from superfile, yazi,
+  -- or `nvim .`), cd to that directory. Uses vim.g.launch_dir captured at the
+  -- top of init.lua before Oil rewrites argv(0) to "oil:///path/".
+  -- auto-session is also disabled for this launch (see plugins/sessions.lua).
+  vim.api.nvim_create_autocmd("VimEnter", {
+    desc = "cd to directory when nvim is opened with a directory argument",
+    group = augroup("dir-cd-on-open"),
+    callback = function()
+      if vim.g.launch_dir then
+        vim.cmd.cd(vim.g.launch_dir)
+      end
+    end,
+  })
 end
 
 -- LSP-specific autocommands

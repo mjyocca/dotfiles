@@ -329,15 +329,20 @@ return {
   --   end,
   -- },
 
+  -- Not really using this at the moment. Commenting out for now.
   -- OIL
-  {
-    "stevearc/oil.nvim",
-    config = function()
-      local oil = require("oil")
-      oil.setup()
-      vim.keymap.set("n", "-", oil.toggle_float, {})
-    end,
-  },
+  -- {
+  --   "stevearc/oil.nvim",
+  --   -- Lazy load so Oil doesn't rewrite argv(0) before auto-session and the
+  --   -- VimEnter autocmd read it. Oil still intercepts directory buffers via its
+  --   -- BufEnter autocmd once loaded.
+  --   lazy = true,
+  --   config = function()
+  --     local oil = require("oil")
+  --     oil.setup()
+  --     vim.keymap.set("n", "-", oil.toggle_float, {})
+  --   end,
+  -- },
 
   -- git signs highlights text that has changed since the list
   -- git commit, and also lets you interactively stage & unstage

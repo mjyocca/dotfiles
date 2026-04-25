@@ -1,3 +1,12 @@
+-- Capture the raw launch argument before any plugin (e.g. Oil) rewrites argv.
+-- Oil transforms `argv(0)` from "/some/dir" to "oil:///some/dir/" before
+-- VimEnter fires, so checks against argv(0) later will fail for directories.
+-- Stored as a global so sessions.lua and autocmds can both read it.
+local _launch_arg = vim.fn.argv(0) --[[@as string]]
+vim.g.launch_dir = (_launch_arg ~= "" and vim.fn.isdirectory(_launch_arg) == 1)
+  and vim.fn.fnamemodify(_launch_arg, ":p")
+  or nil
+
 -- Load Lazy
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
