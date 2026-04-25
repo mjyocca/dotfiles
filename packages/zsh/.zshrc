@@ -20,22 +20,18 @@ EOF
 fi
 
 # =================================================================
-# ASDF 📦 Package Manager (see https://asdf-vm.com/guide/getting-started.html)
+# asdf — completions and language plugin hooks (interactive only)
 # =================================================================
-export PATH="$HOME/bin:$PATH"
-export ASDF_DATA_DIR="$HOME/.asdf"
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+# PATH + ASDF_DATA_DIR are set in .zshenv; only interactive extras here.
 
 # append completions to fpath
-fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
-# initialise completions with ZSH's compinit
-autoload -Uz compinit && compinit export PATH="$HOME/bin:$PATH"
+fpath=(${ASDF_DATA_DIR}/completions $fpath)
+# initialise completions
+autoload -Uz compinit && compinit
 
-# ASDF Golang plugin settings
-# NOTE: Environment variables should generally be set before sourcing asdf.sh
+# Golang plugin settings
 export ASDF_GOLANG_MOD_VERSION_ENABLED=true
-# Load Golang plugin
-. ~/.asdf/plugins/golang/set-env.zsh
+. "${ASDF_DATA_DIR}/plugins/golang/set-env.zsh"
 
 # =================================================================
 # PNPM (see https://pnpm.io/installation)
@@ -46,9 +42,8 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-
 # ================================================================
-# 🧰 CLI Tools
+# CLI Tools
 # ================================================================
 
 # direnv (see https://github.com/direnv/direnv)
