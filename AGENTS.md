@@ -74,6 +74,16 @@ Primary editor config located at `packages/nvim/.config/nvim/`. Key areas:
 
 When working on any Neovim or Lua config task, load: @docs/instructions/neovim.md
 
+### Zsh
+
+Shell config located at `packages/zsh/`. Three-file layout:
+
+- `.zshenv` — PATH and env vars for every shell context (scripts, cron, interactive)
+- `.zshrc` — interactive shell only (prompt, plugins, tool hooks)
+- `.zshrc.local` — per-machine overrides, git-ignored, auto-bootstrapped on first shell open
+
+When working on any zsh config task, load: @docs/instructions/zsh.md
+
 ### Platform Support
 
 - **macOS** — fully supported (`osx/` defaults, Homebrew bootstrap)
