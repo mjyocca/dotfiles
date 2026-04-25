@@ -2,6 +2,15 @@
 # Copy to project root, uncomment as needed, then run: direnv allow
 
 # ---------------------------------------------------------------------------
+# asdf version export
+# Exports ASDF_<LANG>_VERSION env vars from .tool-versions (or .go-version)
+# into the direnv environment so subprocesses spawned by Neovim (e.g. Mason)
+# inherit the correct language versions regardless of working directory.
+# Remove this line if the project has no .tool-versions or .go-version file.
+# ---------------------------------------------------------------------------
+source ~/.asdf-direnv.sh
+
+# ---------------------------------------------------------------------------
 # Plugin gating (opt-in)
 # These control whether heavy plugins are loaded at all.
 # Must be set before Neovim starts — direnv handles this automatically.
