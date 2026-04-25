@@ -186,6 +186,16 @@ return {
       desc = "File Explorer",
     },
     {
+      "-",
+      function()
+        Snacks.picker.explorer({
+          layout = "ivy",
+          auto_close = true,
+        })
+      end,
+      desc = "Float File Explorer (pick target split)",
+    },
+    {
       "<leader><leader>",
       function()
         Snacks.picker.buffers({
