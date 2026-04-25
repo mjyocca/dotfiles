@@ -4,20 +4,20 @@
 # Load starship prompt first before other tools
 eval "$(starship init zsh)"
 
-# Create/Load global env vars file
-if [ -f ~/.global_env.sh ]; then
-	# Load env vars
-	. ~/.global_env.sh
-else
-	touch ~/.global_env.sh
-	cat <<EOF > ~/.global_env.sh
-#!/usr/bin/env bash
-## export TEST_VAR="test"
+# Create/Load machine-local overrides file
+if [[ ! -f ~/.zshrc.local ]]; then
+	cat <<'EOF' > ~/.zshrc.local
+# ~/.zshrc.local — machine-specific overrides, not committed to dotfiles
+# Sourced at the end of ~/.zshrc on every interactive shell.
+# Use this for work tools, credentials, aliases, or PATH additions
+# that should not be shared across machines.
+#
+# Examples:
+#   export GITHUB_TOKEN="..."
+#   export PATH="/opt/corporate/bin:$PATH"
+#   alias vpn="corporate-vpn connect"
 EOF
 fi
-
-# Add .local/bin to path
-export PATH="$HOME/.local/bin:$PATH"
 
 # =================================================================
 # ASDF 📦 Package Manager (see https://asdf-vm.com/guide/getting-started.html)
@@ -40,7 +40,7 @@ export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 # =================================================================
 # PNPM (see https://pnpm.io/installation)
 # =================================================================
-export PNPM_HOME="/Users/michaelyocca/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -58,3 +58,10 @@ eval "$(direnv hook zsh)"
 source <(fzf --zsh)
 
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# ================================================================
+# Local overrides (machine-specific, not committed)
+# ================================================================
+# ~/.zshrc.local is git-ignored. Use it for work-specific tools,
+# credentials, aliases, or anything that should not be shared.
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
