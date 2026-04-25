@@ -87,7 +87,15 @@ Markdown renderer for the terminal from Charmbracelet. Renders `.md` files with 
 
 ## Container Runtimes
 
-### OrbStack *(preferred)*
+### Colima + Lima *(preferred)*
+Colima is the primary container runtime. It uses [Lima](https://lima-vm.io) as the underlying VM layer to run a Linux guest on macOS. Lima supports multiple backends — Apple's Virtualization.framework (`vz`), QEMU, and others — with `vz` used here for near-native performance on Apple Silicon. Docker runs inside that VM — `colima start` provisions the VM, registers a Docker context, and exposes a socket at `~/.colima/<profile>/docker.sock`.
+
+Multiple named profiles are supported, each with its own VM config, resources, and Docker context. Profile switching is automated via `dotf colima-use <profile>`.
+
+- [Colima docs](https://github.com/abiosoft/colima)
+- [Lima docs](https://lima-vm.io/docs/)
+
+### OrbStack
 Fast, lightweight Docker runtime for macOS. Drop-in replacement for Docker Desktop with significantly lower resource usage. Includes a built-in GUI, Docker Compose support, and seamless macOS integration. Also doubles as a Linux VM manager.
 
 - [Docs](https://docs.orbstack.dev/docker/)
@@ -103,12 +111,6 @@ Daemonless, rootless container engine compatible with the Docker CLI. No licensi
 - [Docs](https://podman.io/docs/installation)
 - [Podman Desktop](https://podman-desktop.io/)
 
-### Colima
-Minimal CLI-based container runtime for macOS using Lima under the hood. Supports Docker, containerd, and Kubernetes. No GUI — purely terminal-driven. Good for lightweight, scriptable setups.
-
-- [Docs](https://colima.run/docs/)
-- [GitHub](https://github.com/abiosoft/colima)
-
 ### containerd
 Industry-standard container runtime used as the underlying engine by Docker, Kubernetes, and others. Manages the full container lifecycle — image transfer, storage, execution, networking. Rarely used directly; more commonly a component within a larger stack.
 
@@ -118,19 +120,21 @@ Industry-standard container runtime used as the underlying engine by Docker, Kub
 
 ## Virtual Machines
 
-### OrbStack Linux Machines *(preferred)*
-Lightweight Linux VMs integrated into OrbStack. WSL2-like experience on macOS with automatic file sharing and port forwarding. Fast to spin up, low overhead, managed via CLI or GUI.
-
-- [Docs](https://docs.orbstack.dev/machines/)
-
-### Lima
-Linux VM manager for macOS with automatic file sharing and port forwarding. Uses Apple's Virtualization.framework (or QEMU) as the backend. Colima is built on top of Lima. Highly configurable via YAML templates.
+### Lima *(preferred — via Colima)*
+Linux VM manager for macOS with automatic file sharing and port forwarding. Supports multiple VM backends including Apple's Virtualization.framework (`vz`), QEMU, and others — `vz` is used here for near-native performance on Apple Silicon. Colima is built on top of Lima and is the primary interface used here — Lima provides the VM layer, Colima handles profile management and Docker context wiring.
 
 - [Docs](https://lima-vm.io/docs/)
 - [GitHub](https://github.com/lima-vm/lima)
 
 ### Colima (VM mode)
-Beyond containers, Colima can provision VMs for running Kubernetes clusters or isolated Linux environments. Backed by Lima. Good for keeping containers and VMs managed through a single tool.
+Beyond containers, Colima can provision VMs for running Kubernetes clusters or isolated Linux environments. Each named profile is its own Lima-backed VM. Managed via `dotf colima-use`, `dotf colima-list`, and `dotf colima-migrate-volumes`.
+
+- [Docs](https://github.com/abiosoft/colima)
+
+### OrbStack Linux Machines
+Lightweight Linux VMs integrated into OrbStack. WSL2-like experience on macOS with automatic file sharing and port forwarding. Fast to spin up, low overhead, managed via CLI or GUI.
+
+- [Docs](https://docs.orbstack.dev/machines/)
 
 - [Docs](https://colima.run/docs/)
 
