@@ -29,8 +29,11 @@ function M.general()
   map("v", "<", "<gv", { noremap = true, silent = true })
 
   -- Navigate between open buffers
-  map("n", "<Tab>", ":bnext<CR>", { noremap = true, silent = true })
-  map("n", "<S-Tab>", ":bprevious<CR>", { noremap = true, silent = true })
+  -- <Tab> is reserved by Neovim 0.12 for built-in edit suggestions
+  -- map("n", "<Tab>", ":bnext<CR>", { noremap = true, silent = true })
+  -- map("n", "<S-Tab>", ":bprevious<CR>", { noremap = true, silent = true })
+  map("n", "]b", ":bnext<CR>", { noremap = true, silent = true })
+  map("n", "[b", ":bprevious<CR>", { noremap = true, silent = true })
 end
 
 -- LSP KeyMaps
