@@ -55,6 +55,34 @@ return {
     matcher = { frecency = true },
     picker = {
       -- debug = { scores = true },
+      actions = {
+        git_stash_pop = function(picker, item)
+          if not item then return end
+          vim.system({ "git", "stash", "pop", item.stash }, { cwd = item.cwd }, function(out)
+            vim.schedule(function()
+              if out.code == 0 then
+                Snacks.notify("Stash popped: `" .. item.stash .. "`", { title = "Git Stash" })
+                picker:refresh()
+              else
+                Snacks.notify.error(out.stderr, { title = "Git Stash" })
+              end
+            end)
+          end)
+        end,
+        git_stash_drop = function(picker, item)
+          if not item then return end
+          vim.system({ "git", "stash", "drop", item.stash }, { cwd = item.cwd }, function(out)
+            vim.schedule(function()
+              if out.code == 0 then
+                Snacks.notify("Stash dropped: `" .. item.stash .. "`", { title = "Git Stash" })
+                picker:refresh()
+              else
+                Snacks.notify.error(out.stderr, { title = "Git Stash" })
+              end
+            end)
+          end)
+        end,
+      },
       matcher = { frecency = true },
       icons = {
         files = {
@@ -361,8 +389,17 @@ return {
     },
     {
       "<leader>gps",
-      function()
-        Snacks.picker.git_stash({})
+       function()
+        Snacks.picker.git_stash({
+          win = {
+            input = {
+              keys = {
+                ["<C-p>"] = { "git_stash_pop",  mode = { "n", "i" }, desc = "git_stash_pop (apply + drop)" },
+                ["<C-d>"] = { "git_stash_drop", mode = { "n", "i" }, desc = "git_stash_drop (delete)" },
+              },
+            },
+          },
+        })
       end,
       desc = "[G]it [P]icker [S]tash",
     },
