@@ -308,8 +308,13 @@ return {
       "<leader>sm",
       function()
         Snacks.picker.git_status({
-          layout = "ivy"
+          layout = "ivy",
+          -- Automatically switch to normal mode
+          on_show = function()
+            vim.cmd.stopinsert()
+          end,
         })
+
       end,
       desc = "[S]earch Git [M]odified"
     },
