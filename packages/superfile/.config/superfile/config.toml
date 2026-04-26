@@ -13,7 +13,7 @@
 
 #-- File Editor
 # Default: $EDITOR
-editor = ""
+editor = "nvim"
 
 #-- Directory Editor
 # Default on macOS is `open` (GUI), not $EDITOR. Set explicitly so `E` opens
