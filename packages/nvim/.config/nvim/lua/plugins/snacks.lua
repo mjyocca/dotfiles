@@ -120,6 +120,15 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
+          win = {
+            list = {
+              keys = {
+                -- explorer uses focus="list" so <S-CR> from input defaults
+                -- never fires — wire pick_win explicitly here
+                ["<S-CR>"] = { { "pick_win", "jump" } },
+              },
+            },
+          },
           layout = {
             -- sidebar
             preview = false,
@@ -213,15 +222,23 @@ return {
       end,
       desc = "File Explorer",
     },
+    -- Floating explorer — dropdown layout (centered)
+    -- <CR>   → open in previously focused split
+    -- <S-CR> → pick_win overlay to choose which split
     {
       "-",
       function()
-        Snacks.picker.explorer({
-          layout = "ivy",
-          auto_close = true,
-        })
+        Snacks.picker.explorer({ layout = "dropdown", auto_close = true })
       end,
-      desc = "Float File Explorer (pick target split)",
+      desc = "Float Explorer (dropdown)",
+    },
+    -- Floating explorer — ivy layout (bottom panel)
+    {
+      "_",
+      function()
+        Snacks.picker.explorer({ layout = "ivy", auto_close = true })
+      end,
+      desc = "Float Explorer (ivy)",
     },
     {
       "<leader><leader>",
