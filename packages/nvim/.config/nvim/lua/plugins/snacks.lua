@@ -362,7 +362,7 @@ return {
     {
       "<leader>gps",
       function()
-        Snacks.picker.git_stash({ layout = "select" })
+        Snacks.picker.git_stash({})
       end,
       desc = "[G]it [P]icker [S]tash",
     },
