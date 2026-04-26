@@ -580,6 +580,22 @@ direnv allow       # load the .envrc
 
 ---
 
+## Neovim 0.12 Reserved Keys
+
+`<Tab>` is reserved in 0.12 for built-in edit suggestions (next edit / apply
+inline suggestion). Do not remap `<Tab>` or `<S-Tab>` for any custom purpose.
+
+## Snacks.nvim
+
+Snacks picker supports `pick_win` — a Snacks-internal action that renders
+floating letter-hint overlays on each visible split, letting you choose which
+window a file opens into. Bind it as `{ "pick_win", "jump" }` on any picker
+source. Note: sources that use `focus = "list"` (e.g. the explorer) do not
+inherit input window defaults and require the binding to be set explicitly on
+the `list` window keys.
+
+---
+
 ## Anti-Patterns to Avoid
 
 - Do not call `vim.cmd(...)` for anything that has a `vim.opt` / `vim.keymap.set` / `vim.api` equivalent.
