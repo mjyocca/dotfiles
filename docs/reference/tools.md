@@ -67,11 +67,17 @@ Blazing-fast terminal file manager written in Rust. Full async I/O, image previe
 - [Docs](https://yazi-rs.github.io/docs/)
 - [GitHub](https://github.com/sxyazi/yazi)
 
-### superfile
-Modern, visually polished terminal file manager written in Go. Multi-panel layout with icons, themes, and plugin support. Prioritizes aesthetics alongside functionality. Good alternative to yazi if you prefer a more visual style.
+### superfile *(in use)*
+Modern, visually polished terminal file manager written in Go. Multi-panel layout with icons, themes, and plugin support. Dotfile config lives at `packages/superfile/` and is stowed to `~/.config/superfile/` via `XDG_CONFIG_HOME`. Press `E` to open the current directory in `$EDITOR` (nvim), `.` to toggle dotfile visibility.
 
 - [Docs](https://superfile.dev/)
 - [GitHub](https://github.com/yorukot/superfile)
+
+### television
+Fast, portable fuzzy finder for the terminal written in Rust. Searches through any kind of data in real-time via a channel-based architecture — built-in channels for files, git repos, environment variables, shell history, and more. Channels are composable and fully customizable via TOML. Designed as a general-purpose `fzf` alternative with richer defaults and a built-in preview system.
+
+- [Docs](https://alexpasmantier.github.io/television/)
+- [GitHub](https://github.com/alexpasmantier/television)
 
 ### btop
 Beautifully designed resource monitor for CPU, memory, disk, network, and processes. Successor to bashtop and bpytop, rewritten in C++ for performance. Mouse support, customizable themes, and sorting. Drop-in replacement for `htop`/`top` with far better visuals.
