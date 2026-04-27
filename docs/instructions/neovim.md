@@ -594,6 +594,36 @@ source. Note: sources that use `focus = "list"` (e.g. the explorer) do not
 inherit input window defaults and require the binding to be set explicitly on
 the `list` window keys.
 
+### Floating explorer keymaps
+
+| Key | Layout |
+|---|---|
+| `-` | `dropdown` — centered float |
+| `<leader>-` | `ivy` — bottom panel |
+
+Both floating variants override the explorer source default of
+`jump = { close = false }` (designed for the persistent sidebar) with
+`jump = { close = true }` so `<CR>` closes the picker.
+
+**Single file:**
+
+| Key | Behaviour |
+|---|---|
+| `<CR>` | Open in previously focused split, close picker |
+| `<S-CR>` | Show `pick_win` split overlay, open in chosen split, close picker |
+
+**Multi-file (`<Tab>` to select, then `<S-CR>` per file):**
+
+1. `<Tab>` — mark files for assignment (visual selection highlight)
+2. `<S-CR>` — show split overlay, open the first selected file in chosen split,
+   deselect it, return focus to picker
+3. Repeat `<S-CR>` for each remaining selected file
+4. `<Esc>` or `q` — close picker when done
+
+The `pick_win_stay` custom action (registered in `picker.actions`) handles the
+branching: if tab-selected items exist it stays open and processes one file per
+keypress; if no tab selection it closes after opening.
+
 ---
 
 ## Anti-Patterns to Avoid
