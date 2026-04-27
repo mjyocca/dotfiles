@@ -53,7 +53,8 @@ return {
       })
 
       local utils = require("config.utils")
-      local ensure_installed = vim.list_extend(utils.lsp_servers(), utils.tools())
+      local lsp_servers = utils.lsp_servers()
+      local all_tools = vim.list_extend(vim.list_extend({}, lsp_servers), utils.tools())
 
       require("mason-null-ls").setup({
         automatic_installation = {},
@@ -62,12 +63,14 @@ return {
       --  NOTE: You can press `g?` for help in this menu.
       require("mason").setup()
 
+      -- mason-tool-installer gets everything: LSP servers + non-LSP tools
       require("mason-tool-installer").setup({
-        ensure_installed = ensure_installed,
+        ensure_installed = all_tools,
       })
 
+      -- mason-lspconfig gets LSP servers only — passing non-LSP names here causes warnings
       require("mason-lspconfig").setup({
-        ensure_installed = ensure_installed,
+        ensure_installed = lsp_servers,
         automatic_installation = true,
         automatic_enable = true,
       })

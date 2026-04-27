@@ -221,7 +221,10 @@ There are two source directories. Use the correct one based on the tool type:
 | `lsp/` | LSP servers only (must be in mason-lspconfig registry) | `require("config.utils").lsp_servers()` |
 | `tools/` | Non-LSP mason packages: formatters, linters, DAP adapters, CLIs | `require("config.utils").tools()` |
 
-Both lists are merged and passed to `mason-tool-installer` in `plugins/lsp.lua`.
+`lsp_servers()` and `tools()` are consumed separately in `plugins/lsp.lua`:
+
+- `mason-tool-installer` receives both lists merged — it installs everything
+- `mason-lspconfig` receives `lsp_servers()` only — passing non-LSP names here produces warnings and must be avoided
 
 **`lsp/` — LSP servers**
 
