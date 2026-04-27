@@ -110,13 +110,10 @@ the OS-bundled Ruby (and potentially other system tools) to win over
 asdf-managed versions in interactive shells.
 
 The fix is to re-prepend the shims at the **end** of `.zshrc`, after all other
-PATH modifications, using a move-to-front guard that avoids duplicates:
+PATH modifications:
 
 ```zsh
-case ":$PATH:" in
-  *":${ASDF_DATA_DIR}/shims:"*) export PATH="${ASDF_DATA_DIR}/shims:${PATH#*${ASDF_DATA_DIR}/shims:}" ;;
-  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
-esac
+export PATH="$HOME/.asdf/shims:$PATH"
 ```
 
 This is intentional — not a duplication of `.zshenv`. The two serve different
