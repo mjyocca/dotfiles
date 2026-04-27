@@ -99,7 +99,32 @@ All PATH additions use `case ":$PATH:"` guards to prevent duplicates when
 4. asdf Golang plugin hook
 5. PNPM PATH
 6. CLI tool hooks: `direnv`, `fzf`, `zsh-autosuggestions`
-7. Source `.zshrc.local`
+7. asdf shims re-prioritisation (see below)
+8. Source `.zshrc.local`
+
+### asdf shims re-prioritisation
+
+Tools like PNPM prepend to `$PATH` during `.zshrc`, pushing the asdf shims
+(set early in `.zshenv`) below system-installed binaries. On macOS this causes
+the OS-bundled Ruby (and potentially other system tools) to win over
+asdf-managed versions in interactive shells.
+
+The fix is to re-prepend the shims at the **end** of `.zshrc`, after all other
+PATH modifications, using a move-to-front guard that avoids duplicates:
+
+```zsh
+case ":$PATH:" in
+  *":${ASDF_DATA_DIR}/shims:"*) export PATH="${ASDF_DATA_DIR}/shims:${PATH#*${ASDF_DATA_DIR}/shims:}" ;;
+  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
+esac
+```
+
+This is intentional — not a duplication of `.zshenv`. The two serve different
+purposes:
+- `.zshenv` ensures shims are present for scripts and non-interactive shells
+- `.zshrc` re-prioritises shims after interactive-only tools have had their turn
+
+Do not remove either. Do not move this block above PNPM or other tool hooks.
 
 ---
 
@@ -114,6 +139,9 @@ All PATH additions use `case ":$PATH:"` guards to prevent duplicates when
 - **Do not add new PATH entries to `.zshrc` directly.** If a PATH entry is
   needed only interactively, add it to `.zshrc` with an idempotent guard. If
   scripts also need it, it belongs in `.zshenv`.
+- **Do not remove the asdf shims re-prioritisation block at the end of `.zshrc`.**
+  It exists specifically to counteract PATH ordering issues introduced by tools
+  like PNPM. Moving it earlier defeats its purpose.
 - **One concern per section, with a comment header.** Keep sections visually
   separated and easy to scan.
 

@@ -54,6 +54,19 @@ source <(fzf --zsh)
 
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
+# =================================================================
+# asdf shims — re-prioritise for interactive shells
+# =================================================================
+# .zshenv sets shims early for scripts and non-interactive shells.
+# Tools like PNPM prepend to PATH in .zshrc, pushing shims down and
+# allowing the macOS system Ruby (and other system tools) to win.
+# Re-prepend here after all other PATH modifications so asdf-managed
+# versions always take precedence in interactive sessions.
+case ":$PATH:" in
+  *":${ASDF_DATA_DIR}/shims:"*) export PATH="${ASDF_DATA_DIR}/shims:${PATH#*${ASDF_DATA_DIR}/shims:}" ;;
+  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
+esac
+
 # ================================================================
 # Local overrides (machine-specific, not committed)
 # ================================================================
