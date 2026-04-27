@@ -56,6 +56,57 @@ return {
     picker = {
       -- debug = { scores = true },
       actions = {
+        -- Multi-split file assignment for the floating explorer.
+        -- Only triggered by <S-CR>. Behaviour differs based on whether the
+        -- user has <Tab>-selected items or is just on the cursor item:
+        --
+        -- With tab-selected items:
+        --   - Opens each selected item one at a time via pick_win split overlay
+        --   - Deselects each item after opening (clears the visual selection)
+        --   - Returns focus to the picker list after each assignment
+        --   - Picker stays open until the user closes it manually
+        --
+        -- Without tab-selected items (cursor only):
+        --   - Opens the cursor item via pick_win split overlay
+        --   - Closes the picker after (same as <CR> but with split selection)
+        pick_win_stay = function(picker, item)
+          local actions = require("snacks.picker.actions")
+          local has_multi = #picker:selected() > 0
+
+          if has_multi then
+            -- Stay-open path: open each selected item one at a time
+            picker.opts.jump.close = false
+
+            -- Only process the first selected item per invocation — pick_win
+            -- is async so we can't loop. The user presses <S-CR> once per file.
+            local target = picker:selected()[1]
+            if not target then return end
+
+            -- Show split overlay and jump
+            actions.pick_win(picker, target, {})
+            actions.jump(picker, target, { cmd = "edit" })
+
+            -- Deselect the just-opened item so the next <S-CR> picks the next one
+            picker.list:unselect(target)
+
+            -- Return focus to picker list after the layout unhides
+            vim.schedule(function()
+              if not picker.closed then
+                picker:focus("list")
+              end
+            end)
+
+            picker.opts.jump.close = true
+          else
+            -- Single item path: use pick_win then close explicitly.
+            -- jump.close interacts poorly with pick_win's layout hide/unhide
+            -- cycle, so we manage close ourselves.
+            picker.opts.jump.close = false
+            actions.pick_win(picker, item, {})
+            actions.jump(picker, item, { cmd = "edit" })
+            picker:close()
+          end
+        end,
         git_stash_pop = function(picker, item)
           if not item then return end
           vim.system({ "git", "stash", "pop", item.stash }, { cwd = item.cwd }, function(out)
@@ -120,15 +171,6 @@ return {
         explorer = {
           hidden = true,
           ignored = true,
-          win = {
-            list = {
-              keys = {
-                -- explorer uses focus="list" so <S-CR> from input defaults
-                -- never fires — wire pick_win explicitly here
-                ["<S-CR>"] = { { "pick_win", "jump" } },
-              },
-            },
-          },
           layout = {
             -- sidebar
             preview = false,
@@ -223,23 +265,53 @@ return {
       desc = "File Explorer",
     },
     -- Floating explorer — dropdown layout (centered)
-    -- <CR>   → open in previously focused split
-    -- <S-CR> → pick_win overlay to choose which split
+    -- <CR>      → open in previously focused split, close picker
+    -- <S-CR>    → pick_win split selector, keep picker open (chain multiple files)
     {
       "-",
       function()
-        Snacks.picker.explorer({ layout = "dropdown", auto_close = true })
+        Snacks.picker.explorer({
+          layout = "dropdown",
+          -- Explorer source defaults jump.close = false (designed for sidebar).
+          -- Override here so <CR> closes the floating picker.
+          jump = { close = true },
+          win = {
+            list = {
+              keys = {
+                ["<S-CR>"] = { "pick_win_stay" },
+              },
+            },
+          },
+        })
       end,
       desc = "Float Explorer (dropdown)",
     },
     -- Floating explorer — ivy layout (bottom panel)
     {
-      "_",
+      "<leader>-",
       function()
-        Snacks.picker.explorer({ layout = "ivy", auto_close = true })
+        Snacks.picker.explorer({
+          layout = "ivy",
+          jump = { close = true },
+          win = {
+            list = {
+              keys = {
+                ["<S-CR>"] = { "pick_win_stay" },
+              },
+            },
+          },
+        })
       end,
       desc = "Float Explorer (ivy)",
     },
+    -- Floating explorer — ivy layout (bottom panel)
+    -- {
+    --   "_",
+    --   function()
+    --     Snacks.picker.explorer({ layout = "ivy", auto_close = true })
+    --   end,
+    --   desc = "Float Explorer (ivy)",
+    -- },
     {
       "<leader><leader>",
       function()
