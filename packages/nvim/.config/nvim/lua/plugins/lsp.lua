@@ -20,7 +20,6 @@ return {
             border = "single",
             backdrop = 40,
           },
-          ensure_installed = { "goimports", "gofumpt" },
         },
       }, -- NOTE: Must be loaded before dependants
       "williamboman/mason-lspconfig.nvim",
@@ -53,10 +52,10 @@ return {
         ),
       })
 
-      local ensure_installed = require("config.utils").lsp_servers()
+      local utils = require("config.utils")
+      local ensure_installed = vim.list_extend(utils.lsp_servers(), utils.tools())
 
       require("mason-null-ls").setup({
-        ensure_installed = { "stylua" }, -- Ensures stylua is installed
         automatic_installation = {},
       })
 

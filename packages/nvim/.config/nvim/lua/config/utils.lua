@@ -68,4 +68,23 @@ M.lsp_servers = function()
   return servers
 end
 
+--- Returns a flat list of mason package names collected from all `nvim/tools/*.lua` files.
+--- Each file returns a string[] of mason package names for a specific concern (e.g. go, lua).
+--- Add a new `tools/<concern>.lua` to register additional non-LSP mason tools.
+---@return string[]
+M.tools = function()
+  local tools_dir = vim.fn.stdpath("config") .. "/tools"
+  local result = {}
+  for name, entry_type in vim.fs.dir(tools_dir) do
+    if entry_type == "file" and name:match("%.lua$") then
+      local path = tools_dir .. "/" .. name
+      local ok, pkgs = pcall(dofile, path)
+      if ok and type(pkgs) == "table" then
+        vim.list_extend(result, pkgs)
+      end
+    end
+  end
+  return result
+end
+
 return M

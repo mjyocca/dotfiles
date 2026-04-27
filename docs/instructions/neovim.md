@@ -212,15 +212,67 @@ return {
 }
 ```
 
-### Mason `ensure_installed` — auto-derived from `lsp/`
+### Mason `ensure_installed` — two-directory convention
 
-`require("config.utils").lsp_servers()` scans `lsp/*.lua` at startup and filters
-the result against mason-lspconfig's live registry map. The returned list is
-passed directly to both `mason-tool-installer` and `mason-lspconfig`. Servers
-without a mason package (e.g. `sorbet`, `ember`, `glint`) are silently skipped.
+There are two source directories. Use the correct one based on the tool type:
+
+| Directory | Purpose | Scanner |
+|---|---|---|
+| `lsp/` | LSP servers only (must be in mason-lspconfig registry) | `require("config.utils").lsp_servers()` |
+| `tools/` | Non-LSP mason packages: formatters, linters, DAP adapters, CLIs | `require("config.utils").tools()` |
+
+Both lists are merged and passed to `mason-tool-installer` in `plugins/lsp.lua`.
+
+**`lsp/` — LSP servers**
+
+`lsp_servers()` scans `lsp/*.lua` at startup and filters the result against
+mason-lspconfig's live registry map. Servers without a mason package (e.g.
+`sorbet`, `ember`, `glint`) are silently skipped.
 
 Adding a new `lsp/<name>.lua` file is sufficient — no other registration needed
 as long as the server name is mason-installable.
+
+**`tools/` — non-LSP mason packages**
+
+`tools()` scans `tools/*.lua` at startup. Each file returns a `string[]` of
+mason package names grouped by concern (one file per language or tool category):
+
+```
+tools/
+  go.lua    -- gofumpt, goimports, gomodifytags, impl, golangci-lint
+  lua.lua   -- stylua
+```
+
+Each file must return a plain table of mason package name strings:
+
+```lua
+-- tools/go.lua
+return {
+  "gofumpt",
+  "goimports",
+}
+```
+
+Adding a new `tools/<concern>.lua` file is sufficient — no other registration
+needed.
+
+**Never use `mason.nvim`'s `opts.ensure_installed`** — `mason.nvim` does not
+have this option. It is silently ignored. All installation must go through
+`mason-tool-installer` (via `lsp_servers()` + `tools()`) or `mason-nvim-dap`
+(for DAP adapters managed in `plugins/debug.lua`).
+
+**Decision guide — where to register a new tool:**
+
+| Tool type | Example | Where |
+|---|---|---|
+| LSP server (in mason-lspconfig registry) | `gopls`, `golangci_lint_ls` | `lsp/<name>.lua` |
+| Formatter / linter / CLI | `gofumpt`, `stylua`, `golangci-lint` | `tools/<concern>.lua` |
+| DAP debug adapter | `delve`, `rdbg` | `mason-nvim-dap` `ensure_installed` in `plugins/debug.lua` |
+
+To check whether a server name is in the mason-lspconfig registry before
+creating an `lsp/` file, look it up in
+[nvim-lspconfig/lsp](https://github.com/neovim/nvim-lspconfig/tree/master/lsp)
+and cross-reference with mason-lspconfig's registry map.
 
 ### Semantic tokens
 
@@ -640,4 +692,7 @@ keypress; if no tab selection it closes after opening.
 - Do not call `require("lspconfig")[name].setup(...)` manually — `automatic_enable = true` handles this.
 - Do not use `vim.lsp._enabled_configs` — private API, unreliable at plugin config time. Use `require("config.utils").lsp_servers()`.
 - Do not repeat the global capabilities wildcard in individual `lsp/*.lua` files unless overriding a server-specific capability.
+- Do not use `mason.nvim` `opts.ensure_installed` — `mason.nvim` has no such option; it is silently ignored. Use `tools/<concern>.lua` for non-LSP packages instead.
+- Do not add non-LSP tools (formatters, linters, CLIs) to `lsp/` files — `lsp/` is for LSP servers only. Non-LSP mason packages belong in `tools/<concern>.lua`.
+- Do not hardcode tool lists in `plugins/lsp.lua` or `plugins/formatting.lua` — all mason packages are registered via `lsp/` or `tools/` and auto-collected at startup.
 - Do not use `dofile` to source trusted project config — it bypasses the `vim.secure` trust check entirely. Use `NVIM_LOCAL_CONFIG` in `.envrc` and let `autocmds.local_config()` handle sourcing via `vim.secure.read`.

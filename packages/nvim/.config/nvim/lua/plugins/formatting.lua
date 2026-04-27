@@ -2,10 +2,7 @@ return {
   {
     "nvimtools/none-ls.nvim",
     dependencies = {
-      {
-        "williamboman/mason.nvim",
-        opts = { ensure_installed = { "gomodifytags", "goimports", "gofmt", "impl" } },
-      },
+      "williamboman/mason.nvim",
     },
     config = function()
       local null_ls = require("null-ls")
