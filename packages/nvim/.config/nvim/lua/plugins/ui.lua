@@ -75,6 +75,14 @@ return {
           section_separators = { left = "", right = "" },
           disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter" } },
         },
+        sections = {
+          lualine_x = {
+            'lsp_status',
+            'encoding',
+            'fileformat',
+            'filetype',
+          },
+        },
         tabline = {
           lualine_z = {
             {
