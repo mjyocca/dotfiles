@@ -75,7 +75,23 @@ return {
           section_separators = { left = "", right = "" },
           disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter" } },
         },
+        tabline = {
+          lualine_z = {
+            {
+              'tabs',
+              use_mode_colors = true,
+              cond = function() return #vim.fn.gettabinfo() > 1 end,
+              section_separators = { left = "", right = "" },
+              component_separators = { left = '|', right = '|' },
+              padding = 1,
+            },
+          },
+        },
       })
+
+      vim.api.nvim_set_hl(0, 'TabLine',     { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'TabLineFill', { bg = 'none' })
+      vim.api.nvim_set_hl(0, 'TabLineSel',  { bg = 'none', bold = true })
     end,
   },
 
