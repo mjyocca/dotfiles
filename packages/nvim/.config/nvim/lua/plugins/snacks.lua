@@ -89,9 +89,13 @@ return {
             -- Deselect the just-opened item so the next <S-CR> picks the next one
             picker.list:unselect(target)
 
-            -- Return focus to picker list after the layout unhides
+            -- If that was the last selected item, close the picker.
+            -- Otherwise return focus to the list for the next assignment.
             vim.schedule(function()
-              if not picker.closed then
+              if picker.closed then return end
+              if #picker:selected() == 0 then
+                picker:close()
+              else
                 picker:focus("list")
               end
             end)
