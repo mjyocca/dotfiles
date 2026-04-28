@@ -101,7 +101,7 @@ packages/scripts/.local/bin/
     colima-use              # switch colima profile + docker context + socket
     colima-list             # list profiles, states, contexts
     colima-migrate-volumes  # export/import volumes between colima profiles
-    nvim-project-init       # scaffold .envrc + .nvim.lua in a project root
+    init                    # scaffold template files into the current project root (fzf picker)
 ```
 
 Running `dotf --help` auto-lists all commands with their one-line descriptions

@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Scaffold project template files into the current directory
+# Usage: dotf init [--all] [--help]
+
+set -euo pipefail
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  echo "Usage: dotf init [--all]"
+  echo ""
+  echo "Copies selected template files into the current working directory."
+  echo "Without --all, uses fzf to pick which templates to scaffold."
+  echo ""
+  echo "Options:"
+  echo "  --all   Scaffold all available templates without prompting"
+  echo ""
+  echo "Templates are read from:"
+  echo "  \${XDG_CONFIG_HOME:-\$HOME/.config}/nvim/templates/"
+  exit 0
+fi
+
+template_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/templates"
+
+if [[ ! -d "$template_dir" ]]; then
+  echo "init: template directory not found: $template_dir" >&2
+  exit 1
+fi
+
+# Build list of available templates (strip .template suffix for display)
+# find is used instead of a glob because template filenames start with '.' and
+# bash globs exclude dotfiles by default.
+mapfile -t available < <(
+  find "$template_dir" -maxdepth 1 -name '*.template' -type f \
+    | sort \
+    | xargs -I{} basename {} .template
+)
+
+if [[ ${#available[@]} -eq 0 ]]; then
+  echo "init: no templates found in $template_dir" >&2
+  exit 1
+fi
+
+# Resolve which files to scaffold
+if [[ "${1:-}" == "--all" ]]; then
+  selected=("${available[@]}")
+else
+  # fzf multi-select — TAB to toggle, ENTER to confirm
+  mapfile -t selected < <(
+    printf '%s\n' "${available[@]}" \
+      | fzf --multi \
+            --prompt="scaffold > " \
+            --header="TAB to select, ENTER to confirm" \
+            --height=~10 \
+            --layout=reverse \
+            --bind="ctrl-a:select-all"
+  )
+fi
+
+if [[ ${#selected[@]} -eq 0 ]]; then
+  echo "init: nothing selected"
+  exit 0
+fi
+
+errors=0
+written=()
+
+for file in "${selected[@]}"; do
+  template="${template_dir}/${file}.template"
+  dest="${PWD}/${file}"
+
+  if [[ ! -f "$template" ]]; then
+    echo "init: template not found: $template" >&2
+    (( errors++ )) || true
+    continue
+  fi
+
+  if [[ -f "$dest" ]]; then
+    echo "  skip  ${file} (already exists)"
+  else
+    cp "$template" "$dest"
+    echo "  wrote ${file}"
+    written+=("$file")
+  fi
+done
+
+(( errors > 0 )) && exit 1 || true
+
+if [[ ${#written[@]} -gt 0 ]]; then
+  echo ""
+  echo "Next steps:"
+  [[ -f "${PWD}/.envrc" ]] && echo "  direnv allow    # if using direnv"
+  for f in "${written[@]}"; do
+    echo "  edit ${f}"
+  done
+fi

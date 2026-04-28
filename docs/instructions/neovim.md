@@ -599,17 +599,25 @@ export NVIM_LOCAL_CONFIG="/abs/path/nvim.lua"  # or absolute
 The file itself follows the same conventions as `.nvim.lua` — see the template
 for documented examples.
 
-### `dotf nvim-project-init` — scaffold both files from templates
+### `dotf init` — scaffold template files into the current project
 
-Run `dotf nvim-project-init` from any project root to copy the template files:
+Run `dotf init` from any project root. fzf opens a multi-select menu of
+available templates — TAB to toggle, `ctrl-a` to select all, ENTER to confirm:
 
 ```bash
-dotf nvim-project-init
+dotf init
+# fzf picker: select .envrc and/or .nvim.lua
 # wrote .envrc
 # wrote .nvim.lua
 ```
 
-Existing files are skipped. Templates live at:
+To scaffold all templates without prompting:
+
+```bash
+dotf init --all
+```
+
+Existing files are always skipped. Templates live at:
 
 ```
 packages/nvim/.config/nvim/templates/
