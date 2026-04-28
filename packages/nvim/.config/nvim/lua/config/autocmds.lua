@@ -192,13 +192,32 @@ M.plugins = function()
     })
   end, {})
 
-  -- Send OSC 7 escape sequence to update Ghostty's working directory awareness
+  -- Send OSC 7 escape sequence to update Ghostty's working directory awareness.
+  -- Ghostty uses OSC 7 to track cwd so new panes/splits inherit the correct
+  -- directory. Fired on both DirChanged (cwd changes mid-session) and VimEnter
+  -- (initial launch from superfile/yazi where cd happens at startup).
+  local function emit_osc7()
+    local cwd = vim.fn.getcwd()
+    local uri = "file://" .. vim.fn.hostname() .. cwd
+    local esc_seq = "\x1b]7;" .. uri .. "\x07"
+    vim.api.nvim_chan_send(vim.v.stderr, esc_seq)
+  end
+
   vim.api.nvim_create_autocmd("DirChanged", {
+    desc = "Notify Ghostty of cwd change via OSC 7",
+    callback = emit_osc7,
+  })
+
+  vim.api.nvim_create_autocmd("VimEnter", {
+    desc = "Notify Ghostty of initial cwd via OSC 7 (only when launched with a directory)",
+    group = augroup("osc7-vimenter"),
     callback = function()
-      local cwd = vim.fn.getcwd()
-      local uri = "file://" .. vim.fn.hostname() .. cwd
-      local esc_seq = "\x1b]7;" .. uri .. "\x07"
-      vim.api.nvim_chan_send(vim.v.stderr, esc_seq)
+      -- Only emit when nvim was opened with a directory argument (superfile,
+      -- yazi, `nvim .`). DirChanged already covers mid-session changes and
+      -- plain `nvim` launches where no cd occurs.
+      if vim.g.launch_dir then
+        vim.schedule(emit_osc7)
+      end
     end,
   })
 end
