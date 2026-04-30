@@ -52,3 +52,5 @@ keybind = ctrl+s>shift+7=close_surface
 
 # Reload Config
 keybind = cmd+shift+r=reload_config
+
+custom-shader = ./shaders/cursor_warp.glsl
