@@ -67,15 +67,44 @@ return {
     config = function()
       local lualine = require("lualine")
 
+      -- Custom filename component: substitutes a friendly label for plugin-owned
+      -- buffers that have no real filename (e.g. snacks pickers show [picker]
+      -- instead of [New File]).
+      local plugin_ft_labels = {
+        snacks_picker_list    = "[picker]",
+        snacks_picker_input   = "[picker]",
+        snacks_picker_preview = "[picker]",
+        snacks_terminal       = "[terminal]",
+        snacks_dashboard      = "[dashboard]",
+        snacks_notif          = "[notifications]",
+        snacks_notif_history  = "[notifications]",
+        snacks_input          = "[input]",
+        snacks_win            = "[snacks]",
+        snacks_layout_box     = "[snacks]",
+      }
+
+      local function smart_filename()
+        local ft = vim.bo.filetype
+        return plugin_ft_labels[ft]
+          or (vim.bo.buftype ~= "" and "[" .. vim.bo.buftype .. "]")
+          or "%t"  -- default: tail of the file path (same as lualine's filename component)
+      end
+
       lualine.setup({
         options = {
           theme = "github-dark", -- Your custom theme name
           icons_enabled = true,
           component_separators = "|",
-          section_separators = { left = "", right = "" },
+          -- section_separators = { left = "", right = "" },
+          -- section_separators = { left = "", right = "" },
+          section_separators = { left = '', right = ''},
           disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter" } },
+          globalstatus = true,  -- single statusline across the full editor width (laststatus=3)
         },
         sections = {
+          lualine_c = {
+            { smart_filename },
+          },
           lualine_x = {
             'lsp_status',
             'encoding',
@@ -103,11 +132,13 @@ return {
     end,
   },
 
-  -- filename
+  -- filename + LSP breadcrumb
   -- https://github.com/b0o/incline.nvim
   {
     "b0o/incline.nvim",
-    dependencies = {},
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
     event = "BufReadPre",
     priority = 1200,
     config = function()
