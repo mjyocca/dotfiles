@@ -44,6 +44,20 @@ endif
 # ======================
 # NOTE: Group of targets to continually execute after bootstrap/setup.
 
+# Target: ghostty-shader
+# Purpose: Import a Ghostty GLSL shader from a remote git repository.
+#          Clones (or pulls) the repo into a local cache, presents an fzf
+#          multi-select picker of all .glsl files, copies selected shaders
+#          into packages/ghostty with an attribution header, and optionally
+#          appends custom-shader entries to the ghostty config.
+# Usage: make ghostty-shader REPO=<git-url>
+#   e.g. make ghostty-shader REPO=https://github.com/sahaj-b/ghostty-cursor-shaders
+ghostty-shader:
+ifndef REPO
+	$(error REPO is required. Usage: make ghostty-shader REPO=<git-url>)
+endif
+	@bash ./scripts/ghostty-shader.sh "$(REPO)"
+
 # Target: dotfiles
 # Purpose: GNU Stow all packages in ./packages/ into $HOME.
 #          Packages listed in .stow-ignore.local (git-ignored) are skipped.
