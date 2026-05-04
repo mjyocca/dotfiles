@@ -1,0 +1,3 @@
+-- nvim-next: scratch config
+-- Launched via: nvim-pick  (NVIM_APPNAME=nvim-next nvim)
+-- State/cache isolated to ~/.local/share/nvim-next, ~/.cache/nvim-next

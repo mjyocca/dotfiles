@@ -63,6 +63,9 @@ source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # asdf-managed versions always win in interactive sessions.
 export PATH="$HOME/.asdf/shims:$PATH"
 
+# Neovim aliases and variant shorthands (nv, nv-*, nvim-*)
+[[ -f ~/.config/zsh/nvim.zsh ]] && source ~/.config/zsh/nvim.zsh
+
 # ================================================================
 # Local overrides (machine-specific, not committed)
 # ================================================================
