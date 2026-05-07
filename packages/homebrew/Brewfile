@@ -7,6 +7,7 @@ tap "homebrew/bundle"
 brew 'asdf'
 brew 'autoconf'
 brew 'bat'
+brew 'bjarneo/cliamp/cliamp'
 brew 'btop'
 brew 'cmake'
 brew 'curl'
@@ -51,6 +52,7 @@ brew 'yazi'
 brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
 brew 'tree-sitter-cli'
+brew 'zoxide'
 
 ###############
 # Applications

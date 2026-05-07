@@ -52,6 +52,9 @@ eval "$(direnv hook zsh)"
 # fzf (see https://github.com/junegunn/fzf)
 source <(fzf --zsh)
 
+# zoxide (see https://github.com/ajeetdsouza/zoxide)
+eval "$(zoxide init zsh)"
+
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # =================================================================
