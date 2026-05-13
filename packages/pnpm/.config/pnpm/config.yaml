@@ -1,0 +1,2 @@
+# Ignore packages younger than 2 days
+minimumReleaseAge: 2880m

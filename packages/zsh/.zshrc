@@ -35,12 +35,15 @@ export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 
 # =================================================================
 # PNPM (see https://pnpm.io/installation)
+# NOTE: `pnpm setup` overrides this current block `# pnpm ... # pnpm end`
 # =================================================================
-export PNPM_HOME="$HOME/Library/pnpm"
+# pnpm
+export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
+# pnpm end
 
 # ================================================================
 # CLI Tools
