@@ -1,2 +1,2 @@
-# Ignore packages younger than 2 days
-minimumReleaseAge: 2880m
+# Ignore packages younger than a week
+minimumReleaseAge: 10080m
