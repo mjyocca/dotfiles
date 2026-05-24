@@ -1,0 +1,31 @@
+# Delta GitHub Dark Theme
+# Feature: github-dark
+# Syntax theme: GitHub Dark (from primer/github-vscode-theme)
+
+[delta "github-dark"]
+  dark = true
+  syntax-theme = GitHub Dark
+
+  # Diff line colors — match GitHub web UI
+  minus-style = syntax "#3c1818"
+  minus-non-current-style = syntax "#281010"
+  minus-emph-style = syntax "#672222"
+
+  plus-style = syntax "#11301a"
+  plus-non-current-style = syntax "#0c2011"
+  plus-emph-style = syntax "#1d5c31"
+
+  # Commit/file banner styling
+  commit-decoration-style = "#30363d" box
+  file-style = "#8b949e"
+  file-decoration-style = "#30363d" ul
+  hunk-header-style = syntax line-number
+  hunk-header-decoration-style = "#30363d" box
+
+  # Line numbers
+  line-numbers = true
+  line-numbers-minus-style = "#f85149"
+  line-numbers-plus-style = "#3fb950"
+  line-numbers-left-style = "#30363d"
+  line-numbers-right-style = "#30363d"
+  line-numbers-zero-style = "#484f58"
