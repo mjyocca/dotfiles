@@ -46,7 +46,13 @@ else
   CONTEXT="colima-${PROFILE}"
 fi
 
-SOCKET="${HOME}/.colima/${PROFILE}/docker.sock"
+# Prefer XDG_CONFIG_HOME if set (e.g. $XDG_CONFIG_HOME/colima/<profile>/docker.sock).
+# Otherwise fall back to the legacy default at $HOME/.colima/<profile>/docker.sock.
+if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
+  SOCKET="${XDG_CONFIG_HOME}/colima/${PROFILE}/docker.sock"
+else
+  SOCKET="${HOME}/.colima/${PROFILE}/docker.sock"
+fi
 
 # ── 1. Ensure colima is installed ─────────────────────────────────────────
 if ! command -v colima &>/dev/null; then
@@ -55,7 +61,7 @@ if ! command -v colima &>/dev/null; then
 fi
 
 # ── 2. Start colima profile if not running ────────────────────────────────
-COLIMA_STATUS="$(colima status "${PROFILE}" 2>&1 || true)"
+COLIMA_STATUS="$(colima status "$PROFILE" 2>&1 || true)"
 
 if echo "$COLIMA_STATUS" | grep -q "Running"; then
   info "colima profile '${PROFILE}' is already running"
@@ -64,14 +70,14 @@ elif echo "$COLIMA_STATUS" | grep -q "Stopped"; then
   if [[ "$PROFILE" == "default" ]]; then
     colima start
   else
-    colima start "${PROFILE}"
+    colima start "$PROFILE"
   fi
 else
   warn "Could not determine status for profile '${PROFILE}'. Attempting to start..."
   if [[ "$PROFILE" == "default" ]]; then
     colima start
   else
-    colima start "${PROFILE}"
+    colima start "$PROFILE"
   fi
 fi
 
@@ -83,7 +89,7 @@ if [[ ! -S "$SOCKET" ]]; then
 fi
 
 # ── 4. Switch docker context ─────────────────────────────────────────────
-if ! docker context inspect "${CONTEXT}" &>/dev/null; then
+if ! docker context inspect "$CONTEXT" &>/dev/null; then
   error "Docker context '${CONTEXT}' does not exist."
   error "Available contexts:"
   docker context ls 2>&1 | sed 's/^/  /' >&2
@@ -91,11 +97,11 @@ if ! docker context inspect "${CONTEXT}" &>/dev/null; then
 fi
 
 info "Switching docker context to '${CONTEXT}'..."
-docker context use "${CONTEXT}"
+docker context use "$CONTEXT"
 
 # ── 5. Relink /var/run/docker.sock ───────────────────────────────────────
 info "Relinking /var/run/docker.sock → ${SOCKET}"
-sudo ln -sf "${SOCKET}" /var/run/docker.sock
+sudo ln -sf "$SOCKET" /var/run/docker.sock
 
 success "Active profile : ${PROFILE}"
 success "Docker context : ${CONTEXT}"
