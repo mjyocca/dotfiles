@@ -1,0 +1,14 @@
+// Zellij - minimal config
+// Inherits default keybindings (mode-based: Ctrl p = pane mode, Ctrl t = tab mode)
+
+theme "ansi"
+mouse_mode true
+default_shell "zsh"
+simplified_ui true
+
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name true
+    }
+}
