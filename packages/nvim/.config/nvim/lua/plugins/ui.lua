@@ -191,6 +191,8 @@ return {
         "markdown",
         "markdown_inline",
         "make",
+        "toml",
+        "yaml",
         "query",
         "vim",
         "vimdoc",
