@@ -1,0 +1,28 @@
+onboarding = false
+
+[ui]
+agent_panel_scope = "current"
+show_agent_labels_on_pane_borders = true
+
+[keys]
+prefix = "ctrl+a"
+
+[theme]
+name = "terminal"
+
+# See: https://github.com/ogulcancelik/herdr/blob/4001fd2ec8ff05a982da18744b8cbde9df3ab530/src/app/state.rs#L51
+[theme.custom]
+# accent = "#0c2d6b"
+# accent = "#1158c7"
+
+accent = "lightBlue"
+panel_bg = "transparent"
+surface_dim = "reset"
+surface0 = "reset"
+surface1 = "reset"
+
+[experimental]
+switch_ascii_input_source_in_prefix = false
+
+[ui.toast]
+delivery = "herdr"
