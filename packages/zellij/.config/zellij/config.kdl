@@ -5,3 +5,14 @@ default_mode "normal"
 default_layout "default"
 attach_to_session true
 show_startup_tips false
+
+keybinds {
+  normal {
+    // Press Ctrl+z to enter "Tmux Mode"
+    bind "Ctrl z" { SwitchToMode "Tmux"; }
+  }
+  tmux {
+    bind "&" { CloseFocus; SwitchToMode "Normal"; }
+  }
+}
+
