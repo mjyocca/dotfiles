@@ -16,3 +16,6 @@ packages/colima/.config/**
 !packages/colima/.config/colima/
 !packages/colima/.config/colima/_templates/
 !packages/colima/.config/colima/_templates/default.yaml
+
+opencode.json
+opencode.jsonc
