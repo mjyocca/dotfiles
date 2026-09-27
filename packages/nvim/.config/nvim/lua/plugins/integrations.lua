@@ -24,4 +24,11 @@ return {
 		-- 	},
 		-- },
 	},
+
+	-- Zellij pane/window navigator
+	{
+		"https://github.com/fresh2dev/zellij.vim",
+		lazy = false,
+		priority = 1000,
+	},
 }

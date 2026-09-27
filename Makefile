@@ -58,6 +58,16 @@ ifndef REPO
 endif
 	@bash ./scripts/ghostty-shader.sh "$(REPO)"
 
+# Target: zellij-plugins
+# Purpose: Download zellij wasm plugins from their release pages.
+#          Runs during bootstrap; can also be called manually.
+.PHONY: zellij-plugins
+zellij-plugins:
+	@mkdir -p $(HOME)/.config/zellij/plugins
+	@curl -fSL -o $(HOME)/.config/zellij/plugins/zellij-autolock.wasm \
+		https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm
+	@echo "✓ zellij-autolock v0.2.2 installed"
+
 # Target: dotfiles
 # Purpose: GNU Stow all packages in ./packages/ into $HOME.
 #          Packages listed in .stow-ignore.local (git-ignored) are skipped.
@@ -124,7 +134,7 @@ apply_defaults_osx:
 
 # Target: bootstrap_osx
 # Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
-bootstrap_osx: pre_install_osx install_osx_tools
+bootstrap_osx: pre_install_osx install_osx_tools zellij-plugins
 
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
@@ -144,7 +154,7 @@ brew_bundle:
 # 
 # TODO: Add automation to install necessary tools
 
-bootstrap_linux: update_linux_packages install_linux_tools
+bootstrap_linux: update_linux_packages install_linux_tools zellij-plugins
 
 update_linux_packages:
 	@echo "Updating Linux-specific packages ..."

@@ -17,5 +17,11 @@ packages/colima/.config/**
 !packages/colima/.config/colima/_templates/
 !packages/colima/.config/colima/_templates/default.yaml
 
+# Zellij: ignore compiled wasm plugins (download via: make zellij-plugins)
+packages/zellij/.config/zellij/plugins/*.wasm
+
+# Opencode
 opencode.json
 opencode.jsonc
+
+.opencode/plans/**
