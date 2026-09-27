@@ -1,6 +1,6 @@
 # Global .gitconfig
 [core]
-  pager = delta
+  pager = hunk pager
 	excludesfile = ~/.config/git/.gitignore_global
 
 [init]
