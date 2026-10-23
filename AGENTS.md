@@ -29,11 +29,15 @@ packages/          # Stow packages (each maps to $HOME paths)
   starship/        # Prompt theme
   ghostty/         # Terminal emulator
   asdf/            # Version manager
-  homebrew/        # Brewfile
+  homebrew/        # Brewfile (macOS only)
+  colima/          # Colima VM config (macOS only)
   opencode/        # AI assistant config
   ...
+profiles/          # OS profile allow-lists (one package name per line)
+  macos            # Packages to stow on macOS
+  omarchy          # Packages to stow on Omarchy Linux
 osx/               # macOS-specific defaults & bootstrap scripts
-scripts/           # Utility scripts (stow.sh, plugins.sh, etc.)
+scripts/           # Utility scripts (stow.sh, detect-os.sh, plugins.sh, etc.)
 Makefile           # Command entrypoint
 ```
 
@@ -43,11 +47,30 @@ All commands run through the Makefile:
 
 | Command | Description |
 |---|---|
-| `make dotfiles` | Stow all packages into `$HOME` (skips packages in `.stow-ignore.local`) |
-| `make stow PKG=<name>` | Stow a single package by name (e.g. `make stow PKG=nvim`) |
+| `make dotfiles` | Stow packages for current OS profile into `$HOME` (profile − ignore list) |
+| `make dotfiles PROFILE=omarchy` | Force a specific profile |
+| `make stow PKG=<name>` | Stow a single package by name (bypasses profile + ignore) |
 | `make stow PKG="a b c"` | Stow multiple specific packages |
 | `make bootstrap` | Full machine provisioning (platform-aware) |
 | `make apply_settings` | Apply OS-level defaults (macOS only currently) |
+
+#### Profile-based package selection
+
+Dotfiles are selected per OS via **profiles** in `profiles/<name>`. Each profile
+lists which packages to stow on that OS. The Makefile auto-detects the active
+profile from the running OS (or `PROFILE=...` override).
+
+| OS / Distro | Profile | Notes |
+|---|---|---|
+| macOS (Darwin) | `macos` | Includes `homebrew`, `colima` |
+| Omarchy (Arch-based Linux) | `omarchy` | Excludes `homebrew`, `colima` |
+
+Detection logic (in `scripts/detect-os.sh`):
+- `uname -s == Darwin` → `macos`
+- `/etc/os-release` `ID=omarchy` or `ID_LIKE` contains `arch` → `omarchy`
+- Other Linux → uses `$ID` directly (no profile yet)
+
+To add a package to a profile, edit the relevant `profiles/<name>` file.
 
 #### Per-machine package ignore list
 
@@ -87,7 +110,55 @@ When working on any zsh config task, load: @docs/instructions/zsh.md
 ### Platform Support
 
 - **macOS** — fully supported (`osx/` defaults, Homebrew bootstrap)
-- **Linux** — targets exist in Makefile but not yet implemented
+- **Omarchy (Linux)** — profile-based stow support; desktop configs deferred
+  - Omarchy is bash-first at the desktop level; zsh is included but interactive
+    ergonomics (tdl, tsd, etc.) assume bash
+  - See "Omarchy Conventions" below for override paths and safety rules
+
+### Omarchy Conventions
+
+**Omarchy override model (from official manual `31-dotfiles.md`):**
+- User configs live in `~/.config` (your files, safe to edit)
+- System defaults live in `/usr/share/omarchy` (owned by omarchy package, **never edit**)
+- Override values by placing files in `~/.config` instead
+
+**Prescribed user override paths:**
+```
+~/.config/hypr/
+├── hyprland.lua       # Main config (loads Omarchy defaults + overrides below)
+├── bindings.lua       # Keybindings and overrides
+├── monitors.lua       # Display configuration
+├── input.lua          # Keyboard/mouse settings
+├── looknfeel.lua      # Appearance (gaps, borders, animations)
+├── autostart.lua      # Startup applications
+├── hyprsunset.conf    # Night light
+└── xdph.conf          # Screen sharing / desktop portal
+
+~/.config/omarchy/
+├── shell.json         # Bar layout, widgets, idle/lock timings
+├── hooks/<event>.d/   # Automation hooks (post-boot, theme-set, etc.)
+├── extensions/        # Custom menu entries
+└── themes/            # Custom themes
+```
+
+**Stow is endorsed** by the Omarchy manual for dotfile backup/management.
+
+**Collision warnings:**
+- Omarchy seeds stock configs into `~/.config` (ghostty, btop, lazygit, starship, tmux, etc.)
+- Stowing your packages **replaces** those with symlinks to your repo
+- This is intentional if you want your cross-machine config to win
+- Use `make stow PKG=<name> FLAGS=--adopt` once when migrating to adopt existing files
+- Keep packages you want to own in the `omarchy` profile deliberately
+
+**Post-refresh workflow:**
+- After `omarchy reinstall configs` or `omarchy update`, re-run `make dotfiles`
+- Omarchy may restore configs to defaults and leave `.bak` files
+- Symlinks into the repo should be re-established
+
+**Future desktop packages (when added):**
+- Only stow override files from the paths above
+- Never stow wholesale replacements of Omarchy package internals
+- Prefer files the loader already `require`s (e.g. `bindings.lua`, not `hyprland.lua`)
 
 ### `dotf` — daily-use toolbox
 

@@ -1,0 +1,31 @@
+# Profile: Omarchy (Linux)
+# Packages to stow on Omarchy machines.
+# One package name per line. Blank lines and # comments ignored.
+# Override per-machine via .stow-ignore.local at repo root.
+#
+# Omarchy is bash-first at the desktop level; zsh is included but
+# interactive ergonomics (tdl, tsd, etc.) assume bash.
+#
+# Excludes: homebrew, colima (macOS-only tools)
+
+asdf
+bat
+btop
+ghostty
+gitconfig
+herdr
+lazygit
+nvim
+nvim-next
+opencode
+pnpm
+scripts
+ssh
+starship
+superfile
+tmux
+tool-versions
+yazi
+zed
+zellij
+zsh
