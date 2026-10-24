@@ -2,6 +2,28 @@
 
 This file contains Omarchy (Arch-based Linux) specific conventions and configuration instructions.
 
+## Official Resources
+
+**When you need additional context about Omarchy, consult these authoritative sources:**
+
+- **Online Manual**: https://learn.omacom.io/ — comprehensive documentation for users
+- **GitHub Manual**: https://github.com/basecamp/omarchy/tree/quattro/manual — markdown source files
+  - Chapter 31 (Dotfiles): https://github.com/basecamp/omarchy/blob/quattro/manual/31-dotfiles.md
+  - Chapter 15 (Terminal): https://github.com/basecamp/omarchy/blob/quattro/manual/15-terminal.md
+  - Chapter 16 (Neovim): https://github.com/basecamp/omarchy/blob/quattro/manual/16-neovim.md
+  - Chapter 40 (Prompt): https://github.com/basecamp/omarchy/blob/quattro/manual/40-prompt.md
+  - Chapter 42 (Common Tweaks): https://github.com/basecamp/omarchy/blob/quattro/manual/42-common-tweaks.md
+- **Source Code**: `/usr/share/omarchy/` — read-only system package (safe to read, never edit)
+  - `bin/` — Command scripts (useful to understand how omarchy commands work)
+  - `config/` — Default configuration templates
+  - `default/` — System defaults (hypr, bash, etc.)
+  - `themes/` — Stock theme definitions
+  - `shell/` — Omarchy shell source and defaults
+
+**Reading is safe**: You can freely read `/usr/share/omarchy/` to understand defaults, check how commands work, or reference stock themes. Never modify these files directly.
+
+**When to consult**: Before making significant changes to Omarchy configuration, check the relevant manual chapter. When you need to understand how a specific omarchy command works, read the source in `/usr/share/omarchy/bin/`.
+
 ## Omarchy Override Model
 
 **From official manual (`31-dotfiles.md`):**
