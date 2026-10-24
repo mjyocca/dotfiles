@@ -180,7 +180,7 @@ brew_bundle:
 # 
 # TODO: Add automation to install necessary tools
 
-bootstrap_linux: update_linux_packages install_linux_tools zellij-plugins
+bootstrap_linux: update_linux_packages install_linux_tools install_git_hooks zellij-plugins
 
 update_linux_packages:
 	@echo "Updating Linux-specific packages ..."
@@ -194,3 +194,10 @@ install_linux_tools:
 	$(INSTALL_CMD) curl
 	$(INSTALL_CMD) vim
 	$(INSTALL_CMD) stow
+	$(INSTALL_CMD) gitleaks
+	@echo "Installing git hooks..."
+	@bash ./scripts/install-git-hooks.sh
+
+install_git_hooks:
+	@echo "Installing git hooks..."
+	@bash ./scripts/install-git-hooks.sh

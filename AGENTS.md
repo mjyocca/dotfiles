@@ -128,6 +128,68 @@ Then load the matching instruction file:
 **Complex OS tooling:** For Omarchy desktop config (Hyprland, bar, themes), also
 invoke the `omarchy` skill (already available).
 
+### Security: Gitleaks Integration
+
+**Gitleaks** scans git commits for secrets (API keys, tokens, passwords) and prevents them from being committed.
+
+**Pre-commit hook** is installed via `scripts/install-git-hooks.sh` and runs automatically on every commit:
+- Scans staged changes for secrets
+- Blocks commit if secrets detected
+- Provides guidance on how to fix
+
+**Manual usage:**
+```bash
+# Scan staged changes
+gitleaks protect --staged
+
+# Scan entire repository history
+gitleaks detect --source . --log-level info
+
+# Scan specific commit
+gitleaks protect --commit <sha>
+```
+
+**Configuration** (optional): Create `.gitleaks.toml` in repo root to:
+- Allowlist specific paths (e.g., test fixtures)
+- Add custom patterns
+- Exclude false positives
+
+**Installation:**
+- macOS: `brew install gitleaks` (in Brewfile)
+- Linux: `sudo pacman -S gitleaks` (via bootstrap_linux)
+- Git hook: `make install_git_hooks` or `scripts/install-git-hooks.sh`
+
+### Linux Package Management (Omarchy/Arch)
+
+**Package tracking** uses simple text files following community convention:
+
+```
+packages/pacman/
+├── packages.txt       # Official Arch packages (210 packages on this system)
+└── packages-aur.txt   # AUR packages (4 packages on this system)
+```
+
+**Format:** One package per line, comments with `#`:
+```
+# Development tools
+git
+neovim
+gitleaks
+```
+
+**Maintenance commands:**
+```bash
+# Export currently installed packages
+pacman -Qqen > packages/pacman/packages.txt      # Official packages
+pacman -Qqem > packages/pacman/packages-aur.txt  # AUR packages
+
+# Install from package lists
+sudo pacman -S --needed - < packages/pacman/packages.txt
+yay -S --needed - < packages/pacman/packages-aur.txt
+```
+
+**Note:** Omarchy uses `omarchy pkg add <package>` for interactive installation, but doesn't provide user-level package tracking. These files serve as your declarative package manifest.
+
 ### `dotf` — daily-use toolbox
 
 `dotf` is a dispatcher script stowed to `~/.local/bin/dotf`. It routes

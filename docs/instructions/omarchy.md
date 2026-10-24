@@ -42,6 +42,8 @@ This file provides an index of Omarchy-specific conventions and points to author
 - **Dotfiles management**: Stow is endorsed by Omarchy for backup/management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
+- **Package tracking**: Use `packages/pacman/packages.txt` and `packages-aur.txt` (see [AGENTS.md](../../AGENTS.md#linux-package-management-omarchyarch))
+- **Security**: Gitleaks pre-commit hook scans for secrets (see [AGENTS.md](../../AGENTS.md#security-gitleaks-integration))
 
 ## User Override Paths
 
