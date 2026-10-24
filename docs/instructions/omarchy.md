@@ -44,6 +44,7 @@ This file provides an index of Omarchy-specific conventions and points to author
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
 - **Package tracking**: Use `packages/pacman/packages.txt` and `packages-aur.txt` (see [AGENTS.md](../../AGENTS.md#linux-package-management-omarchyarch))
 - **Security**: Gitleaks pre-commit hook scans for secrets (see [AGENTS.md](../../AGENTS.md#security-gitleaks-integration))
+- **Dev tools**: Managed via mise (cross-platform), see [AGENTS.md](../../AGENTS.md#dev-tools-mise)
 
 ## User Override Paths
 
@@ -81,6 +82,31 @@ make dotfiles  # Re-establish symlinks
 
 **Plugin development:**
 See [Plugin Development Guide](https://plugins.omarchy.org/develop.html)
+
+## Mise Integration
+
+Dev tools are managed via mise (cross-platform), aligned with how Omarchy manages AI tools.
+
+**Config location:** `packages/mise/.config/mise/config.toml` (stowed to `~/.config/mise/config.toml`)
+
+**Auto-updates:** Omarchy's `post-update` hook runs `mise up` to keep tools current:
+```bash
+~/.config/omarchy/hooks/post-update.d/99-mise-update
+```
+
+**Manual commands:**
+```bash
+mise install          # Install all tools
+mise update           # Update all tools
+mise list             # List installed tools
+MISE_MINIMUM_RELEASE_AGE=0 mise up --yes  # Force update now
+```
+
+**Add a new tool:**
+```bash
+mise use -g <tool>@latest
+# Then commit the updated config.toml
+```
 
 ## Warnings
 

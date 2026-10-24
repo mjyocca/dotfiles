@@ -190,6 +190,39 @@ yay -S --needed - < packages/pacman/packages-aur.txt
 
 **Note:** Omarchy uses `omarchy pkg add <package>` for interactive installation, but doesn't provide user-level package tracking. These files serve as your declarative package manifest.
 
+### Dev Tools (mise)
+
+Dev tools are managed via [mise](https://mise.jdx.dev/) for cross-platform consistency. Configuration lives at `packages/mise/.config/mise/config.toml` and is stowed to `~/.config/mise/config.toml`.
+
+**What belongs in mise:**
+- CLI tools used across projects (gitleaks, lazygit, jq, ripgrep, etc.)
+- TUI tools (btop, yazi, superfile, etc.)
+- Shell utilities (starship, direnv, zoxide, etc.)
+
+**What stays in Homebrew/pacman:**
+- System infrastructure (git, curl, stow, build tools)
+- System services (docker, systemd units)
+- GUI applications (editors, browsers, etc.)
+
+**Commands:**
+```bash
+mise install          # Install all tools from config.toml
+mise update           # Update all tools
+mise add <tool>       # Add a new tool
+mise list             # List installed tools
+```
+
+**Decision matrix for new packages:**
+
+| Category | Manager | Example |
+|----------|---------|---------|
+| System infrastructure | Homebrew/pacman | git, curl, gcc, cmake |
+| System services | Homebrew/pacman | docker, colima |
+| GUI applications | Homebrew/pacman | vscode, alacritty |
+| Dev CLI tools | mise | gitleaks, lazygit, jq |
+| TUI tools | mise | btop, yazi, superfile |
+| Shell utilities | mise | starship, direnv, zoxide |
+
 ### `dotf` — daily-use toolbox
 
 `dotf` is a dispatcher script stowed to `~/.local/bin/dotf`. It routes

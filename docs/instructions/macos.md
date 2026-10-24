@@ -28,7 +28,7 @@ This file provides an index of macOS-specific conventions and points to authorit
 
 ## Key Concepts
 
-- **Package management**: Homebrew for CLI tools, casks for GUI apps
+- **Package management**: Homebrew for system packages, mise for dev tools
 - **Shell**: Zsh is default shell on macOS
 - **Dotfiles management**: GNU Stow for symlink management
 - **System defaults**: Use `defaults write` for macOS system preferences
@@ -52,6 +52,30 @@ colima start              # Start Docker daemon
 colima stop               # Stop Docker daemon
 colima status             # Check status
 ```
+
+### Dev Tools (mise)
+
+Dev tools are managed via [mise](https://mise.jdx.dev/) for cross-platform consistency. The configuration lives at `packages/mise/.config/mise/config.toml` and is stowed to `~/.config/mise/config.toml`.
+
+**What belongs in mise:**
+- CLI tools used across projects (gitleaks, lazygit, jq, ripgrep, etc.)
+- TUI tools (btop, yazi, superfile, etc.)
+- Shell utilities (starship, direnv, zoxide, etc.)
+
+**What stays in Homebrew:**
+- System infrastructure (git, curl, stow, build tools)
+- System services (docker, colima)
+- GUI applications (casks)
+
+**Commands:**
+```bash
+mise install          # Install all tools from config.toml
+mise update           # Update all tools
+mise add <tool>       # Add a new tool
+mise list             # List installed tools
+```
+
+See [AGENTS.md](../../AGENTS.md#dev-tools-mise) for the full decision matrix.
 
 ## System Configuration
 

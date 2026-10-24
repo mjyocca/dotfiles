@@ -1,0 +1,33 @@
+# Dev tools managed by mise (cross-platform)
+# This file is stowed to ~/.config/mise/config.toml
+# See AGENTS.md for the architecture decision matrix
+
+[tools]
+# AI/Dev tools
+gitleaks = "latest"
+lazygit = "latest"
+lazydocker = "latest"
+neovim = "latest"
+opencode = "latest"
+herdr = "latest"
+
+# CLI utilities
+jq = "latest"
+yq = "latest"
+ripgrep = "latest"
+fd = "latest"
+bat = "latest"
+eza = "latest"
+fzf = "latest"
+zoxide = "latest"
+dua = "latest"
+
+# TUI tools
+btop = "latest"
+starship = "latest"
+direnv = "latest"
+tmux = "latest"
+zellij = "latest"
+superfile = "latest"
+television = "latest"
+yazi = "latest"

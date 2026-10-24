@@ -201,3 +201,15 @@ install_linux_tools:
 install_git_hooks:
 	@echo "Installing git hooks..."
 	@bash ./scripts/install-git-hooks.sh
+
+# ===========================
+# MISE TARGETS (Dev Tools)
+# ===========================
+
+mise_install:
+	@echo "Installing mise-managed dev tools..."
+	@mise install
+
+mise_update:
+	@echo "Updating mise-managed dev tools..."
+	@mise update
