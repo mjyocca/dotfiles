@@ -107,58 +107,26 @@ Shell config located at `packages/zsh/`. Three-file layout:
 
 When working on any zsh config task, load: @docs/instructions/zsh.md
 
-### Platform Support
+### Platform Detection & Instructions
 
-- **macOS** — fully supported (`osx/` defaults, Homebrew bootstrap)
-- **Omarchy (Linux)** — profile-based stow support; desktop configs deferred
-  - Omarchy is bash-first at the desktop level; zsh is included but interactive
-    ergonomics (tdl, tsd, etc.) assume bash
-  - See "Omarchy Conventions" below for override paths and safety rules
+OS-specific conventions and bootstrap instructions live in `docs/instructions/<profile>.md`.
+Before any OS-specific task (bootstrap, apply_settings, desktop config), detect the profile:
 
-### Omarchy Conventions
-
-**Omarchy override model (from official manual `31-dotfiles.md`):**
-- User configs live in `~/.config` (your files, safe to edit)
-- System defaults live in `/usr/share/omarchy` (owned by omarchy package, **never edit**)
-- Override values by placing files in `~/.config` instead
-
-**Prescribed user override paths:**
-```
-~/.config/hypr/
-├── hyprland.lua       # Main config (loads Omarchy defaults + overrides below)
-├── bindings.lua       # Keybindings and overrides
-├── monitors.lua       # Display configuration
-├── input.lua          # Keyboard/mouse settings
-├── looknfeel.lua      # Appearance (gaps, borders, animations)
-├── autostart.lua      # Startup applications
-├── hyprsunset.conf    # Night light
-└── xdph.conf          # Screen sharing / desktop portal
-
-~/.config/omarchy/
-├── shell.json         # Bar layout, widgets, idle/lock timings
-├── hooks/<event>.d/   # Automation hooks (post-boot, theme-set, etc.)
-├── extensions/        # Custom menu entries
-└── themes/            # Custom themes
+```bash
+./scripts/detect-os.sh --print  # outputs: macos | omarchy | ubuntu | etc.
 ```
 
-**Stow is endorsed** by the Omarchy manual for dotfile backup/management.
+Then load the matching instruction file:
 
-**Collision warnings:**
-- Omarchy seeds stock configs into `~/.config` (ghostty, btop, lazygit, starship, tmux, etc.)
-- Stowing your packages **replaces** those with symlinks to your repo
-- This is intentional if you want your cross-machine config to win
-- Use `make stow PKG=<name> FLAGS=--adopt` once when migrating to adopt existing files
-- Keep packages you want to own in the `omarchy` profile deliberately
+| Profile | Instructions File |
+|---|---|
+| `macos` | `@docs/instructions/macos.md` |
+| `omarchy` | `@docs/instructions/omarchy.md` |
 
-**Post-refresh workflow:**
-- After `omarchy reinstall configs` or `omarchy update`, re-run `make dotfiles`
-- Omarchy may restore configs to defaults and leave `.bak` files
-- Symlinks into the repo should be re-established
+**When to load:** Before any OS-specific task. Don't guess — detect first.
 
-**Future desktop packages (when added):**
-- Only stow override files from the paths above
-- Never stow wholesale replacements of Omarchy package internals
-- Prefer files the loader already `require`s (e.g. `bindings.lua`, not `hyprland.lua`)
+**Complex OS tooling:** For Omarchy desktop config (Hyprland, bar, themes), also
+invoke the `omarchy` skill (already available).
 
 ### `dotf` — daily-use toolbox
 
