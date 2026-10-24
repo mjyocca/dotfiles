@@ -1,3 +1,62 @@
+---
+title: "Neovim Instructions"
+description: "Agent instructions for Neovim 0.12+ configuration with LazyVim and Lua"
+sources:
+  - name: "Neovim Documentation"
+    url: "https://neovim.io/doc/"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Official Neovim documentation and user manual"
+  - name: "LazyVim"
+    url: "https://www.lazyvim.org/"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "LazyVim distribution documentation"
+  - name: "lazy.nvim"
+    url: "https://github.com/folke/lazy.nvim"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Plugin manager for Neovim"
+  - name: "nvim-lspconfig"
+    url: "https://github.com/neovim/nvim-lspconfig"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "LSP server configurations"
+  - name: "mason.nvim"
+    url: "https://github.com/williamboman/mason.nvim"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Package manager for LSP servers, DAP adapters, formatters, linters"
+  - name: "Snacks.nvim"
+    url: "https://github.com/folke/snacks.nvim"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Collection of QoL plugins (picker, explorer, notifications, etc.)"
+  - name: "nvim-cmp"
+    url: "https://github.com/hrsh7th/nvim-cmp"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Completion engine for Neovim"
+  - name: "LuaSnip"
+    url: "https://github.com/L3MON4D3/LuaSnip"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Snippet engine for Neovim"
+  - name: "nvim-treesitter"
+    url: "https://github.com/nvim-treesitter/nvim-treesitter"
+    type: "official"
+    last_synced: "2026-01-23"
+    notes: "Treesitter configurations and abstraction layer for Neovim"
+  - name: "Plugin Development Guide"
+    url: "https://plugins.omarchy.org/develop.html"
+    type: "community"
+    last_synced: "2026-01-23"
+    notes: "General plugin development patterns (Omarchy community guide)"
+last_updated: "2026-01-23"
+maintainer: "mjyocca"
+status: "active"
+---
+
 # Neovim & Lua Agent Instructions
 
 Instructions and best practices for configuring Neovim 0.12+. This config uses
@@ -707,3 +766,25 @@ keypress; if no tab selection it closes after opening.
 - Do not add non-LSP tools (formatters, linters, CLIs) to `lsp/` files — `lsp/` is for LSP servers only. Non-LSP mason packages belong in `tools/<concern>.lua`.
 - Do not hardcode tool lists in `plugins/lsp.lua` or `plugins/formatting.lua` — all mason packages are registered via `lsp/` or `tools/` and auto-collected at startup.
 - Do not use `dofile` to source trusted project config — it bypasses the `vim.secure` trust check entirely. Use `NVIM_LOCAL_CONFIG` in `.envrc` and let `autocmds.local_config()` handle sourcing via `vim.secure.read`.
+
+---
+
+## Additional Resources
+
+For detailed information on specific plugins and tools used in this configuration:
+
+- [LazyVim Documentation](https://www.lazyvim.org/) — base distribution
+- [lazy.nvim](https://github.com/folke/lazy.nvim) — plugin manager
+- [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) — LSP configurations
+- [mason.nvim](https://github.com/williamboman/mason.nvim) — package manager for LSP/formatters/linters
+- [Snacks.nvim](https://github.com/folke/snacks.nvim) — picker, explorer, notifications
+- [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) — completion engine
+- [LuaSnip](https://github.com/L3MON4D3/LuaSnip) — snippet engine
+- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) — syntax highlighting and code analysis
+- [Plugin Development Guide](https://plugins.omarchy.org/develop.html) — general plugin development patterns
+
+---
+
+**Last updated**: 2026-01-23  
+**Status**: Active  
+**Next review**: Check plugin versions and Neovim 0.12 compatibility quarterly
