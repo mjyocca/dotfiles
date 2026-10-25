@@ -35,3 +35,34 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 - `.stow-ignore.local` — machine-specific package ignore list
 - `packages/zsh/.zshrc.local` — machine-specific shell overrides
 - `packages/zsh/.global_env.sh` — legacy, replaced by `.zshrc.local`
+
+## Gitleaks — secret scanning
+
+**Automatic:** Pre-commit hook scans staged changes on every `git commit`. Install with `make install_git_hooks`.
+
+**Manual usage:**
+
+```bash
+# Scan staged changes (what the pre-commit hook does)
+gitleaks protect --staged
+
+# Scan entire repository history
+gitleaks detect --source . --log-level info
+
+# Scan specific commit
+gitleaks detect --source . --commit <sha>
+
+# Scan uncommitted changes (working directory)
+gitleaks protect --verbose
+
+# Scan a specific file or directory
+gitleaks dir <path>
+```
+
+**When to use manually:**
+- Before pushing to verify no secrets in recent commits
+- When reviewing a PR from another contributor
+- To audit repository history after adding new sensitive files
+- To scan a specific branch: `gitleaks detect --source . --log-opts <branch>..HEAD`
+
+**Configuration:** `.gitleaks.toml` in repo root (allowlists specific paths, custom patterns)
