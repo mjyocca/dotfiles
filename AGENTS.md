@@ -52,6 +52,7 @@ docs/
     omarchy.md     # Omarchy conventions and package management
     neovim.md      # Neovim conventions
     zsh.md         # Zsh conventions
+    bash.md        # Bash conventions (Omarchy default)
 .agents/skills/    # Reproducible workflows (load when task matches)
 Makefile           # Command entrypoint
 ```
@@ -62,6 +63,7 @@ Platform-specific and tool-specific instructions are in `docs/instructions/`:
 
 - `@docs/instructions/neovim.md` — LazyVim config structure, plugin management, keymaps
 - `@docs/instructions/zsh.md` — Shell config layout (zshenv/zshrc), prompt, plugin hooks
+- `@docs/instructions/bash.md` — Bash config layout, Omarchy bootstrap, cross-platform tool init
 - `@docs/instructions/omarchy.md` — Omarchy desktop conventions, Hyprland, theme management
 - `@docs/instructions/macos.md` — macOS-specific setup, Homebrew, system preferences
 
