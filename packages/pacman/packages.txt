@@ -14,7 +14,6 @@
 base-devel
 curl
 git
-github-cli
 stow
 unzip
 wget
@@ -38,12 +37,5 @@ kubectl
 qemu
 
 # --- CLI Utilities ---
-cliamp
-cmatrix
-figlet
-git-delta
-neofetch
 pv
-sl
 tree
-tree-sitter-cli

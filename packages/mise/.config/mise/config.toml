@@ -12,6 +12,9 @@ opencode = "latest"
 herdr = "latest"
 
 # CLI utilities
+gh = "latest"
+delta = "latest"
+tree-sitter = "latest"
 jq = "latest"
 yq = "latest"
 ripgrep = "latest"
