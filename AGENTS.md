@@ -128,6 +128,39 @@ Then load the matching instruction file:
 **Complex OS tooling:** For Omarchy desktop config (Hyprland, bar, themes), also
 invoke the `omarchy` skill (already available).
 
+### Package Management Architecture
+
+Three-layer architecture separates concerns across platforms:
+
+```
+Layer 1: System Packages (OS-specific, infrastructure)
+├── macOS: Homebrew (packages/homebrew/Brewfile)
+└── Omarchy: pacman/AUR (packages/pacman/packages.txt, packages-gui.txt)
+
+Layer 2: Dev Tools (cross-platform, version-managed)
+└── mise: packages/mise/.config/mise/config.toml
+
+Layer 3: Language Runtimes (cross-platform, version-managed)
+└── asdf: packages/tool-versions/.tool-versions
+```
+
+**Quick decision matrix:**
+| Category | Manager | Example |
+|----------|---------|---------|
+| System infrastructure | Homebrew/pacman | git, curl, gcc, cmake |
+| System services | Homebrew/pacman | docker, colima |
+| GUI applications | Homebrew/pacman | vscode, alacritty |
+| Dev CLI tools | mise | gitleaks, lazygit, jq |
+| TUI tools | mise | btop, yazi, superfile |
+| Shell utilities | mise | starship, direnv, zoxide |
+| Language runtimes | asdf | node, ruby, go, rust, zig |
+
+**For workflows and detailed commands**, load the OS-specific instructions:
+- `@docs/instructions/omarchy.md` — Omarchy package management
+- `@docs/instructions/macos.md` — macOS package management
+
+**For step-by-step procedures**, use the `package-management` skill.
+
 ### Security: Gitleaks Integration
 
 **Gitleaks** scans git commits for secrets (API keys, tokens, passwords) and prevents them from being committed.
@@ -161,86 +194,31 @@ gitleaks protect --commit <sha>
 
 ### Linux Package Management (Omarchy/Arch)
 
-**Package tracking** uses three curated files following community convention:
+System packages are tracked in curated files under `packages/pacman/`. For detailed workflows, commands, and troubleshooting, see `@docs/instructions/omarchy.md`.
 
-```
-packages/pacman/
-├── packages.txt       # System packages (infrastructure, CLI tools)
-├── packages-gui.txt   # GUI applications
-└── packages-aur.txt   # AUR packages
-```
+**Package files:**
+- `packages.txt` — System packages (infrastructure, CLI tools)
+- `packages-gui.txt` — GUI applications
+- `packages-aur.txt` — AUR packages
 
-**Format:** One package per line, comments with `#`:
-```
-# Core Infrastructure
-git
-stow
-curl
-```
-
-**Maintenance commands:**
+**Quick commands:**
 ```bash
-# Install from package lists
 sudo pacman -S --needed - < packages/pacman/packages.txt
-sudo pacman -S --needed - < packages/pacman/packages-gui.txt
-yay -S --needed - < packages/pacman/packages-aur.txt
-
-# Export currently installed packages (then curate!)
-pacman -Qqen > packages/pacman/packages.txt
-pacman -Qqem > packages/pacman/packages-aur.txt
-
-# Find untracked packages
 ./scripts/omarchy/find-untracked-packages.sh
 ```
 
-**Package categories:**
-
-| Category | File | Examples |
-|----------|------|----------|
-| System packages | `packages.txt` | git, curl, stow, docker, cmake |
-| GUI applications | `packages-gui.txt` | 1password, alacritty, spotify |
-| AUR packages | `packages-aur.txt` | brave-bin, heroic-games-launcher |
-| Dev tools | `packages/mise/.config/mise/config.toml` | gitleaks, lazygit, jq, ripgrep |
-
-**What NOT to track:**
-- Hardware-specific drivers (amd-ucode, vulkan-radeon, etc.)
-- Omarchy defaults (already in `/usr/share/omarchy/install/omarchy-base.packages`)
-- Packages managed by mise (see `packages/mise/.config/mise/config.toml`)
-
-**Note:** Omarchy uses `omarchy pkg add <package>` for interactive installation, but doesn't provide user-level package tracking. These files serve as your declarative package manifest.
-
 ### Dev Tools (mise)
 
-Dev tools are managed via [mise](https://mise.jdx.dev/) for cross-platform consistency. Configuration lives at `packages/mise/.config/mise/config.toml` and is stowed to `~/.config/mise/config.toml`.
+Dev tools are managed via [mise](https://mise.jdx.dev/) for cross-platform consistency. For detailed workflows and commands, see `@docs/instructions/omarchy.md` or `@docs/instructions/macos.md`.
 
-**What belongs in mise:**
-- CLI tools used across projects (gitleaks, lazygit, jq, ripgrep, etc.)
-- TUI tools (btop, yazi, superfile, etc.)
-- Shell utilities (starship, direnv, zoxide, etc.)
+**Config:** `packages/mise/.config/mise/config.toml` → `~/.config/mise/config.toml`
 
-**What stays in Homebrew/pacman:**
-- System infrastructure (git, curl, stow, build tools)
-- System services (docker, systemd units)
-- GUI applications (editors, browsers, etc.)
-
-**Commands:**
+**Quick commands:**
 ```bash
-mise install          # Install all tools from config.toml
+mise install          # Install all tools
 mise update           # Update all tools
-mise add <tool>       # Add a new tool
-mise list             # List installed tools
+mise use -g <tool>@latest  # Add new tool
 ```
-
-**Decision matrix for new packages:**
-
-| Category | Manager | Example |
-|----------|---------|---------|
-| System infrastructure | Homebrew/pacman | git, curl, gcc, cmake |
-| System services | Homebrew/pacman | docker, colima |
-| GUI applications | Homebrew/pacman | vscode, alacritty |
-| Dev CLI tools | mise | gitleaks, lazygit, jq |
-| TUI tools | mise | btop, yazi, superfile |
-| Shell utilities | mise | starship, direnv, zoxide |
 
 ### `dotf` — daily-use toolbox
 

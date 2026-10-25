@@ -107,16 +107,59 @@ System packages are tracked in three curated files:
 
 Dev tools are managed separately via mise in `packages/mise/.config/mise/config.toml`.
 
+### Common Commands
+
+**System packages:**
+```bash
+# Install system packages
+sudo pacman -S --needed - < packages/pacman/packages.txt
+
+# Install GUI applications
+sudo pacman -S --needed - < packages/pacman/packages-gui.txt
+
+# Install AUR packages
+yay -S --needed - < packages/pacman/packages-aur.txt
+
+# Find untracked packages
+./scripts/omarchy/find-untracked-packages.sh
+
+# Export installed packages (then curate!)
+pacman -Qqen > packages/pacman/packages.txt
+pacman -Qqem > packages/pacman/packages-aur.txt
+```
+
 **Workflow:**
 1. Install with `omarchy pkg add <package>` or `pacman -S <package>`
 2. Run `./scripts/omarchy/find-untracked-packages.sh` to see what's not tracked
 3. Add to the appropriate file (packages.txt for system, packages-gui.txt for GUI)
 4. Hardware-specific packages (drivers, firmware) don't need tracking
 
-**What NOT to track:**
-- Hardware-specific drivers (amd-ucode, vulkan-radeon, rocm-smi-lib, etc.)
-- Omarchy defaults (already in `/usr/share/omarchy/install/omarchy-base.packages`)
-- Packages managed by mise (see mise config.toml)
+### What NOT to Track
+
+**❌ Do NOT add to packages.txt or Brewfile:**
+
+1. **Hardware-specific drivers**
+   - amd-ucode, vulkan-radeon, rocm-smi-lib, xpadneo-dkms
+   - These are machine-specific and shouldn't be in shared config
+
+2. **Omarchy defaults**
+   - Packages already in `/usr/share/omarchy/install/omarchy-base.packages`
+   - The find-untracked-packages.sh script filters these out
+
+3. **Packages managed by mise**
+   - Dev tools like gitleaks, lazygit, jq, ripgrep, etc.
+   - These belong in `packages/mise/.config/mise/config.toml`
+
+4. **Language runtimes in system packages**
+   - Don't install node, ruby, go via pacman/brew
+   - Use asdf instead for version management
+
+**✅ DO track:**
+1. **System infrastructure** you depend on (git, curl, stow, build tools)
+2. **System services** you use (docker, colima)
+3. **GUI applications** you launch from app menu
+4. **Dev tools** in mise (cross-platform CLI/TUI tools)
+5. **Language runtimes** in asdf (version-managed)
 
 ## Mise Integration
 
@@ -129,18 +172,126 @@ Dev tools are managed via mise (cross-platform), aligned with how Omarchy manage
 ~/.config/omarchy/hooks/post-update.d/99-mise-update
 ```
 
-**Manual commands:**
+### Common Commands
+
 ```bash
-mise install          # Install all tools
-mise update           # Update all tools
-mise list             # List installed tools
-MISE_MINIMUM_RELEASE_AGE=0 mise up --yes  # Force update now
+# Install all dev tools
+mise install
+
+# Update all dev tools
+mise update
+
+# Add new tool
+mise use -g <tool>@latest
+
+# List installed tools
+mise list
+
+# Check tool versions
+mise current
+
+# Force update now
+MISE_MINIMUM_RELEASE_AGE=0 mise up --yes
 ```
 
-**Add a new tool:**
+## Asdf Integration
+
+Language runtimes are managed via asdf (cross-platform).
+
+**Config location:** `packages/tool-versions/.tool-versions` (stowed to `~/.tool-versions`)
+
+### Common Commands
+
 ```bash
-mise use -g <tool>@latest
-# Then commit the updated config.toml
+# Install all language runtimes
+asdf install
+
+# Add new runtime
+asdf install <lang> <version>
+
+# Set global version
+asdf global <lang> <version>
+
+# List installed versions
+asdf list <lang>
+
+# Check current version
+asdf current <lang>
+```
+
+## Troubleshooting
+
+### Package already in mise but also in packages.txt
+
+**Problem:** You see gitleaks in both packages.txt and mise config.
+
+**Solution:**
+```bash
+# Remove from packages.txt
+# Edit packages/pacman/packages.txt and remove the line
+
+# Keep in mise config.toml
+# It should only be in packages/mise/.config/mise/config.toml
+
+# Commit the fix
+git add packages/pacman/packages.txt
+git commit -m "remove gitleaks from system packages (managed by mise)"
+```
+
+### GUI app vs system package?
+
+**Rule of thumb:**
+- If it has a GUI and you launch it from the app menu → `packages-gui.txt`
+- If it's a CLI tool or system service → `packages.txt`
+
+**Examples:**
+- ✅ alacritty (terminal emulator with GUI) → packages-gui.txt
+- ✅ git (CLI tool) → packages.txt
+- ✅ docker (system service) → packages.txt
+- ✅ vscode (GUI editor) → packages-gui.txt
+
+### Language runtime in system packages?
+
+**Problem:** You installed node via pacman and it's in packages.txt.
+
+**Solution:**
+```bash
+# 1. Remove from packages.txt
+# Edit packages/pacman/packages.txt and remove 'nodejs'
+
+# 2. Install via asdf instead
+asdf install nodejs 20.10.0
+asdf global nodejs 20.10.0
+
+# 3. This updates packages/tool-versions/.tool-versions
+
+# 4. Commit
+git add packages/pacman/packages.txt packages/tool-versions/.tool-versions
+git commit -m "migrate nodejs from system package to asdf"
+```
+
+### Mise tool not installing
+
+**Problem:** `mise install` fails for a tool.
+
+**Solutions:**
+1. Check if the tool name is correct in the mise registry
+2. Verify your internet connection
+3. Try updating mise: `mise self-update`
+4. Check mise logs for specific error messages
+
+### Asdf plugin not found
+
+**Problem:** `asdf install <lang>` says plugin not found.
+
+**Solution:**
+```bash
+# Add the plugin first
+asdf plugin add <lang>
+# e.g., asdf plugin add nodejs
+
+# Then install
+asdf install <lang> <version>
 ```
 
 ## Warnings
