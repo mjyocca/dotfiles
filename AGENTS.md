@@ -20,6 +20,8 @@ When you encounter a file reference (e.g., @docs/instructions/macos.md), use you
 | `make apply_settings` | Apply OS-level defaults |
 | `make install_git_hooks` | Install gitleaks pre-commit hook |
 
+For the `dotf` toolbox (colima profile switching, project scaffolding), see `@docs/reference/dotf.md`.
+
 ## Project Structure
 
 ```
@@ -53,6 +55,17 @@ docs/
 .agents/skills/    # Reproducible workflows (load when task matches)
 Makefile           # Command entrypoint
 ```
+
+## Agent Instructions
+
+Platform-specific and tool-specific instructions are in `docs/instructions/`:
+
+- `@docs/instructions/neovim.md` — LazyVim config structure, plugin management, keymaps
+- `@docs/instructions/zsh.md` — Shell config layout (zshenv/zshrc), prompt, plugin hooks
+- `@docs/instructions/omarchy.md` — Omarchy desktop conventions, Hyprland, theme management
+- `@docs/instructions/macos.md` — macOS-specific setup, Homebrew, system preferences
+
+Load these when working on the respective components.
 
 ## OS Detection & Profiles
 
@@ -108,6 +121,8 @@ Three-layer architecture separates concerns:
 **NEVER hardcode usernames or absolute paths.** Always use `$HOME` or `~`.
 
 **Gitleaks** pre-commit hook scans for secrets on every commit. Install with `make install_git_hooks`.
+
+For detailed security practices (VM mounts, SSH includes, git email), see `@docs/reference/security.md`.
 
 ## Conventions
 
