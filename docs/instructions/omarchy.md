@@ -90,7 +90,7 @@ sudo pacman -S --needed - < packages/pacman/packages.txt
 sudo pacman -S --needed - < packages/pacman/packages-gui.txt
 
 # Find packages installed but not tracked
-./scripts/find-untracked-packages.sh
+./scripts/omarchy/find-untracked-packages.sh
 
 # Add a new package
 omarchy pkg add <package>
@@ -109,7 +109,7 @@ Dev tools are managed separately via mise in `packages/mise/.config/mise/config.
 
 **Workflow:**
 1. Install with `omarchy pkg add <package>` or `pacman -S <package>`
-2. Run `./scripts/find-untracked-packages.sh` to see what's not tracked
+2. Run `./scripts/omarchy/find-untracked-packages.sh` to see what's not tracked
 3. Add to the appropriate file (packages.txt for system, packages-gui.txt for GUI)
 4. Hardware-specific packages (drivers, firmware) don't need tracking
 

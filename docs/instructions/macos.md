@@ -53,29 +53,31 @@ colima stop               # Stop Docker daemon
 colima status             # Check status
 ```
 
-### Dev Tools (mise)
+## Package Management
 
-Dev tools are managed via [mise](https://mise.jdx.dev/) for cross-platform consistency. The configuration lives at `packages/mise/.config/mise/config.toml` and is stowed to `~/.config/mise/config.toml`.
+Homebrew is for **system packages only** (infrastructure, build deps, GUI apps).
 
-**What belongs in mise:**
-- CLI tools used across projects (gitleaks, lazygit, jq, ripgrep, etc.)
-- TUI tools (btop, yazi, superfile, etc.)
-- Shell utilities (starship, direnv, zoxide, etc.)
+Dev tools are managed via mise (cross-platform), not Homebrew.
 
-**What stays in Homebrew:**
-- System infrastructure (git, curl, stow, build tools)
-- System services (docker, colima)
-- GUI applications (casks)
-
-**Commands:**
+**System packages (Homebrew):**
 ```bash
-mise install          # Install all tools from config.toml
-mise update           # Update all tools
-mise add <tool>       # Add a new tool
-mise list             # List installed tools
+brew bundle --file=packages/homebrew/Brewfile
 ```
 
-See [AGENTS.md](../../AGENTS.md#dev-tools-mise) for the full decision matrix.
+**Dev tools (mise):**
+```bash
+mise install
+mise update
+```
+
+**What goes where:**
+- System infrastructure (git, curl, gcc) → Homebrew
+- GUI applications (vscode, alacritty) → Homebrew cask
+- Dev CLI tools (gitleaks, lazygit, jq) → mise
+
+**Future:** macOS-specific scripts will be added to `scripts/macos/` as needed.
+
+**Agent guidance:** Load the `package-management` skill for comprehensive workflows and decision matrices.
 
 ## System Configuration
 

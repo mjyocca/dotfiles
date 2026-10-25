@@ -190,7 +190,7 @@ pacman -Qqen > packages/pacman/packages.txt
 pacman -Qqem > packages/pacman/packages-aur.txt
 
 # Find untracked packages
-./scripts/find-untracked-packages.sh
+./scripts/omarchy/find-untracked-packages.sh
 ```
 
 **Package categories:**

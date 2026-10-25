@@ -5,7 +5,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PACKAGES_TXT="$REPO_ROOT/packages/pacman/packages.txt"
 PACKAGES_GUI_TXT="$REPO_ROOT/packages/pacman/packages-gui.txt"
 OMARCHY_BASE="/usr/share/omarchy/install/omarchy-base.packages"
