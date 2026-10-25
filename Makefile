@@ -158,9 +158,14 @@ apply_defaults_osx:
 	@echo "Applying OSX Application default settings ..."
 	apply-user-defaults ./scripts/macos/defaults.apps.yml
 
+# Target: install_mise
+# Purpose: Install mise if not already present (idempotent)
+install_mise:
+	@bash ./scripts/install-mise.sh
+
 # Target: bootstrap_osx
 # Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
-bootstrap_osx: pre_install_osx install_osx_tools zellij-plugins
+bootstrap_osx: pre_install_osx install_osx_tools install_mise mise_install zellij-plugins
 
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
@@ -180,7 +185,7 @@ brew_bundle:
 # 
 # TODO: Add automation to install necessary tools
 
-bootstrap_linux: update_linux_packages install_linux_tools install_git_hooks zellij-plugins
+bootstrap_linux: update_linux_packages install_linux_tools install_mise mise_install install_git_hooks zellij-plugins
 
 update_linux_packages:
 	@echo "Updating Linux-specific packages ..."
