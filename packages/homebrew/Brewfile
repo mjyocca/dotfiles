@@ -3,8 +3,12 @@
 tap "homebrew/bundle"
 
 ##############
-# System Infrastructure (NOT dev tools - those are managed by mise)
+# Version Managers
 brew 'asdf'
+brew 'mise'
+
+##############
+# System Infrastructure (NOT dev tools - those are managed by mise)
 brew 'autoconf'
 brew 'cmake'
 brew 'curl'
@@ -15,7 +19,6 @@ brew 'git'
 brew 'libyaml'
 brew 'make'
 brew 'mas'
-brew 'mise'
 brew 'openssl'
 brew 'readline'
 brew 'sqlite'

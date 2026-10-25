@@ -10,6 +10,10 @@
 # Duplicates with omarchy-base.packages are OK (e.g., git, docker)
 # — pacman --needed skips already-installed packages.
 
+# --- Version Managers ---
+asdf
+mise
+
 # --- Core Infrastructure ---
 base-devel
 curl
