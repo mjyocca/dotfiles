@@ -8,6 +8,9 @@
 # Per-machine zsh overrides — not committed
 packages/zsh/.zshrc.local
 
+# Per-machine bash overrides — not committed
+packages/bash/.bashrc.local
+
 # Per-machine stow ignore list — not committed
 .stow-ignore.local
 

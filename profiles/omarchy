@@ -9,6 +9,7 @@
 # Excludes: homebrew, colima (macOS-only tools)
 
 asdf
+bash
 bat
 btop
 ghostty
@@ -29,4 +30,3 @@ tool-versions
 yazi
 zed
 zellij
-zsh
