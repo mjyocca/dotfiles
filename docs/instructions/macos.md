@@ -1,6 +1,6 @@
 ---
 title: "macOS Instructions"
-description: "Index of macOS-specific conventions and configuration for dotfiles management"
+description: "macOS-specific conventions and configuration for dotfiles management"
 sources:
   - name: "Apple Developer Documentation"
     url: "https://developer.apple.com/documentation/"
@@ -24,29 +24,50 @@ status: "active"
 
 # macOS Instructions
 
-This file provides an index of macOS-specific conventions and points to authoritative sources. Keep content lean — link out, don't duplicate.
+This file captures macOS-specific conventions, override paths, package management, and troubleshooting. Keep content lean — link out, don't duplicate.
 
 ## Key Concepts
 
-- **Package management**: Homebrew for system packages, mise for dev tools
+- **Package management**: Homebrew for system packages, mise for dev tools, asdf for language runtimes
 - **Shell**: Zsh is default shell on macOS
 - **Dotfiles management**: GNU Stow for symlink management
-- **System defaults**: Use `defaults write` for macOS system preferences
+- **System defaults**: Managed via `defaults write` in `scripts/macos/`
+- **Docker**: Colima for container runtime (macOS-only)
 
-## Package Management
+## System Configuration
 
-### Homebrew
+### Override Paths
+- **User config**: `~/.config/` (XDG standard)
+- **Applications**: `/Applications/`
+- **Homebrew prefix**: `/opt/homebrew/` (Apple Silicon) or `/usr/local/` (Intel)
+- **LaunchAgents**: `~/Library/LaunchAgents/`
+
+### macOS Defaults
+System preferences are managed via `apply-user-defaults` using YAML files:
+- `scripts/macos/defaults.yml` — System defaults
+- `scripts/macos/defaults.apps.yml` — Application-specific defaults
+
+**Apply defaults:**
 ```bash
-brew install <package>     # Install package
-brew install --cask <app>  # Install GUI app
-brew update && brew upgrade  # Update all packages
+make apply_settings
+# or directly:
+apply-user-defaults ./scripts/macos/defaults.yml
+apply-user-defaults ./scripts/macos/defaults.apps.yml
 ```
 
-**Brewfile**: `packages/homebrew/Brewfile`
-- List of packages and casks to install
-- Use `brew bundle` to install from Brewfile
+### Common Tasks
 
-### Colima (Docker)
+**Install dotfiles:**
+```bash
+make dotfiles  # Runs stow to create symlinks
+```
+
+**Install all packages:**
+```bash
+brew bundle --file=packages/homebrew/Brewfile
+```
+
+**Colima (Docker):**
 ```bash
 colima start              # Start Docker daemon
 colima stop               # Stop Docker daemon
@@ -55,13 +76,14 @@ colima status             # Check status
 
 ## Package Management
 
+### System Packages (Homebrew)
+
 Homebrew is for **system packages only** (infrastructure, build deps, GUI apps).
 
-Dev tools are managed via mise (cross-platform), not Homebrew.
+**Config location:** `packages/homebrew/Brewfile` (stowed to `~/Brewfile`)
 
-### Common Commands
+#### Commands
 
-**System packages (Homebrew):**
 ```bash
 # Install from Brewfile
 brew bundle --file=packages/homebrew/Brewfile
@@ -79,52 +101,7 @@ brew install <package>
 brew install --cask <app>
 ```
 
-**Dev tools (mise):**
-```bash
-# Install all dev tools
-mise install
-
-# Update all dev tools
-mise update
-
-# Add new tool
-mise use -g <tool>@latest
-
-# List installed tools
-mise list
-
-# Check tool versions
-mise current
-```
-
-**Language runtimes (asdf):**
-```bash
-# Install all language runtimes
-asdf install
-
-# Add new runtime
-asdf install <lang> <version>
-
-# Set global version
-asdf global <lang> <version>
-
-# List installed versions
-asdf list <lang>
-
-# Check current version
-asdf current <lang>
-```
-
-### What Goes Where
-
-- **System infrastructure** (git, curl, gcc) → Homebrew
-- **GUI applications** (vscode, alacritty) → Homebrew cask
-- **Dev CLI tools** (gitleaks, lazygit, jq) → mise
-- **Language runtimes** (node, ruby, go) → asdf
-
-**Future:** macOS-specific scripts will be added to `scripts/macos/` as needed.
-
-### What NOT to Track
+#### What NOT to Track
 
 **❌ Do NOT add to Brewfile:**
 
@@ -143,9 +120,62 @@ asdf current <lang>
 4. **Dev tools** in mise (cross-platform CLI/TUI tools)
 5. **Language runtimes** in asdf (version-managed)
 
-### Troubleshooting
+### Dev Tools (mise)
 
-#### Package already in mise but also in Brewfile
+Dev tools are managed via mise (cross-platform).
+
+**Config location:** `packages/mise/.config/mise/config.toml` (stowed to `~/.config/mise/config.toml`)
+
+#### Commands
+
+```bash
+# Install all dev tools
+mise install
+
+# Update all dev tools
+mise update
+
+# Add new tool
+mise use -g <tool>@latest
+
+# List installed tools
+mise list
+
+# Check tool versions
+mise current
+
+# Force update now
+MISE_MINIMUM_RELEASE_AGE=0 mise up --yes
+```
+
+### Language Runtimes (asdf)
+
+Language runtimes are managed via asdf (cross-platform).
+
+**Config location:** `packages/tool-versions/.tool-versions` (stowed to `~/.tool-versions`)
+
+#### Commands
+
+```bash
+# Install all language runtimes
+asdf install
+
+# Add new runtime
+asdf install <lang> <version>
+
+# Set global version
+asdf global <lang> <version>
+
+# List installed versions
+asdf list <lang>
+
+# Check current version
+asdf current <lang>
+```
+
+## Troubleshooting
+
+### Package already in mise but also in Brewfile
 
 **Problem:** You see gitleaks in both Brewfile and mise config.
 
@@ -162,7 +192,7 @@ git add packages/homebrew/Brewfile
 git commit -m "remove gitleaks from Homebrew (managed by mise)"
 ```
 
-#### GUI app vs system package?
+### GUI app vs system package?
 
 **Rule of thumb:**
 - If it has a GUI and you launch it from `/Applications/` → Homebrew cask
@@ -174,7 +204,7 @@ git commit -m "remove gitleaks from Homebrew (managed by mise)"
 - ✅ docker (system service) → formula
 - ✅ vscode (GUI editor) → cask
 
-#### Language runtime in Homebrew?
+### Language runtime in Homebrew?
 
 **Problem:** You installed node via Homebrew and it's in Brewfile.
 
@@ -197,7 +227,7 @@ git add packages/homebrew/Brewfile packages/tool-versions/.tool-versions
 git commit -m "migrate nodejs from Homebrew to asdf"
 ```
 
-#### Mise tool not installing
+### Mise tool not installing
 
 **Problem:** `mise install` fails for a tool.
 
@@ -207,7 +237,7 @@ git commit -m "migrate nodejs from Homebrew to asdf"
 3. Try updating mise: `mise self-update`
 4. Check mise logs for specific error messages
 
-#### Asdf plugin not found
+### Asdf plugin not found
 
 **Problem:** `asdf install <lang>` says plugin not found.
 
@@ -219,33 +249,6 @@ asdf plugin add <lang>
 
 # Then install
 asdf install <lang> <version>
-```
-
-## System Configuration
-
-### Defaults
-System preferences are managed via `defaults write` commands in `packages/macos/` scripts.
-
-### Common Paths
-- **User config**: `~/.config/` (XDG standard)
-- **Applications**: `/Applications/`
-- **Homebrew prefix**: `/opt/homebrew/` (Apple Silicon) or `/usr/local/` (Intel)
-
-## Common Tasks
-
-**Install dotfiles:**
-```bash
-make install  # Runs stow to create symlinks
-```
-
-**Update system defaults:**
-```bash
-make defaults  # Apply macOS system preferences
-```
-
-**Install all packages:**
-```bash
-brew bundle --file=packages/homebrew/Brewfile
 ```
 
 ## Warnings

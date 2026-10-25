@@ -1,6 +1,6 @@
 ---
 title: "Omarchy Instructions"
-description: "Index of Omarchy-specific conventions and configuration for dotfiles management"
+description: "Omarchy-specific conventions and configuration for dotfiles management"
 sources:
   - name: "Omarchy Manual"
     url: "https://omarchy.org/manual/"
@@ -34,7 +34,7 @@ status: "active"
 
 # Omarchy Instructions
 
-This file provides an index of Omarchy-specific conventions and points to authoritative sources. Keep content lean — link out, don't duplicate.
+This file captures Omarchy-specific conventions, override paths, package management, and troubleshooting. Keep content lean — link out, don't duplicate.
 
 ## Key Concepts
 
@@ -42,13 +42,14 @@ This file provides an index of Omarchy-specific conventions and points to author
 - **Dotfiles management**: Stow is endorsed by Omarchy for backup/management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
-- **Package tracking**: Use `packages/pacman/packages.txt` and `packages-aur.txt` (see [AGENTS.md](../../AGENTS.md#linux-package-management-omarchyarch))
-- **Security**: Gitleaks pre-commit hook scans for secrets (see [AGENTS.md](../../AGENTS.md#security-gitleaks-integration))
-- **Dev tools**: Managed via mise (cross-platform), see [AGENTS.md](../../AGENTS.md#dev-tools-mise)
+- **Package tracking**: Use `packages/pacman/packages.txt` and `packages-aur.txt`
+- **Security**: Gitleaks pre-commit hook scans for secrets
 
-## User Override Paths
+## System Configuration
 
-### Hyprland (Window Manager)
+### Override Paths
+
+#### Hyprland (Window Manager)
 ```
 ~/.config/hypr/
 ├── hyprland.conf    # Main config
@@ -57,7 +58,7 @@ This file provides an index of Omarchy-specific conventions and points to author
 └── autostart.conf   # Startup applications
 ```
 
-### Omarchy Shell
+#### Omarchy Shell
 ```
 ~/.config/omarchy/
 ├── shell.json       # Shell configuration
@@ -66,13 +67,13 @@ This file provides an index of Omarchy-specific conventions and points to author
 └── plugins/         # Custom plugins
 ```
 
-### Other Configs
+#### Other Configs
 - **Terminal**: `~/.config/ghostty/config`
 - **Prompt**: `~/.config/starship.toml`
 - **Neovim**: `~/.config/nvim/`
 - **Git**: `~/.config/git/config`
 
-## Common Tasks
+### Common Tasks
 
 **Update dotfiles after Omarchy update:**
 ```bash
@@ -83,21 +84,9 @@ make dotfiles  # Re-establish symlinks
 **Plugin development:**
 See [Plugin Development Guide](https://plugins.omarchy.org/develop.html)
 
-**Manage system packages:**
-```bash
-# Install system packages
-sudo pacman -S --needed - < packages/pacman/packages.txt
-sudo pacman -S --needed - < packages/pacman/packages-gui.txt
-
-# Find packages installed but not tracked
-./scripts/omarchy/find-untracked-packages.sh
-
-# Add a new package
-omarchy pkg add <package>
-# Then add to packages/pacman/packages.txt or packages-gui.txt
-```
-
 ## Package Management
+
+### System Packages (pacman/AUR)
 
 System packages are tracked in three curated files:
 
@@ -105,11 +94,8 @@ System packages are tracked in three curated files:
 - **`packages/pacman/packages-gui.txt`** — GUI applications
 - **`packages/pacman/packages-aur.txt`** — AUR packages
 
-Dev tools are managed separately via mise in `packages/mise/.config/mise/config.toml`.
+#### Commands
 
-### Common Commands
-
-**System packages:**
 ```bash
 # Install system packages
 sudo pacman -S --needed - < packages/pacman/packages.txt
@@ -134,9 +120,9 @@ pacman -Qqem > packages/pacman/packages-aur.txt
 3. Add to the appropriate file (packages.txt for system, packages-gui.txt for GUI)
 4. Hardware-specific packages (drivers, firmware) don't need tracking
 
-### What NOT to Track
+#### What NOT to Track
 
-**❌ Do NOT add to packages.txt or Brewfile:**
+**❌ Do NOT add to packages.txt:**
 
 1. **Hardware-specific drivers**
    - amd-ucode, vulkan-radeon, rocm-smi-lib, xpadneo-dkms
@@ -151,17 +137,17 @@ pacman -Qqem > packages/pacman/packages-aur.txt
    - These belong in `packages/mise/.config/mise/config.toml`
 
 4. **Language runtimes in system packages**
-   - Don't install node, ruby, go via pacman/brew
+   - Don't install node, ruby, go via pacman
    - Use asdf instead for version management
 
 **✅ DO track:**
 1. **System infrastructure** you depend on (git, curl, stow, build tools)
-2. **System services** you use (docker, colima)
+2. **System services** you use (docker)
 3. **GUI applications** you launch from app menu
 4. **Dev tools** in mise (cross-platform CLI/TUI tools)
 5. **Language runtimes** in asdf (version-managed)
 
-## Mise Integration
+### Dev Tools (mise)
 
 Dev tools are managed via mise (cross-platform), aligned with how Omarchy manages AI tools.
 
@@ -172,7 +158,7 @@ Dev tools are managed via mise (cross-platform), aligned with how Omarchy manage
 ~/.config/omarchy/hooks/post-update.d/99-mise-update
 ```
 
-### Common Commands
+#### Commands
 
 ```bash
 # Install all dev tools
@@ -194,13 +180,13 @@ mise current
 MISE_MINIMUM_RELEASE_AGE=0 mise up --yes
 ```
 
-## Asdf Integration
+### Language Runtimes (asdf)
 
 Language runtimes are managed via asdf (cross-platform).
 
 **Config location:** `packages/tool-versions/.tool-versions` (stowed to `~/.tool-versions`)
 
-### Common Commands
+#### Commands
 
 ```bash
 # Install all language runtimes

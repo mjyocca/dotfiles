@@ -151,12 +151,12 @@ endif
 # ======================
 
 # Target: apply_defaults_osx
-# Purpose: Leverages apply-user-defaults binary to apply MacOS/Application settings declared at ./osx/defaults.yml & ./osx/defaults.apps.yml
+# Purpose: Leverages apply-user-defaults binary to apply MacOS/Application settings declared at ./scripts/macos/defaults.yml & ./scripts/macos/defaults.apps.yml
 apply_defaults_osx:
 	@echo "Applying OSX default settings ..."
-	apply-user-defaults ./osx/defaults.yml
+	apply-user-defaults ./scripts/macos/defaults.yml
 	@echo "Applying OSX Application default settings ..."
-	apply-user-defaults ./osx/defaults.apps.yml
+	apply-user-defaults ./scripts/macos/defaults.apps.yml
 
 # Target: bootstrap_osx
 # Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
@@ -164,8 +164,8 @@ bootstrap_osx: pre_install_osx install_osx_tools zellij-plugins
 
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
-	@bash ./osx/core-utils.sh
-	@bash ./osx/config.sh
+	@bash ./scripts/macos/core-utils.sh
+	@bash ./scripts/macos/config.sh
 
 install_osx_tools:
 	@echo "Installing macOS-specific tools..."

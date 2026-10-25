@@ -10,7 +10,7 @@
 
 **macOS**
 ```bash
-curl -sO https://raw.githubusercontent.com/mjyocca/dotfiles/main/osx/installer.sh
+curl -sO https://raw.githubusercontent.com/mjyocca/dotfiles/main/scripts/macos/installer.sh
 bash installer.sh
 ```
 
