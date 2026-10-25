@@ -83,6 +83,41 @@ make dotfiles  # Re-establish symlinks
 **Plugin development:**
 See [Plugin Development Guide](https://plugins.omarchy.org/develop.html)
 
+**Manage system packages:**
+```bash
+# Install system packages
+sudo pacman -S --needed - < packages/pacman/packages.txt
+sudo pacman -S --needed - < packages/pacman/packages-gui.txt
+
+# Find packages installed but not tracked
+./scripts/find-untracked-packages.sh
+
+# Add a new package
+omarchy pkg add <package>
+# Then add to packages/pacman/packages.txt or packages-gui.txt
+```
+
+## Package Management
+
+System packages are tracked in three curated files:
+
+- **`packages/pacman/packages.txt`** — System packages (infrastructure, CLI tools)
+- **`packages/pacman/packages-gui.txt`** — GUI applications
+- **`packages/pacman/packages-aur.txt`** — AUR packages
+
+Dev tools are managed separately via mise in `packages/mise/.config/mise/config.toml`.
+
+**Workflow:**
+1. Install with `omarchy pkg add <package>` or `pacman -S <package>`
+2. Run `./scripts/find-untracked-packages.sh` to see what's not tracked
+3. Add to the appropriate file (packages.txt for system, packages-gui.txt for GUI)
+4. Hardware-specific packages (drivers, firmware) don't need tracking
+
+**What NOT to track:**
+- Hardware-specific drivers (amd-ucode, vulkan-radeon, rocm-smi-lib, etc.)
+- Omarchy defaults (already in `/usr/share/omarchy/install/omarchy-base.packages`)
+- Packages managed by mise (see mise config.toml)
+
 ## Mise Integration
 
 Dev tools are managed via mise (cross-platform), aligned with how Omarchy manages AI tools.

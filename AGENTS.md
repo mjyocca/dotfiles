@@ -161,32 +161,51 @@ gitleaks protect --commit <sha>
 
 ### Linux Package Management (Omarchy/Arch)
 
-**Package tracking** uses simple text files following community convention:
+**Package tracking** uses three curated files following community convention:
 
 ```
 packages/pacman/
-├── packages.txt       # Official Arch packages (210 packages on this system)
-└── packages-aur.txt   # AUR packages (4 packages on this system)
+├── packages.txt       # System packages (infrastructure, CLI tools)
+├── packages-gui.txt   # GUI applications
+└── packages-aur.txt   # AUR packages
 ```
 
 **Format:** One package per line, comments with `#`:
 ```
-# Development tools
+# Core Infrastructure
 git
-neovim
-gitleaks
+stow
+curl
 ```
 
 **Maintenance commands:**
 ```bash
-# Export currently installed packages
-pacman -Qqen > packages/pacman/packages.txt      # Official packages
-pacman -Qqem > packages/pacman/packages-aur.txt  # AUR packages
-
 # Install from package lists
 sudo pacman -S --needed - < packages/pacman/packages.txt
+sudo pacman -S --needed - < packages/pacman/packages-gui.txt
 yay -S --needed - < packages/pacman/packages-aur.txt
+
+# Export currently installed packages (then curate!)
+pacman -Qqen > packages/pacman/packages.txt
+pacman -Qqem > packages/pacman/packages-aur.txt
+
+# Find untracked packages
+./scripts/find-untracked-packages.sh
 ```
+
+**Package categories:**
+
+| Category | File | Examples |
+|----------|------|----------|
+| System packages | `packages.txt` | git, curl, stow, docker, cmake |
+| GUI applications | `packages-gui.txt` | 1password, alacritty, spotify |
+| AUR packages | `packages-aur.txt` | brave-bin, heroic-games-launcher |
+| Dev tools | `packages/mise/.config/mise/config.toml` | gitleaks, lazygit, jq, ripgrep |
+
+**What NOT to track:**
+- Hardware-specific drivers (amd-ucode, vulkan-radeon, etc.)
+- Omarchy defaults (already in `/usr/share/omarchy/install/omarchy-base.packages`)
+- Packages managed by mise (see `packages/mise/.config/mise/config.toml`)
 
 **Note:** Omarchy uses `omarchy pkg add <package>` for interactive installation, but doesn't provide user-level package tracking. These files serve as your declarative package manifest.
 
