@@ -28,7 +28,7 @@ done
 command -v pacman >/dev/null || { echo 'pacman is required' >&2; exit 1; }
 
 tracked=""
-files="$(package_list_files "$repo_root/packages/pacman" "$machine" system gui aur)"
+files="$(package_list_files "$repo_root/manifests/pacman" "$machine" system gui aur)"
 while IFS= read -r file; do
   parsed="$(read_package_list "$file")"
   tracked+=$'\n'"$parsed"

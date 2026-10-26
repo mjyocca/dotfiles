@@ -8,7 +8,7 @@ This file captures Omarchy-specific conventions, override paths, package managem
 - **Dotfiles management**: Stow is endorsed by Omarchy for backup/management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
-- **Package tracking**: Track direct dependencies in all three `packages/pacman/packages*.txt` lists, including packages already installed by the OS
+- **Package tracking**: Track direct dependencies in all three `manifests/pacman/packages*.txt` lists, including packages already installed by the OS
 - **Security**: Gitleaks pre-commit hook scans for secrets
 
 ## System Configuration
@@ -54,11 +54,11 @@ See [Plugin Development Guide](https://plugins.omarchy.org/develop.html)
 
 ### System Packages (pacman/AUR)
 
-System packages are tracked in three curated files:
+System packages are tracked in three repository-only provisioning manifests (not stowed):
 
-- **`packages/pacman/packages.txt`** — Repository system/CLI packages
-- **`packages/pacman/packages-gui.txt`** — Repository GUI applications
-- **`packages/pacman/packages-aur.txt`** — All AUR packages, including GUI apps
+- **`manifests/pacman/packages.txt`** — Repository system/CLI packages
+- **`manifests/pacman/packages-gui.txt`** — Repository GUI applications
+- **`manifests/pacman/packages-aur.txt`** — All AUR packages, including GUI apps
 
 "Repository" includes the configured Omarchy repository, not only Arch's official repositories. Use actual package names, not executable names: `git-delta` provides `delta`, and AUR `asdf-vm` provides `asdf`. Preserve Omarchy's `mise-bin` provider rather than replacing it with Arch's conflicting `mise`. Prefer explicit providers such as `qemu-base` over ambiguous virtual targets.
 
@@ -66,7 +66,7 @@ List format: one package name per line; blank lines, indentation, and full-line 
 
 #### Machine Overlays
 
-Track hardware-specific direct dependencies under `packages/pacman/machines/<name>/`, using the same `packages.txt`, `packages-gui.txt`, and `packages-aur.txt` filenames. Overlay files are optional; shared files remain required. Select exactly one overlay explicitly with `--machine <name>`; no hostname or hardware detection is performed. Names use letters, digits, underscores, or hyphens and must start with a letter or digit. Unknown machine names are errors.
+Track hardware-specific direct dependencies under `manifests/pacman/machines/<name>/`, using the same `packages.txt`, `packages-gui.txt`, and `packages-aur.txt` filenames. Overlay files are optional; shared files remain required. Select exactly one overlay explicitly with `--machine <name>`; no hostname or hardware detection is performed. Names use letters, digits, underscores, or hyphens and must start with a letter or digit. Unknown machine names are errors.
 
 The selected overlay adds to the shared lists, with the same validation, routing, and deduplication. A list selector such as `aur` applies to both shared and machine AUR files. Neither deleting entries nor selecting a different machine uninstalls anything. Bootstrap still installs shared lists only; apply the desired overlay separately.
 

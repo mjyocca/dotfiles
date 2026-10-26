@@ -32,10 +32,11 @@ packages/          # Stow packages (each maps to $HOME paths)
   ssh/             # SSH config
   starship/        # Prompt theme
   ghostty/         # Terminal emulator
-  pacman/          # System packages (Omarchy: packages.txt, packages-gui.txt, packages-aur.txt)
   homebrew/        # System packages (macOS: Brewfile)
   mise/            # Dev tools (cross-platform: config.toml)
   tool-versions/   # Language runtimes (cross-platform: .tool-versions)
+manifests/         # Repository-only provisioning manifests (not stowed)
+  pacman/          # Shared package lists and machine-specific overlays
 profiles/          # OS profile allow-lists (one package name per line)
   macos            # Packages to stow on macOS
   omarchy          # Packages to stow on Omarchy Linux
@@ -92,7 +93,7 @@ Choose by dependency: mission-critical, session-critical, or OS-integrated tools
 - macOS → `@docs/instructions/macos.md`
 - Omarchy → `@docs/instructions/omarchy.md`
 
-Machine-specific pacman dependencies live in `packages/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
+Pacman lists live in `manifests/pacman/` and are read directly from the repository, not stowed. Machine-specific dependencies live in `manifests/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
 
 ## Skills
 

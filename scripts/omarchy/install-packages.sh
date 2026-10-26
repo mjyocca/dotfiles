@@ -41,7 +41,7 @@ esac
 repo_packages=()
 aur_packages=()
 declare -A owners=()
-files="$(package_list_files "$repo_root/packages/pacman" "$machine" "${lists[@]}")"
+files="$(package_list_files "$repo_root/manifests/pacman" "$machine" "${lists[@]}")"
 while IFS= read -r file; do
   parsed="$(read_package_list "$file")"
   while IFS= read -r package; do

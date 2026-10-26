@@ -22,7 +22,7 @@ Load `docs/instructions/package-management.md` first. Classify the *tool*, not j
 
 **Tie-breakers for a tool that could reasonably use either manager:**
 
-1. Check how *this repo* owns the tool or similar tools: `packages/homebrew/Brewfile`, `packages/pacman/packages.txt` (and GUI/AUR lists), and `packages/mise/.config/mise/config.toml`. Prefer consistency with an existing comparable tool when the primary criteria do not decide; do not copy an old choice that contradicts them.
+1. Check how *this repo* owns the tool or similar tools: `packages/homebrew/Brewfile`, `manifests/pacman/packages.txt` (and GUI/AUR lists), and `packages/mise/.config/mise/config.toml`. Prefer consistency with an existing comparable tool when the primary criteria do not decide; do not copy an old choice that contradicts them.
 2. If still unclear, inspect how the installed Omarchy version provides it when available (`/usr/share/omarchy/install/omarchy-base.packages`, `/etc/mise/conf.d/*.toml`, and `mise config ls`). Default filenames vary by version. Otherwise consult the upstream sources at the bottom of this skill.
 
 These lookups break ties; they do not replace our ownership rules. For a still-ambiguous tool, prefer platform ownership if it is in the upstream pacman base list, or mise if it is in upstream mise defaults. If it appears in both, apply the primary criteria and check how the system uses it; do not create a duplicate by default. Absence from either list does not mean the tool is unavailable in pacman or mise. Check actual package availability and the *effective* mise configuration (system defaults may apply) before adding a second installation. Do not uninstall OS-required packages merely to resolve an overlap.
@@ -39,21 +39,22 @@ omarchy pkg add <package>
 ./scripts/omarchy/find-untracked-packages.sh
 
 # 3. Track direct dependencies even if already installed by the OS
-# - packages/pacman/packages.txt (repository system/CLI)
-# - packages/pacman/packages-gui.txt (repository GUI apps)
-# - packages/pacman/packages-aur.txt (all AUR packages, including GUI)
+# - manifests/pacman/packages.txt (repository system/CLI)
+# - manifests/pacman/packages-gui.txt (repository GUI apps)
+# - manifests/pacman/packages-aur.txt (all AUR packages, including GUI)
+# These manifests are repository-only; do not stow them.
 # Apply one list (system, gui, or aur), or omit the argument for all three.
 # Preview with --dry-run; the installer validates names and strips comments.
 # --needed skips up-to-date packages; it is not version pinning.
 bash ./scripts/omarchy/install-packages.sh system
-# Hardware-specific dependencies belong in packages/pacman/machines/<name>/.
+# Hardware-specific dependencies belong in manifests/pacman/machines/<name>/.
 # Explicit selection adds that overlay to shared lists; absent files are OK.
 bash ./scripts/omarchy/install-packages.sh --machine amd-strix-halo --dry-run
 # Use the same selection when auditing installed packages:
 ./scripts/omarchy/find-untracked-packages.sh --machine amd-strix-halo
 
 # 4. Commit the change
-git add packages/pacman/packages.txt
+git add manifests/pacman/packages.txt
 git commit -m "add <package> to system packages"
 ```
 

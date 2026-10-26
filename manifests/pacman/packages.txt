@@ -1,4 +1,5 @@
 # System packages for Omarchy/Arch Linux
+# Future Stow option: packages/pacman/.config/dotfiles/packages/pacman/ → ~/.config/dotfiles/packages/pacman/.
 # Curated direct dependencies, including preinstalled packages (git, bat, tmux).
 # GUI/AUR apps are in the sibling lists; optional/versioned tools are in mise.
 # Install all: bash ./scripts/omarchy/install-packages.sh
