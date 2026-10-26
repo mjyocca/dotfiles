@@ -41,5 +41,6 @@ kubectl
 qemu
 
 # --- CLI Utilities ---
+ffmpeg
 pv
 tree
