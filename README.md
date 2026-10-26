@@ -8,7 +8,21 @@
 
 ## Installing
 
-**MacOS**
+**macOS**
 ```bash
-curl -sO https://raw.githubusercontent.com/mjyocca/dotfiles/main/osx/installer.sh
+curl -sO https://raw.githubusercontent.com/mjyocca/dotfiles/main/scripts/macos/installer.sh
+bash installer.sh
 ```
+
+**Omarchy (Linux)**
+```bash
+# Prerequisites: git, stow
+sudo pacman -S git stow
+
+git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+make dotfiles  # Auto-detects Omarchy profile
+```
+
+The `make dotfiles` command stows packages based on your OS profile (macOS or Omarchy).
+Override with `PROFILE=<name>` if needed.

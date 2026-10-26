@@ -1,0 +1,33 @@
+# GUI Applications
+# Desktop applications with graphical interfaces
+# One package per line, comments with #
+
+1password
+aether
+alacritty
+blender
+brave-bin
+chromium
+evince
+ghostty
+gnome-disk-utility
+imv
+kdenlive
+libreoffice-fresh
+localsend
+lutris
+moonlight-qt
+mpv
+nautilus
+nautilus-python
+obs-studio
+obsidian
+pinta
+signal-desktop
+spotify
+steam
+sunshine
+system-config-printer
+typora
+udiskie
+xournalpp

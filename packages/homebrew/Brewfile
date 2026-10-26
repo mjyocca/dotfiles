@@ -3,60 +3,42 @@
 tap "homebrew/bundle"
 
 ##############
-# Binaries & Tools
+# Version Managers
 brew 'asdf'
+brew 'mise'
+
+##############
+# System Infrastructure (NOT dev tools - those are managed by mise)
 brew 'autoconf'
-brew 'bat'
-brew 'bjarneo/cliamp/cliamp'
-brew 'btop'
 brew 'cmake'
 brew 'curl'
 brew 'coreutils'
-brew 'cmatrix'
-brew 'direnv'
-brew 'eza'
-brew 'fd'
-brew 'fzf'
-brew 'figlet' # ascii art
-brew 'git'
-brew 'git-delta'
-brew 'gh'
 brew 'gcc'
 brew 'gmp'
-brew 'htop'
-brew 'lazygit'
-brew 'lazydocker'
+brew 'git'
 brew 'libyaml'
-brew 'lsd'
-brew 'jq'
 brew 'make'
 brew 'mas'
-brew 'neovim'
-brew 'neofetch'
-brew 'pv'
-brew 'ripgrep' # required for telescope
+brew 'openssl'
 brew 'readline'
 brew 'sqlite'
 brew 'stow'
-brew 'starship'
-brew 'sl'
-brew 'superfile'
-brew 'television'
-brew 'tfenv'
-brew 'tmux'
-brew 'tree'
-brew 'openssl'
 brew 'unzip'
+brew 'pv'
+brew 'tree'
 brew 'wget'
-brew 'yazi'
 brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
-brew 'zellij'
 
-# herdr — agent multiplexer. Run `herdr integration install opencode` after first launch.
-brew 'herdr'
-brew 'tree-sitter-cli'
-brew 'zoxide'
+###############
+# System Services
+brew 'docker'
+brew 'docker-compose'
+brew 'docker-buildx'
+brew 'lima'
+brew 'colima'
+brew 'qemu'
+brew 'kubernetes-cli'
 
 ###############
 # Applications
@@ -87,22 +69,8 @@ cask 'gitbutler'
 cask 'orbstack'
 # cask 'podman-desktop'
 
-brew 'docker'
-brew 'docker-compose'
-brew 'docker-buildx'
-# brew 'podman'
-brew 'lima'
-brew 'colima'
-brew 'qemu'
-
-brew 'kubernetes-cli'
-
 # Fonts
 cask 'font-fira-code-nerd-font'
-
-## AI Tools
-tap 'anomalyco/tap'
-brew 'opencode'
 
 ###############
 # Mac App Store

@@ -6,15 +6,18 @@ setup_osx_launchctl() {
 	info "Configuring MacOS launchagents"
 
 	info "Enabling ssh agent on setup"
-	cp "$HOME/dotfiles/osx/com.openssh.ssh-agent.plist" "$HOME/Library/LaunchAgents/"
+	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+	info "Enabling ssh agent on setup"
+	cp "$SCRIPT_DIR/com.openssh.ssh-agent.plist" "$HOME/Library/LaunchAgents/"
 	launchctl unload "$HOME/Library/LaunchAgents/com.openssh.ssh-agent.plist"
 	launchctl load "$HOME/Library/LaunchAgents/com.openssh.ssh-agent.plist"
 	launchctl enable gui/$(id -u)/com.openssh.ssh-agent
 
 	info "Remapping Caps to Esc"
-	cp "$HOME/dotfiles/osx/com.local.remap_caps_lock.plist" "$HOME/library/launchagents/"
-	launchctl unload "$HOME/library/launchagents/com.local.remap_caps_lock.plist"
-	launchctl load "$HOME/library/launchagents/com.local.remap_caps_lock.plist"
+	cp "$SCRIPT_DIR/com.local.remap_caps_lock.plist" "$HOME/Library/LaunchAgents/"
+	launchctl unload "$HOME/Library/LaunchAgents/com.local.remap_caps_lock.plist"
+	launchctl load "$HOME/Library/LaunchAgents/com.local.remap_caps_lock.plist"
 	launchctl enable gui/$(id -u)/com.local.remap_caps_lock
 }
 

@@ -177,3 +177,13 @@ Do not touch `.zshenv` or `.zshrc`. Add to `~/.zshrc.local` on that machine:
 ```zsh
 export MYTOOL_API_KEY="..."
 ```
+
+---
+
+## Sources
+
+- [GNU Zsh manual](https://zsh.sourceforge.net/Doc/) — official documentation
+- [Zsh Patterns](http://zsh.sourceforge.net/Guide/) — beginner's guide
+- [bash instructions](./bash.md) — Omarchy shell equivalent
+
+_Last synced: 2026-01-23_

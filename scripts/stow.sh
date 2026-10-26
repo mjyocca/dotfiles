@@ -2,14 +2,19 @@
 # Stow dotfile packages into $HOME via GNU Stow.
 #
 # Usage:
-#   ./scripts/stow.sh                        # stow all packages (respects ignore file)
-#   ./scripts/stow.sh <pkg> [<pkg> ...]      # stow specific packages
+#   ./scripts/stow.sh                        # stow packages for current OS profile
+#   ./scripts/stow.sh <pkg> [<pkg> ...]      # stow specific packages (bypass profile + ignore)
 #   ./scripts/stow.sh --adopt <pkg>          # pass extra flags to stow before pkg names
 #   ./scripts/stow.sh --simulate <pkg>       # dry-run a specific package
 #
 # Any argument starting with '-' is treated as a flag and forwarded to stow.
 # Package names are any argument that does not start with '-'.
-# When package names are given the ignore list is bypassed entirely.
+# When package names are given the profile and ignore list are bypassed entirely.
+#
+# Profile-based selection:
+#   On full stow (no explicit packages), the script loads the profile for the
+#   detected OS. Profiles live in profiles/<os> and list which packages to stow.
+#   Override the profile with: PROFILE=omarchy ./scripts/stow.sh
 #
 # Common stow flags:
 #   --adopt      Move existing files into the package, then symlink
@@ -21,7 +26,7 @@
 # Per-machine ignore file:
 #   .stow-ignore.local  (git-ignored, lives at the repo root)
 #   One package name per line. Blank lines and # comments are ignored.
-#   Only consulted during a full stow (no package names given).
+#   Subtracted from the profile list during a full stow.
 #
 # Example .stow-ignore.local:
 #   # work machine — use corporate zsh config instead
@@ -35,7 +40,13 @@ DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=utils.sh
 source "${DOTFILES_ROOT}/scripts/utils.sh"
 
+# Load OS detection
+export DOTFILES_ROOT
+# shellcheck source=detect-os.sh
+source "${DOTFILES_ROOT}/scripts/detect-os.sh"
+
 IGNORE_FILE="${DOTFILES_ROOT}/.stow-ignore.local"
+PROFILE_FILE="${DOTFILES_ROOT}/profiles/${DOTFILES_PROFILE}"
 
 # ── Load ignore list ──────────────────────────────────────────────────────
 _load_ignore_list() {
@@ -49,6 +60,29 @@ _load_ignore_list() {
   done < "$IGNORE_FILE"
 }
 
+# ── Load profile list ─────────────────────────────────────────────────────
+_load_profile() {
+  local -n _out=$1
+  if [[ ! -f "$PROFILE_FILE" ]]; then
+    error "No profile found: $PROFILE_FILE"
+    error "Detected OS profile: $DOTFILES_PROFILE"
+    error "Available profiles:"
+    ls -1 "${DOTFILES_ROOT}/profiles/" 2>/dev/null | sed 's/^/  /' | sed 's/^/  /' >&2
+    exit 1
+  fi
+  while IFS= read -r line; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    # Validate package exists
+    if [[ ! -d "${DOTFILES_ROOT}/packages/${line}" ]]; then
+      warn "Profile references missing package: packages/${line}"
+      continue
+    fi
+    _out+=("$line")
+  done < "$PROFILE_FILE"
+}
+
 # ── Run stow with shared base flags + any extra flags + packages ──────────
 _stow_packages() {
   local -a extra_flags=("${STOW_FLAGS[@]}")
@@ -59,7 +93,7 @@ _stow_packages() {
     return
   fi
 
-  info "Stowing: ${packages[*]}${extra_flags:+ (flags: ${extra_flags[*]})}"
+  info "Profile: $DOTFILES_PROFILE | Stowing: ${packages[*]}${extra_flags:+ (flags: ${extra_flags[*]})}"
   stow --dir "${DOTFILES_ROOT}/packages" \
        --target "$HOME" \
        --verbose 2 \
@@ -82,7 +116,7 @@ stow_dotfiles() {
   done
 
   if [[ ${#pkgs[@]} -gt 0 ]]; then
-    # Explicit package list — bypass ignore file
+    # Explicit package list — bypass profile and ignore file
     for pkg in "${pkgs[@]}"; do
       if [[ ! -d "${DOTFILES_ROOT}/packages/${pkg}" ]]; then
         error "Package not found: packages/${pkg}"
@@ -94,7 +128,15 @@ stow_dotfiles() {
     return
   fi
 
-  # No packages given — stow all, minus the ignore list
+  # No packages given — stow profile minus ignore list
+  local -a profile_pkgs=()
+  _load_profile profile_pkgs
+
+  if [[ ${#profile_pkgs[@]} -eq 0 ]]; then
+    warn "Profile '$DOTFILES_PROFILE' is empty or invalid."
+    return
+  fi
+
   local -a ignore=()
   _load_ignore_list ignore
 
@@ -103,8 +145,7 @@ stow_dotfiles() {
   fi
 
   local -a to_stow=()
-  for pkg_dir in "${DOTFILES_ROOT}/packages"/*/; do
-    pkg="$(basename "$pkg_dir")"
+  for pkg in "${profile_pkgs[@]}"; do
     local skip=0
     for ignored in "${ignore[@]}"; do
       [[ "$pkg" == "$ignored" ]] && skip=1 && break
@@ -112,7 +153,7 @@ stow_dotfiles() {
     if [[ $skip -eq 0 ]]; then
       to_stow+=("$pkg")
     else
-      warn "Skipping:  $pkg"
+      warn "Skipping:  $pkg (ignored)"
     fi
   done
 

@@ -13,6 +13,10 @@
 #
 OS := $(shell uname -s)
 
+# Profile detection - can be overridden via PROFILE=xxx on command line
+PROFILE ?= $(shell bash ./scripts/detect-os.sh --print 2>/dev/null || echo unknown)
+export PROFILE
+
 ifeq ($(OS), Darwin)
 	PLATFORM := "OSX"
 	PKG_MANAGER := brew
@@ -20,21 +24,37 @@ ifeq ($(OS), Darwin)
 	UPDATE_CMD := $(PKG_MANAGER) update
 else ifeq ($(OS), Linux)
 	PLATFORM := "Linux"
-	DISTRO := $(shell awk -F= '/^ID=/{print $$2}' /etc/os-release)
-	ifeq ($(DISTRO), ubuntu)
+	# Extract ID from /etc/os-release, fallback to ID_LIKE for derivatives
+	_DISTRO_ID := $(shell awk -F= '/^ID=/{print $$2}' /etc/os-release 2>/dev/null | tr -d '"')
+	_DISTRO_LIKE := $(shell awk -F= '/^ID_LIKE=/{print $$2}' /etc/os-release 2>/dev/null | tr -d '"')
+	
+	# Map distro to package manager
+	# Omarchy: ID=omarchy, ID_LIKE=arch → pacman
+	# Arch: ID=arch → pacman
+	# Ubuntu/Debian → apt-get
+	# Fedora → dnf
+	# CentOS → yum
+	ifeq ($(_DISTRO_ID),ubuntu)
 		PKG_MANAGER := apt-get
-	else ifeq ($(DISTRO), debian)
+	else ifeq ($(_DISTRO_ID),debian)
 		PKG_MANAGER := apt-get
-	else ifeq ($(DISTRO), fedora)
+	else ifeq ($(_DISTRO_ID),fedora)
 		PKG_MANAGER := dnf
-	else ifeq ($(DISTRO), centos)
+	else ifeq ($(_DISTRO_ID),centos)
 		PKG_MANAGER := yum
-	else ifeq ($(DISTRO), arch)
+	else ifeq ($(_DISTRO_ID),arch)
+		PKG_MANAGER := pacman
+	else ifeq ($(_DISTRO_ID),omarchy)
+		# Omarchy is arch-based
+		PKG_MANAGER := pacman
+	else ifneq ($(filter arch,$(_DISTRO_LIKE)),)
+		# Fallback: if ID_LIKE contains "arch", use pacman
 		PKG_MANAGER := pacman
 	else
-		$(error Unsupported Linux distribution: $(DISTRO))
+		$(error Unsupported Linux distribution: $(_DISTRO_ID) (ID_LIKE: $(_DISTRO_LIKE)))
 	endif
 
+	DISTRO := $(_DISTRO_ID)
 	INSTALL_CMD := sudo $(PKG_MANAGER) install -y
 	UPDATE_CMD := sudo $(PKG_MANAGER) update
 endif
@@ -69,11 +89,14 @@ zellij-plugins:
 	@echo "✓ zellij-autolock v0.2.2 installed"
 
 # Target: dotfiles
-# Purpose: GNU Stow all packages in ./packages/ into $HOME.
-#          Packages listed in .stow-ignore.local (git-ignored) are skipped.
+# Purpose: GNU Stow packages for current OS profile into $HOME.
+#          Profile detection happens automatically (macOS → macos, Omarchy → omarchy).
+#          Override with: make dotfiles PROFILE=omarchy
+#          Packages in .stow-ignore.local are subtracted from the profile.
 # Usage: Run `make dotfiles`.
 dotfiles:
 	@echo "Stowing Dotfile Packages..."
+	@echo "Profile: $(PROFILE)"
 	@bash ./scripts/stow.sh
 
 # Target: stow
@@ -93,9 +116,12 @@ apply_settings:
 ifeq ($(PLATFORM), "OSX")
 	$(MAKE) apply_defaults_osx 
 else
-	## TODO: Update to apply settings for Linux
-	@echo "Unsupported OS: $(OS)"
-	@echo "Platform $(PLATFORM)"
+	## TODO: Implement OS-specific settings application for Linux profiles
+	## For Omarchy: most user settings are in ~/.config/ and managed via stow.
+	## Consider adding: gsettings, dconf, or profile-specific setting scripts.
+	@echo "Linux settings application not yet implemented for profile: $(PROFILE)"
+	@echo "Most settings are managed via stow in ~/.config/"
+	@echo "See: profiles/$(PROFILE) and AGENTS.md for Omarchy conventions."
 endif
 
 # ======================
@@ -125,21 +151,26 @@ endif
 # ======================
 
 # Target: apply_defaults_osx
-# Purpose: Leverages apply-user-defaults binary to apply MacOS/Application settings declared at ./osx/defaults.yml & ./osx/defaults.apps.yml
+# Purpose: Leverages apply-user-defaults binary to apply MacOS/Application settings declared at ./scripts/macos/defaults.yml & ./scripts/macos/defaults.apps.yml
 apply_defaults_osx:
 	@echo "Applying OSX default settings ..."
-	apply-user-defaults ./osx/defaults.yml
+	apply-user-defaults ./scripts/macos/defaults.yml
 	@echo "Applying OSX Application default settings ..."
-	apply-user-defaults ./osx/defaults.apps.yml
+	apply-user-defaults ./scripts/macos/defaults.apps.yml
+
+# Target: install_mise
+# Purpose: Install mise if not already present (idempotent)
+install_mise:
+	@bash ./scripts/install-mise.sh
 
 # Target: bootstrap_osx
 # Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
-bootstrap_osx: pre_install_osx install_osx_tools zellij-plugins
+bootstrap_osx: pre_install_osx install_osx_tools install_mise mise_install zellij-plugins
 
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
-	@bash ./osx/core-utils.sh
-	@bash ./osx/config.sh
+	@bash ./scripts/macos/core-utils.sh
+	@bash ./scripts/macos/config.sh
 
 install_osx_tools:
 	@echo "Installing macOS-specific tools..."
@@ -154,7 +185,7 @@ brew_bundle:
 # 
 # TODO: Add automation to install necessary tools
 
-bootstrap_linux: update_linux_packages install_linux_tools zellij-plugins
+bootstrap_linux: update_linux_packages install_linux_tools install_mise mise_install install_git_hooks zellij-plugins
 
 update_linux_packages:
 	@echo "Updating Linux-specific packages ..."
@@ -163,7 +194,27 @@ update_linux_packages:
 
 install_linux_tools:
 	@echo "Installing Linux-specific tools..."
-	@echo "LINUX $(DISTRO)"
+	@echo "Profile: $(PROFILE) | DISTRO: $(DISTRO)"
 	$(INSTALL_CMD) git
 	$(INSTALL_CMD) curl
 	$(INSTALL_CMD) vim
+	$(INSTALL_CMD) stow
+	$(INSTALL_CMD) gitleaks
+	@echo "Installing git hooks..."
+	@bash ./scripts/install-git-hooks.sh
+
+install_git_hooks:
+	@echo "Installing git hooks..."
+	@bash ./scripts/install-git-hooks.sh
+
+# ===========================
+# MISE TARGETS (Dev Tools)
+# ===========================
+
+mise_install:
+	@echo "Installing mise-managed dev tools..."
+	@mise install
+
+mise_update:
+	@echo "Updating mise-managed dev tools..."
+	@mise update

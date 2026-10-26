@@ -4,180 +4,113 @@ Dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/). Configurat
 
 ## External File Loading
 
-CRITICAL: When you encounter a file reference (e.g., @rules/general.md), use your Read tool to load it on a need-to-know basis. They're relevant to the SPECIFIC task at hand.
-
-Instructions:
-
-- Do NOT preemptively load all references - use lazy loading based on actual need
-- When loaded, treat content as mandatory instructions that override defaults
-- Follow references recursively when needed
-
-## docs/ Reading Policy
+When you encounter a file reference (e.g., @docs/instructions/macos.md), use your Read tool to load it on a need-to-know basis.
 
 - `docs/instructions/` — agent-facing. Load on demand when relevant to the task.
 - `docs/reference/` and all other `docs/` subdirectories — human-facing reference material. Do NOT read unless explicitly asked to.
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `make dotfiles` | Stow packages for current OS profile into `$HOME` |
+| `make dotfiles PROFILE=omarchy` | Force a specific profile |
+| `make stow PKG=<name>` | Stow a single package by name |
+| `make bootstrap` | Full machine provisioning (platform-aware) |
+| `make apply_settings` | Apply OS-level defaults |
+| `make install_git_hooks` | Install gitleaks pre-commit hook |
 
 ## Project Structure
 
 ```
 packages/          # Stow packages (each maps to $HOME paths)
-  nvim/            # Primary config — Neovim (LazyVim-based)
-  zsh/             # Shell config
+  nvim/            # Neovim config
+  bash/            # Shell config (Omarchy default)
+  zsh/             # Shell config (macOS default)
   tmux/            # Terminal multiplexer
   gitconfig/       # Git config
   ssh/             # SSH config
   starship/        # Prompt theme
   ghostty/         # Terminal emulator
-  asdf/            # Version manager
-  homebrew/        # Brewfile
-  opencode/        # AI assistant config
-  ...
-osx/               # macOS-specific defaults & bootstrap scripts
-scripts/           # Utility scripts (stow.sh, plugins.sh, etc.)
+  pacman/          # System packages (Omarchy: packages.txt, packages-gui.txt, packages-aur.txt)
+  homebrew/        # System packages (macOS: Brewfile)
+  mise/            # Dev tools (cross-platform: config.toml)
+  tool-versions/   # Language runtimes (cross-platform: .tool-versions)
+profiles/          # OS profile allow-lists (one package name per line)
+  macos            # Packages to stow on macOS
+  omarchy          # Packages to stow on Omarchy Linux
+scripts/
+  macos/           # macOS bootstrap, defaults, config scripts
+  omarchy/         # Omarchy-specific utility scripts
+  detect-os.sh     # OS detection and profile selection
+  stow.sh          # Stow orchestration
+  install-git-hooks.sh  # Gitleaks pre-commit hook installer
+docs/
+  instructions/    # OS-specific conventions (load on demand)
+    macos.md       # macOS conventions and package management
+    omarchy.md     # Omarchy conventions and package management
+    neovim.md      # Neovim conventions
+    zsh.md         # Zsh conventions
+    bash.md        # Bash conventions (Omarchy default)
+.agents/skills/    # Reproducible workflows (load when task matches)
 Makefile           # Command entrypoint
 ```
 
-### Commands
+## Agent Instructions
 
-All commands run through the Makefile:
+Platform-specific and tool-specific instructions are in `docs/instructions/`:
 
-| Command | Description |
-|---|---|
-| `make dotfiles` | Stow all packages into `$HOME` (skips packages in `.stow-ignore.local`) |
-| `make stow PKG=<name>` | Stow a single package by name (e.g. `make stow PKG=nvim`) |
-| `make stow PKG="a b c"` | Stow multiple specific packages |
-| `make bootstrap` | Full machine provisioning (platform-aware) |
-| `make apply_settings` | Apply OS-level defaults (macOS only currently) |
+- `@docs/instructions/neovim.md` — LazyVim config structure, plugin management, keymaps
+- `@docs/instructions/zsh.md` — Shell config layout (zshenv/zshrc), prompt, plugin hooks
+- `@docs/instructions/bash.md` — Bash config layout, Omarchy bootstrap, cross-platform tool init
+- `@docs/instructions/omarchy.md` — Omarchy desktop conventions, Hyprland, theme management
+- `@docs/instructions/macos.md` — macOS-specific setup, Homebrew, system preferences
 
-#### Per-machine package ignore list
+Load these when working on the respective components.
 
-Create a `.stow-ignore.local` file at the repo root to skip packages on a
-specific machine. The file is git-ignored and never committed.
+## OS Detection & Profiles
 
-```
-# .stow-ignore.local — example for a work machine
-# One package name per line. Blank lines and # comments are ignored.
-zsh
-homebrew
+```bash
+./scripts/detect-os.sh --print  # outputs: macos | omarchy | ubuntu | etc.
 ```
 
-`make dotfiles` reads this file automatically and skips any listed packages.
-`make stow PKG=<name>` always bypasses the ignore list.
+Profiles are allow-lists in `profiles/<name>`. Each lists which packages to stow on that OS.
 
-### Neovim
-
-Primary editor config located at `packages/nvim/.config/nvim/`. Key areas:
-
-- `lua/config/` — core options, keymaps, autocmds
-- `lua/plugins/` — plugin definitions (lsp, ai, coding, editor, ui, etc.)
-- `lua/lang/` — LSP configuration per language (each file configures a language server: typescript, ruby, golang, rust, lua, bash, markdown, mdx, terraform, c, sorbet, ember, ember_glint, base)
-
-When working on any Neovim or Lua config task, load: @docs/instructions/neovim.md
-
-### Zsh
-
-Shell config located at `packages/zsh/`. Three-file layout:
-
-- `.zshenv` — PATH and env vars for every shell context (scripts, cron, interactive)
-- `.zshrc` — interactive shell only (prompt, plugins, tool hooks)
-- `.zshrc.local` — per-machine overrides, git-ignored, auto-bootstrapped on first shell open
-
-When working on any zsh config task, load: @docs/instructions/zsh.md
-
-### Platform Support
-
-- **macOS** — fully supported (`osx/` defaults, Homebrew bootstrap)
-- **Linux** — targets exist in Makefile but not yet implemented
-
-### `dotf` — daily-use toolbox
-
-`dotf` is a dispatcher script stowed to `~/.local/bin/dotf`. It routes
-subcommands to individual scripts in `~/.local/bin/dotf.d/`. Source lives at:
-
-```
-packages/scripts/.local/bin/
-  dotf            # dispatcher — routes dotf <cmd> [args] to dotf.d/<cmd>
-  dotf.d/         # one executable file per subcommand
-    colima-use              # switch colima profile + docker context + socket
-    colima-list             # list profiles, states, contexts
-    colima-migrate-volumes  # export/import volumes between colima profiles
-    init                    # scaffold template files into the current project root (fzf picker)
-```
-
-Running `dotf --help` auto-lists all commands with their one-line descriptions
-(pulled from the second line of each script).
-
-**Adding a new subcommand:**
-
-1. Create an executable file at `packages/scripts/.local/bin/dotf.d/<name>`
-2. Line 1: `#!/usr/bin/env bash`
-3. Line 2: a `# <one-line description>` comment — this is what `dotf --help` prints
-4. Run `make dotfiles` to stow it into `~/.local/bin/dotf.d/`
-
----
-
-### Makefile vs. `dotf` — where to put new commands
-
-| Criterion | Makefile target | `dotf` subcommand |
+| OS | Profile | Notes |
 |---|---|---|
-| Operates on the dotfiles repo itself | yes | no |
-| Run during bootstrap / provisioning | yes | no |
-| Needs to be available everywhere on the machine | no | yes |
-| Used interactively during normal daily work | no | yes |
-| Manages external tools (docker, colima, editors…) | no | yes |
-| Accepts dynamic arguments / flags | awkward | natural |
+| macOS | `macos` | Includes `homebrew`, `colima` |
+| Omarchy | `omarchy` | Excludes `homebrew`, `colima` |
 
-**Use a Makefile target when** the command is about the dotfiles project:
-provisioning a machine, stowing packages, applying OS defaults, installing
-tools. These run once or rarely and operate on the repo itself.
+To add a package to a profile, edit the relevant `profiles/<name>` file.
 
-**Use a `dotf` subcommand when** the script is a general-purpose utility that
-should be available anywhere in a shell session: switching runtimes, managing
-containers, scaffolding projects, or any workflow tool that travels with the
-developer rather than the repo.
+Per-machine ignore list: `.stow-ignore.local` (git-ignored).
 
----
+## Package Management Architecture
 
-### Security Practices
+Three layers: system packages (Homebrew/pacman), dev tools (mise), language runtimes (asdf). For architecture, decision matrix, commands, and conventions load:
+- Cross-platform → `@docs/instructions/package-management.md`
+- macOS → `@docs/instructions/macos.md`
+- Omarchy → `@docs/instructions/omarchy.md`
 
-Learnings from a security audit of this repo. Apply these when adding or
-modifying any package config.
+## Skills
 
-**Never commit secrets or credentials**
-- Secrets, API keys, and tokens belong in `~/.zshrc.local` (git-ignored)
-- Never put real values in `.zshenv` or `.zshrc` — those are committed
-- The `.zshrc.local` bootstrap in `.zshrc` exists specifically for this
+| Skill | Description | When to load |
+|-------|-------------|--------------|
+| `package-management` | Workflows for managing packages across platforms | Adding packages, installing software, troubleshooting conflicts |
 
-**Never hardcode usernames or absolute paths**
-- Always use `$HOME` or `~` — never `/Users/<name>/...`
-- Hardcoded paths break on other machines and leak identity in public repos
+## Security
 
-**Scope VM mounts tightly**
-- Do not mount `/Users` (entire home directory) into a VM — it grants every
-  process in the VM read/write access to `~/.ssh`, `~/.aws`, `~/.config`, etc.
-- Scope colima mounts to specific project directories (e.g. `~/code`)
-- Mounts in colima are mutable post-creation via `~/.colima/<profile>/colima.yaml`
+**NEVER commit secrets or credentials.** Use `~/.bashrc.local` or `~/.zshrc.local` (git-ignored).
 
-**Do not commit runtime SSH includes**
-- OrbStack and similar tools auto-inject `Include` directives into `~/.ssh/config`
-- These reference runtime-generated files with internal hostnames and VM IPs
-- Remove any auto-injected `Include` stanzas before committing `packages/ssh/.ssh/config`
+**NEVER hardcode usernames or absolute paths.** Always use `$HOME` or `~`.
 
-**Keep git config email private**
-- Use GitHub's noreply address format: `<id>+<username>@users.noreply.github.com`
-- Never commit a real personal email address in `packages/gitconfig/.gitconfig`
+**Gitleaks** pre-commit hook scans for secrets on every commit. Install with `make install_git_hooks`.
 
-**git-ignore all per-machine local files**
-- `.stow-ignore.local` — machine-specific package ignore list
-- `packages/zsh/.zshrc.local` — machine-specific shell overrides
-- `packages/zsh/.global_env.sh` — legacy, replaced by `.zshrc.local`
+For detailed security practices (VM mounts, SSH includes, git email), see `@docs/reference/security.md`.
 
----
+## Conventions
 
-### Conventions
-
-- Each `packages/<name>/` directory mirrors the `$HOME` path structure for Stow
+- Each `packages/<name>/` mirrors `$HOME` structure for Stow
 - No manual symlinks — always use `make dotfiles`
-- Platform-specific logic belongs in `osx/` (later: `linux/`)
-
-
+- Platform-specific scripts belong in `scripts/macos/` or `scripts/omarchy/`
+- Cross-platform scripts stay in `scripts/`

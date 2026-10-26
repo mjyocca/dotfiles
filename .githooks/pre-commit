@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Pre-commit hook to scan staged changes for secrets using gitleaks
+# Install: scripts/install-git-hooks.sh
+# Requires: gitleaks in PATH
+
+set -euo pipefail
+
+# Check if gitleaks is available
+if ! command -v gitleaks &> /dev/null; then
+  echo "⚠️  gitleaks not found. Skipping secret scan."
+  echo "   Install with: sudo pacman -S gitleaks (Arch) or brew install gitleaks (macOS)"
+  exit 0
+fi
+
+echo "🔍 Scanning staged changes for secrets..."
+
+# Run gitleaks on staged changes only
+# --staged: only scan staged files (not entire repo)
+# --redact: hide secret values in output
+# --verbose: show detailed results
+if gitleaks protect --staged --redact --verbose; then
+  echo "✅ No secrets detected in staged changes"
+  exit 0
+else
+  echo ""
+  echo "❌ Secrets detected in staged changes!"
+  echo ""
+  echo "To fix:"
+  echo "  1. Remove the secrets from your code"
+  echo "  2. Use environment variables or a secrets manager"
+  echo "  3. Add false positives to .gitleaks.toml (see docs)"
+  echo ""
+  echo "To bypass (NOT recommended):"
+  echo "  git commit --no-verify"
+  echo ""
+  exit 1
+fi

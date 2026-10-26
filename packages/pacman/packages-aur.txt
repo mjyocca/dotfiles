@@ -1,0 +1,4 @@
+heroic-games-launcher
+llama-cpp-rocm-git
+ngrok
+woeusb-ng
