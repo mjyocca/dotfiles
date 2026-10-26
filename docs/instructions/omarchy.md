@@ -8,7 +8,7 @@ This file captures Omarchy-specific conventions, override paths, package managem
 - **Dotfiles management**: Stow is endorsed by Omarchy for backup/management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
-- **Package tracking**: Use `packages/pacman/packages.txt` and `packages-aur.txt`
+- **Package tracking**: Explicitly track your direct dependencies in `packages/pacman/packages.txt` and `packages-aur.txt`, including Omarchy defaults
 - **Security**: Gitleaks pre-commit hook scans for secrets
 
 ## System Configuration
@@ -82,8 +82,8 @@ pacman -Qqem > packages/pacman/packages-aur.txt
 
 **Workflow:**
 1. Install with `omarchy pkg add <package>` or `pacman -S <package>`
-2. Run `./scripts/omarchy/find-untracked-packages.sh` to see what's not tracked
-3. Add to the appropriate file (packages.txt for system, packages-gui.txt for GUI)
+2. Run `./scripts/omarchy/find-untracked-packages.sh` to discover missing packages (Omarchy defaults may be filtered out)
+3. Add direct dependencies to the appropriate file (packages.txt for system, packages-gui.txt for GUI), even if Omarchy already installed them
 4. Hardware-specific packages (drivers, firmware) don't need tracking
 
 #### What NOT to Track
@@ -94,15 +94,11 @@ pacman -Qqem > packages/pacman/packages-aur.txt
    - amd-ucode, vulkan-radeon, rocm-smi-lib, xpadneo-dkms
    - These are machine-specific and shouldn't be in shared config
 
-2. **Omarchy defaults**
-   - Packages already in `/usr/share/omarchy/install/omarchy-base.packages`
-   - The find-untracked-packages.sh script filters these out
-
-3. **Packages managed by mise**
-   - Dev tools like gitleaks, lazygit, jq, ripgrep, etc.
+2. **Packages managed by mise**
+   - Optional/version-sensitive tools like gitleaks, kubectl, gh, hunk, opencode
    - These belong in `packages/mise/.config/mise/config.toml`
 
-4. **Language runtimes in system packages**
+3. **Language runtimes in system packages (interim)**
    - Don't install node, ruby, go via pacman
    - Use asdf instead for version management
 
@@ -110,8 +106,8 @@ pacman -Qqem > packages/pacman/packages-aur.txt
 1. **System infrastructure** you depend on (git, curl, stow, build tools)
 2. **System services** you use (docker)
 3. **GUI applications** you launch from app menu
-4. **Dev tools** in mise (cross-platform CLI/TUI tools)
-5. **Language runtimes** in asdf (version-managed)
+4. **Platform-managed CLI/TUI tools** you depend on, including Omarchy defaults (bat, jq, lazygit, ripgrep, starship, tmux)
+5. **Optional/version-sensitive tools** in mise and **language runtimes** in asdf (until the separate runtime migration)
 
 ## Dev Tools & Language Runtimes
 

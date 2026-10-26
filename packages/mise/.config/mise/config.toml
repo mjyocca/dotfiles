@@ -1,37 +1,24 @@
-# Dev tools managed by mise (cross-platform)
+# Version-sensitive and optional tools managed by mise (cross-platform)
 # This file is stowed to ~/.config/mise/config.toml
-# See AGENTS.md for the architecture decision matrix
+# See docs/instructions/package-management.md for the decision criteria
 
 [tools]
 # AI/Dev tools
 gitleaks = "latest"
-lazygit = "latest"
 lazydocker = "latest"
-neovim = "latest"
-opencode = "latest"
-herdr = "latest"
+hunk = "latest"
+# aqua backend: prebuilt binaries; registry default (npm:@opencode/cli) requires a mise-managed node
+"aqua:anomalyco/opencode" = "latest"
 
 # CLI utilities
 gh = "latest"
-delta = "latest"
-tree-sitter = "latest"
-jq = "latest"
+kubectl = "latest"
 yq = "latest"
-ripgrep = "latest"
-fd = "latest"
 glow = "latest"
-bat = "latest"
-eza = "latest"
-fzf = "latest"
-zoxide = "latest"
+lsd = "latest"
 dua = "latest"
 
-# TUI tools
-btop = "latest"
-starship = "latest"
-direnv = "latest"
-tmux = "latest"
-zellij = "latest"
+# Optional TUI tools not supplied by Omarchy's base packages
 superfile = "latest"
 television = "latest"
 yazi = "latest"

@@ -1,14 +1,15 @@
-##############
-# Taps
-tap "homebrew/bundle"
+# frozen_string_literal: true
 
-##############
+###############
+# Taps
+tap 'homebrew/bundle'
+
 # Version Managers
 brew 'asdf'
 brew 'mise'
 
 ##############
-# System Infrastructure (NOT dev tools - those are managed by mise)
+# System infrastructure and general utilities
 brew 'autoconf'
 brew 'cmake'
 brew 'curl'
@@ -26,10 +27,35 @@ brew 'stow'
 brew 'unzip'
 brew 'pv'
 brew 'tree'
-brew 'ffmpeg'           # video thumbnails (yazi previews, etc.)
+brew 'ffmpeg' # video thumbnails (yazi previews, etc.)
 brew 'wget'
+brew 'figlet' # misc CLI, not in mise registry
+brew 'cmatrix' # misc CLI, not in mise registry
+brew 'sl' # misc CLI, not in mise registry
 brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
+
+###############
+# Platform-managed CLI/TUI tools (Omarchy uses pacman for these)
+brew 'bat'
+brew 'btop'
+brew 'eza'
+brew 'fd'
+brew 'fzf'
+brew 'herdr'
+brew 'jq'
+brew 'lazygit'
+brew 'neovim'
+brew 'ripgrep'
+brew 'starship'
+brew 'tmux'
+brew 'tree-sitter-cli'
+brew 'zoxide'
+
+# Session-critical tools not shipped in Omarchy's base package list
+brew 'direnv'
+brew 'git-delta'
+brew 'zellij'
 
 ###############
 # System Services
@@ -39,7 +65,7 @@ brew 'docker-buildx'
 brew 'lima'
 brew 'colima'
 brew 'qemu'
-brew 'kubernetes-cli'
+brew 'tailscale'
 
 ###############
 # Applications
@@ -76,7 +102,7 @@ cask 'font-symbols-only-nerd-font'
 
 ###############
 # Mac App Store
-mas "system-color-picker", id: 1545870783
+mas 'system-color-picker', id: 1545870783
 
 ###############
 # Hooks

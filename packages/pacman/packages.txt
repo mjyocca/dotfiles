@@ -1,14 +1,14 @@
 # System packages for Omarchy/Arch Linux
-# Curated list of packages you depend on, sourced from Brewfile.
+# Curated list of direct dependencies, including Omarchy base packages.
 # GUI applications are in packages-gui.txt
-# Dev tools are managed by mise (see packages/mise/.config/mise/config.toml)
+# Version-sensitive and optional tools are managed by mise (see packages/mise/.config/mise/config.toml)
 #
 # Maintenance:
 #   Install: sudo pacman -S --needed - < packages/pacman/packages.txt
 #   Re-export: pacman -Qqen > packages/pacman/packages.txt (then curate)
 #
-# Duplicates with omarchy-base.packages are OK (e.g., git, docker)
-# — pacman --needed skips already-installed packages.
+# Explicitly track Omarchy base dependencies (e.g., git, bat, tmux).
+# pacman --needed skips already-installed packages.
 
 # --- Version Managers ---
 asdf
@@ -37,10 +37,30 @@ sqlite
 docker
 docker-buildx
 docker-compose
-kubectl
 qemu
 
-# --- CLI Utilities ---
+# --- General Utilities ---
 ffmpeg
 pv
 tree
+
+# --- Platform-managed CLI/TUI tools (also in Omarchy base) ---
+bat
+btop
+eza
+fd
+fzf
+herdr
+jq
+lazygit
+neovim
+ripgrep
+starship
+tmux
+tree-sitter-cli
+zoxide
+
+# --- Session-critical tools beyond Omarchy base ---
+direnv
+git-delta
+zellij
