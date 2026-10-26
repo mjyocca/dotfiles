@@ -122,11 +122,13 @@ Don't touch `.bashrc`. Add to `~/.bashrc.local` on that machine.
 
 ---
 
-## References
+## Sources
 
 - [GNU Bash manual](https://www.gnu.org/software/bash/manual/)
 - [Omarchy dotfiles manual](https://omarchy.org/manual/dotfiles/)
 - [bash-completion](https://github.com/scop/bash-completion)
 - [mise activate](https://mise.jdx.dev/)
 - [direnv hook](https://direnv.net/docs/hook.html)
-- [zsh instructions](./zsh.md) — for the macOS zsh equivalent
+- [zsh instructions](./zsh.md) — macOS shell equivalent
+
+_Last synced: 2026-01-23_

@@ -1,27 +1,3 @@
----
-title: "macOS Instructions"
-description: "macOS-specific conventions and configuration for dotfiles management"
-sources:
-  - name: "Apple Developer Documentation"
-    url: "https://developer.apple.com/documentation/"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "System frameworks and APIs"
-  - name: "Homebrew Documentation"
-    url: "https://docs.brew.sh/"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "Package manager documentation"
-  - name: "macOS User Guide"
-    url: "https://support.apple.com/guide/mac-help"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "Apple's official user documentation"
-last_updated: "2026-01-23"
-maintainer: "mjyocca"
-status: "active"
----
-
 # macOS Instructions
 
 This file captures macOS-specific conventions, override paths, package management, and troubleshooting. Keep content lean — link out, don't duplicate.
@@ -120,77 +96,11 @@ brew install --cask <app>
 4. **Dev tools** in mise (cross-platform CLI/TUI tools)
 5. **Language runtimes** in asdf (version-managed)
 
-### Dev Tools (mise)
+## Dev Tools & Language Runtimes
 
-Dev tools are managed via mise (cross-platform).
-
-**Config location:** `packages/mise/.config/mise/config.toml` (stowed to `~/.config/mise/config.toml`)
-
-#### Commands
-
-```bash
-# Install all dev tools
-mise install
-
-# Update all dev tools
-mise update
-
-# Add new tool
-mise use -g <tool>@latest
-
-# List installed tools
-mise list
-
-# Check tool versions
-mise current
-
-# Force update now
-MISE_MINIMUM_RELEASE_AGE=0 mise up --yes
-```
-
-### Language Runtimes (asdf)
-
-Language runtimes are managed via asdf (cross-platform).
-
-**Config location:** `packages/tool-versions/.tool-versions` (stowed to `~/.tool-versions`)
-
-#### Commands
-
-```bash
-# Install all language runtimes
-asdf install
-
-# Add new runtime
-asdf install <lang> <version>
-
-# Set global version
-asdf global <lang> <version>
-
-# List installed versions
-asdf list <lang>
-
-# Check current version
-asdf current <lang>
-```
+See [package management instructions](./package-management.md) for mise and asdf conventions, commands, and troubleshooting.
 
 ## Troubleshooting
-
-### Package already in mise but also in Brewfile
-
-**Problem:** You see gitleaks in both Brewfile and mise config.
-
-**Solution:**
-```bash
-# Remove from Brewfile
-# Edit packages/homebrew/Brewfile and remove the line
-
-# Keep in mise config.toml
-# It should only be in packages/mise/.config/mise/config.toml
-
-# Commit the fix
-git add packages/homebrew/Brewfile
-git commit -m "remove gitleaks from Homebrew (managed by mise)"
-```
 
 ### GUI app vs system package?
 
@@ -204,61 +114,16 @@ git commit -m "remove gitleaks from Homebrew (managed by mise)"
 - ✅ docker (system service) → formula
 - ✅ vscode (GUI editor) → cask
 
-### Language runtime in Homebrew?
-
-**Problem:** You installed node via Homebrew and it's in Brewfile.
-
-**Solution:**
-```bash
-# 1. Remove from Brewfile
-# Edit packages/homebrew/Brewfile and remove 'nodejs' or 'node'
-
-# 2. Uninstall the Homebrew version
-brew uninstall node
-
-# 3. Install via asdf instead
-asdf install nodejs 20.10.0
-asdf global nodejs 20.10.0
-
-# 4. This updates packages/tool-versions/.tool-versions
-
-# 5. Commit
-git add packages/homebrew/Brewfile packages/tool-versions/.tool-versions
-git commit -m "migrate nodejs from Homebrew to asdf"
-```
-
-### Mise tool not installing
-
-**Problem:** `mise install` fails for a tool.
-
-**Solutions:**
-1. Check if the tool name is correct in the mise registry
-2. Verify your internet connection
-3. Try updating mise: `mise self-update`
-4. Check mise logs for specific error messages
-
-### Asdf plugin not found
-
-**Problem:** `asdf install <lang>` says plugin not found.
-
-**Solution:**
-```bash
-# Add the plugin first
-asdf plugin add <lang>
-# e.g., asdf plugin add nodejs
-
-# Then install
-asdf install <lang> <version>
-```
-
 ## Warnings
 
 - **SIP (System Integrity Protection)**: Cannot modify system files in `/System/`
 - **File permissions**: macOS has strict permissions for certain directories
 - **Code signing**: Some applications require code signing or notarization
 
-## Additional Resources
+## Sources
 
-- [Apple Developer Documentation](https://developer.apple.com/documentation/) — system APIs and frameworks
+- [Apple Developer Documentation](https://developer.apple.com/documentation/) — system frameworks and APIs
 - [Homebrew Documentation](https://docs.brew.sh/) — package manager
-- [macOS User Guide](https://support.apple.com/guide/mac-help) — user documentation
+- [macOS User Guide](https://support.apple.com/guide/mac-help) — Apple's official user documentation
+
+_Last synced: 2026-01-23_

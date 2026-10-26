@@ -20,14 +20,13 @@ When you encounter a file reference (e.g., @docs/instructions/macos.md), use you
 | `make apply_settings` | Apply OS-level defaults |
 | `make install_git_hooks` | Install gitleaks pre-commit hook |
 
-For the `dotf` toolbox (colima profile switching, project scaffolding), see `@docs/reference/dotf.md`.
-
 ## Project Structure
 
 ```
 packages/          # Stow packages (each maps to $HOME paths)
   nvim/            # Neovim config
-  zsh/             # Shell config
+  bash/            # Shell config (Omarchy default)
+  zsh/             # Shell config (macOS default)
   tmux/            # Terminal multiplexer
   gitconfig/       # Git config
   ssh/             # SSH config
@@ -88,27 +87,10 @@ Per-machine ignore list: `.stow-ignore.local` (git-ignored).
 
 ## Package Management Architecture
 
-Three-layer architecture separates concerns:
-
-| Layer | Manager | Scope | Config File |
-|-------|---------|-------|-------------|
-| System Packages | Homebrew / pacman | OS-specific | `Brewfile`, `packages.txt` |
-| Dev Tools | mise | Cross-platform | `config.toml` |
-| Language Runtimes | asdf | Cross-platform | `.tool-versions` |
-
-**Quick decision matrix:**
-| Category | Manager | Example |
-|----------|---------|---------|
-| System infrastructure | Homebrew/pacman | git, curl, gcc |
-| GUI applications | Homebrew/pacman | vscode, alacritty |
-| Dev CLI tools | mise | gitleaks, lazygit, jq |
-| Language runtimes | asdf | node, ruby, go |
-
-**For platform-specific conventions**, load:
+Three layers: system packages (Homebrew/pacman), dev tools (mise), language runtimes (asdf). For architecture, decision matrix, commands, and conventions load:
+- Cross-platform → `@docs/instructions/package-management.md`
 - macOS → `@docs/instructions/macos.md`
 - Omarchy → `@docs/instructions/omarchy.md`
-
-**For step-by-step workflows**, use the `package-management` skill.
 
 ## Skills
 
@@ -118,7 +100,7 @@ Three-layer architecture separates concerns:
 
 ## Security
 
-**NEVER commit secrets or credentials.** Use `~/.zshrc.local` (git-ignored).
+**NEVER commit secrets or credentials.** Use `~/.bashrc.local` or `~/.zshrc.local` (git-ignored).
 
 **NEVER hardcode usernames or absolute paths.** Always use `$HOME` or `~`.
 

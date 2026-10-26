@@ -3,8 +3,8 @@
 # One package name per line. Blank lines and # comments ignored.
 # Override per-machine via .stow-ignore.local at repo root.
 #
-# Omarchy is bash-first at the desktop level; zsh is included but
-# interactive ergonomics (tdl, tsd, etc.) assume bash.
+# Omarchy uses bash only — zsh is excluded from this profile.
+# macOS profile uses zsh only.
 #
 # Excludes: homebrew, colima (macOS-only tools)
 

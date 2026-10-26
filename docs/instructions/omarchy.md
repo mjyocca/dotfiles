@@ -1,37 +1,3 @@
----
-title: "Omarchy Instructions"
-description: "Omarchy-specific conventions and configuration for dotfiles management"
-sources:
-  - name: "Omarchy Manual"
-    url: "https://omarchy.org/manual/"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "Primary user documentation"
-  - name: "Omarchy Plugins"
-    url: "https://plugins.omarchy.org/"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "Plugin registry and discovery"
-  - name: "Omarchy Plugin Development"
-    url: "https://plugins.omarchy.org/develop.html"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "Guide for developing and publishing plugins"
-  - name: "GitHub Manual (legacy)"
-    url: "https://github.com/basecamp/omarchy/tree/quattro/manual"
-    type: "official"
-    last_synced: "2026-01-23"
-    notes: "Markdown source files, may be deprecated in favor of omarchy.org/manual"
-  - name: "Omarchy Source Code"
-    url: "/usr/share/omarchy"
-    type: "local"
-    last_synced: "2026-01-23"
-    notes: "Read-only system package"
-last_updated: "2026-01-23"
-maintainer: "mjyocca"
-status: "active"
----
-
 # Omarchy Instructions
 
 This file captures Omarchy-specific conventions, override paths, package management, and troubleshooting. Keep content lean — link out, don't duplicate.
@@ -147,82 +113,11 @@ pacman -Qqem > packages/pacman/packages-aur.txt
 4. **Dev tools** in mise (cross-platform CLI/TUI tools)
 5. **Language runtimes** in asdf (version-managed)
 
-### Dev Tools (mise)
+## Dev Tools & Language Runtimes
 
-Dev tools are managed via mise (cross-platform), aligned with how Omarchy manages AI tools.
-
-**Config location:** `packages/mise/.config/mise/config.toml` (stowed to `~/.config/mise/config.toml`)
-
-**Auto-updates:** Omarchy's `post-update` hook runs `mise up` to keep tools current:
-```bash
-~/.config/omarchy/hooks/post-update.d/99-mise-update
-```
-
-#### Commands
-
-```bash
-# Install all dev tools
-mise install
-
-# Update all dev tools
-mise update
-
-# Add new tool
-mise use -g <tool>@latest
-
-# List installed tools
-mise list
-
-# Check tool versions
-mise current
-
-# Force update now
-MISE_MINIMUM_RELEASE_AGE=0 mise up --yes
-```
-
-### Language Runtimes (asdf)
-
-Language runtimes are managed via asdf (cross-platform).
-
-**Config location:** `packages/tool-versions/.tool-versions` (stowed to `~/.tool-versions`)
-
-#### Commands
-
-```bash
-# Install all language runtimes
-asdf install
-
-# Add new runtime
-asdf install <lang> <version>
-
-# Set global version
-asdf global <lang> <version>
-
-# List installed versions
-asdf list <lang>
-
-# Check current version
-asdf current <lang>
-```
+See [package management instructions](./package-management.md) for mise and asdf conventions, commands, and troubleshooting.
 
 ## Troubleshooting
-
-### Package already in mise but also in packages.txt
-
-**Problem:** You see gitleaks in both packages.txt and mise config.
-
-**Solution:**
-```bash
-# Remove from packages.txt
-# Edit packages/pacman/packages.txt and remove the line
-
-# Keep in mise config.toml
-# It should only be in packages/mise/.config/mise/config.toml
-
-# Commit the fix
-git add packages/pacman/packages.txt
-git commit -m "remove gitleaks from system packages (managed by mise)"
-```
 
 ### GUI app vs system package?
 
@@ -236,58 +131,17 @@ git commit -m "remove gitleaks from system packages (managed by mise)"
 - ✅ docker (system service) → packages.txt
 - ✅ vscode (GUI editor) → packages-gui.txt
 
-### Language runtime in system packages?
-
-**Problem:** You installed node via pacman and it's in packages.txt.
-
-**Solution:**
-```bash
-# 1. Remove from packages.txt
-# Edit packages/pacman/packages.txt and remove 'nodejs'
-
-# 2. Install via asdf instead
-asdf install nodejs 20.10.0
-asdf global nodejs 20.10.0
-
-# 3. This updates packages/tool-versions/.tool-versions
-
-# 4. Commit
-git add packages/pacman/packages.txt packages/tool-versions/.tool-versions
-git commit -m "migrate nodejs from system package to asdf"
-```
-
-### Mise tool not installing
-
-**Problem:** `mise install` fails for a tool.
-
-**Solutions:**
-1. Check if the tool name is correct in the mise registry
-2. Verify your internet connection
-3. Try updating mise: `mise self-update`
-4. Check mise logs for specific error messages
-
-### Asdf plugin not found
-
-**Problem:** `asdf install <lang>` says plugin not found.
-
-**Solution:**
-```bash
-# Add the plugin first
-asdf plugin add <lang>
-# e.g., asdf plugin add nodejs
-
-# Then install
-asdf install <lang> <version>
-```
-
 ## Warnings
 
 - **Collision risk**: Stowing packages replaces Omarchy-seeded configs in `~/.config/`
 - **Stale configs**: After Omarchy updates, check for `.bak` files and re-run `make dotfiles`
 - **Read-only source**: Never edit `/usr/share/omarchy/` directly
 
-## Additional Resources
+## Sources
 
-- [Omarchy Manual](https://omarchy.org/manual/) — primary documentation
-- [Plugin Registry](https://plugins.omarchy.org/) — discover and install plugins
-- [Plugin Development](https://plugins.omarchy.org/develop.html) — create custom plugins
+- [Omarchy Manual](https://omarchy.org/manual/) — primary user documentation
+- [Omarchy Plugins](https://plugins.omarchy.org/) — plugin registry and discovery
+- [Omarchy Plugin Development](https://plugins.omarchy.org/develop.html) — create custom plugins
+- [Omarchy Source Code](/usr/share/omarchy) — read-only system package (local)
+
+_Last synced: 2026-01-23_
