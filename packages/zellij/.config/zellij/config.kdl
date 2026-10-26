@@ -1,6 +1,9 @@
 theme "ansi"
 default_shell "zsh"
 // pane_frames false
+// Restore pre-0.45.0 rendering: full-border frames + stacked panes expanded in place
+pane_frame_style "full"
+stacked_pane_list false
 default_mode "normal"
 default_layout "default"
 attach_to_session true
