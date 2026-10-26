@@ -1,14 +1,9 @@
 # System packages for Omarchy/Arch Linux
-# Curated list of direct dependencies, including Omarchy base packages.
-# GUI applications are in packages-gui.txt
-# Version-sensitive and optional tools are managed by mise (see packages/mise/.config/mise/config.toml)
-#
-# Maintenance:
-#   Install: sudo pacman -S --needed - < packages/pacman/packages.txt
-#   Re-export: pacman -Qqen > packages/pacman/packages.txt (then curate)
-#
-# Explicitly track Omarchy base dependencies (e.g., git, bat, tmux).
-# pacman --needed skips already-installed packages.
+# Curated direct dependencies, including preinstalled packages (git, bat, tmux).
+# GUI/AUR apps are in the sibling lists; optional/versioned tools are in mise.
+# Install all: bash ./scripts/omarchy/install-packages.sh
+# Install this list: bash ./scripts/omarchy/install-packages.sh system
+# --needed skips up-to-date packages; newer versions can still be upgraded.
 
 # --- Version Managers ---
 asdf
@@ -44,7 +39,7 @@ ffmpeg
 pv
 tree
 
-# --- Platform-managed CLI/TUI tools (also in Omarchy base) ---
+# --- Platform-managed CLI/TUI tools ---
 bat
 btop
 eza
@@ -60,7 +55,7 @@ tmux
 tree-sitter-cli
 zoxide
 
-# --- Session-critical tools beyond Omarchy base ---
+# --- Additional session-critical tools ---
 direnv
 git-delta
 zellij

@@ -87,7 +87,7 @@ Per-machine ignore list: `.stow-ignore.local` (git-ignored).
 
 ## Package Management Architecture
 
-Current layers: platform/session tools (Homebrew/pacman), version-sensitive and optional tools (mise), language runtimes (asdf, planned to move to mise separately). Track direct Omarchy dependencies in pacman even if Omarchy already installs them; `pacman -S --needed` is idempotent. For architecture, decision criteria, commands, and conventions load:
+Choose by dependency: mission-critical, session-critical, or OS-integrated tools → Homebrew/pacman; version-switched or fast-moving cloud API tools → mise (unless needed independently of mise). Optional tools use mise when suitable; if both managers fit, first compare our existing package lists/config, then consult the package-management skill's upstream lookup if still ambiguous. Runtimes stay on asdf until their separate migration to mise. Track direct pacman dependencies explicitly; use filtered `pacman -S --needed` commands to skip installed packages without treating comments as targets. For details load:
 - Cross-platform → `@docs/instructions/package-management.md`
 - macOS → `@docs/instructions/macos.md`
 - Omarchy → `@docs/instructions/omarchy.md`

@@ -36,7 +36,7 @@ brew 'zsh-autosuggestions'
 brew 'zero-sh/tap/apply-user-defaults'
 
 ###############
-# Platform-managed CLI/TUI tools (Omarchy uses pacman for these)
+# Platform-managed CLI/TUI tools
 brew 'bat'
 brew 'btop'
 brew 'eza'
@@ -52,7 +52,7 @@ brew 'tmux'
 brew 'tree-sitter-cli'
 brew 'zoxide'
 
-# Session-critical tools not shipped in Omarchy's base package list
+# Additional session-critical tools
 brew 'direnv'
 brew 'git-delta'
 brew 'zellij'

@@ -8,7 +8,7 @@ This file captures Omarchy-specific conventions, override paths, package managem
 - **Dotfiles management**: Stow is endorsed by Omarchy for backup/management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
-- **Package tracking**: Explicitly track your direct dependencies in `packages/pacman/packages.txt` and `packages-aur.txt`, including Omarchy defaults
+- **Package tracking**: Explicitly track your direct dependencies in `packages/pacman/packages.txt` and `packages-aur.txt`, including packages already installed by the OS
 - **Security**: Gitleaks pre-commit hook scans for secrets
 
 ## System Configuration
@@ -63,27 +63,28 @@ System packages are tracked in three curated files:
 #### Commands
 
 ```bash
-# Install system packages
-sudo pacman -S --needed - < packages/pacman/packages.txt
+# Install all curated lists (also run by make bootstrap on Omarchy)
+bash ./scripts/omarchy/install-packages.sh
 
-# Install GUI applications
-sudo pacman -S --needed - < packages/pacman/packages-gui.txt
-
-# Install AUR packages
-yay -S --needed - < packages/pacman/packages-aur.txt
+# Or choose one list: system, gui (includes AUR packages), or aur
+bash ./scripts/omarchy/install-packages.sh system
+bash ./scripts/omarchy/install-packages.sh gui
+bash ./scripts/omarchy/install-packages.sh aur
 
 # Find untracked packages
 ./scripts/omarchy/find-untracked-packages.sh
 
-# Export installed packages (then curate!)
-pacman -Qqen > packages/pacman/packages.txt
-pacman -Qqem > packages/pacman/packages-aur.txt
+# Inspect installed packages without overwriting curated lists
+pacman -Qqen
+pacman -Qqem
 ```
 
+The list installer strips comments/blank lines and uses `--needed` to skip already up-to-date targets on repeat runs. It uses `yay` for the GUI list because that list includes AUR packages. Newer package versions may still be installed; `--needed` does not freeze versions. Bootstrap first runs `pacman -Syu` to update the system, then installs these lists.
+
 **Workflow:**
-1. Install with `omarchy pkg add <package>` or `pacman -S <package>`
-2. Run `./scripts/omarchy/find-untracked-packages.sh` to discover missing packages (Omarchy defaults may be filtered out)
-3. Add direct dependencies to the appropriate file (packages.txt for system, packages-gui.txt for GUI), even if Omarchy already installed them
+1. Install with `omarchy pkg add <package>` or `sudo pacman -S --needed <package>`
+2. Run `./scripts/omarchy/find-untracked-packages.sh` to discover missing packages (preinstalled packages may be filtered out)
+3. Add direct dependencies to the appropriate file (packages.txt for system, packages-gui.txt for GUI), even if already installed
 4. Hardware-specific packages (drivers, firmware) don't need tracking
 
 #### What NOT to Track
@@ -106,7 +107,7 @@ pacman -Qqem > packages/pacman/packages-aur.txt
 1. **System infrastructure** you depend on (git, curl, stow, build tools)
 2. **System services** you use (docker)
 3. **GUI applications** you launch from app menu
-4. **Platform-managed CLI/TUI tools** you depend on, including Omarchy defaults (bat, jq, lazygit, ripgrep, starship, tmux)
+4. **Platform-managed CLI/TUI tools** you depend on, including preinstalled tools (bat, jq, lazygit, ripgrep, starship, tmux)
 5. **Optional/version-sensitive tools** in mise and **language runtimes** in asdf (until the separate runtime migration)
 
 ## Dev Tools & Language Runtimes
@@ -119,7 +120,7 @@ See [package management instructions](./package-management.md) for mise and asdf
 
 **Rule of thumb:**
 - If it has a GUI and you launch it from the app menu → `packages-gui.txt`
-- If it's a CLI tool or system service → `packages.txt`
+- If it's a system service or platform-managed CLI tool → `packages.txt`; classify other CLIs with the [ownership criteria](./package-management.md)
 
 **Examples:**
 - ✅ alacritty (terminal emulator with GUI) → packages-gui.txt

@@ -57,6 +57,10 @@ else ifeq ($(OS), Linux)
 	DISTRO := $(_DISTRO_ID)
 	INSTALL_CMD := sudo $(PKG_MANAGER) install -y
 	UPDATE_CMD := sudo $(PKG_MANAGER) update
+	ifeq ($(PKG_MANAGER),pacman)
+		INSTALL_CMD := sudo pacman -S --needed
+		UPDATE_CMD := sudo pacman -Syu
+	endif
 endif
 
 # ======================
@@ -183,7 +187,7 @@ brew_bundle:
 ## LINUX SPECIFIC TARGETs
 # ======================
 # 
-# TODO: Add automation to install necessary tools
+# Omarchy installs curated lists; other Linux profiles retain their existing setup.
 
 bootstrap_linux: update_linux_packages install_linux_tools install_mise mise_install install_git_hooks zellij-plugins
 
@@ -195,11 +199,15 @@ update_linux_packages:
 install_linux_tools:
 	@echo "Installing Linux-specific tools..."
 	@echo "Profile: $(PROFILE) | DISTRO: $(DISTRO)"
+ifeq ($(PROFILE),omarchy)
+	@bash ./scripts/omarchy/install-packages.sh
+else
 	$(INSTALL_CMD) git
 	$(INSTALL_CMD) curl
 	$(INSTALL_CMD) vim
 	$(INSTALL_CMD) stow
 	$(INSTALL_CMD) gitleaks
+endif
 	@echo "Installing git hooks..."
 	@bash ./scripts/install-git-hooks.sh
 

@@ -18,7 +18,7 @@ glow = "latest"
 lsd = "latest"
 dua = "latest"
 
-# Optional TUI tools not supplied by Omarchy's base packages
+# Optional cross-platform TUI tools
 superfile = "latest"
 television = "latest"
 yazi = "latest"

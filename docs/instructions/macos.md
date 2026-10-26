@@ -54,7 +54,7 @@ colima status             # Check status
 
 ### System Packages (Homebrew)
 
-Homebrew owns platform/session tools (infrastructure, build deps, GUI apps, and the same CLI/TUI tools Omarchy supplies through pacman).
+Homebrew owns mission-critical, session-critical, and OS-integrated tools (infrastructure, build dependencies, GUI apps, and shell/session utilities). See [package management instructions](./package-management.md) for ownership decisions.
 
 **Config location:** `packages/homebrew/Brewfile` (stowed to `~/Brewfile`)
 
@@ -93,7 +93,7 @@ brew install --cask <app>
 1. **System infrastructure** you depend on (git, curl, stow, build tools)
 2. **System services** you use (docker, colima)
 3. **GUI applications** you launch from app menu
-4. **Session-critical and Omarchy-base CLI/TUI tools** (starship, direnv, fzf, jq, lazygit, ripgrep, tmux)
+4. **Session-critical and other platform-managed CLI/TUI tools** (starship, direnv, fzf, jq, lazygit, ripgrep, tmux)
 5. **Optional/version-sensitive tools** in mise; **language runtimes** in asdf until the separate migration
 
 ## Dev Tools & Language Runtimes
@@ -106,7 +106,7 @@ See [package management instructions](./package-management.md) for mise and asdf
 
 **Rule of thumb:**
 - If it has a GUI and you launch it from `/Applications/` → Homebrew cask
-- If it's a CLI tool or system service → Homebrew formula
+- If it's a system service or a platform-managed CLI tool → Homebrew formula; classify other CLIs with the [ownership criteria](./package-management.md)
 
 **Examples:**
 - ✅ alacritty (terminal emulator with GUI) → cask
