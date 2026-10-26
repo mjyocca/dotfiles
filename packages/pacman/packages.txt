@@ -4,10 +4,12 @@
 # Install all: bash ./scripts/omarchy/install-packages.sh
 # Install this list: bash ./scripts/omarchy/install-packages.sh system
 # --needed skips up-to-date packages; newer versions can still be upgraded.
+# Hardware-specific dependencies: machines/<name>/; select with --machine <name>.
 
 # --- Version Managers ---
-asdf
-mise
+# Omarchy ships mise-bin (provides/conflicts with Arch mise).
+mise-bin
+# asdf-vm is in packages-aur.txt until the separate runtime migration.
 
 # --- Core Infrastructure ---
 base-devel
@@ -32,7 +34,7 @@ sqlite
 docker
 docker-buildx
 docker-compose
-qemu
+qemu-base # Explicit headless provider; add desktop extras per machine if needed.
 
 # --- General Utilities ---
 ffmpeg

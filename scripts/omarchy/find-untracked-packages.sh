@@ -1,95 +1,83 @@
 #!/usr/bin/env bash
-# Helper script to identify installed packages not tracked in dotfiles
-# Shows packages that might need to be added to packages.txt or packages-gui.txt
+# Report explicit pacman packages absent from the curated lists.
+set -euo pipefail
 
-set -e
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=package-lists.sh
+source "$repo_root/scripts/omarchy/package-lists.sh"
+omarchy_base="${OMARCHY_BASE_PACKAGES:-/usr/share/omarchy/install/omarchy-base.packages}"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-PACKAGES_TXT="$REPO_ROOT/packages/pacman/packages.txt"
-PACKAGES_GUI_TXT="$REPO_ROOT/packages/pacman/packages-gui.txt"
-OMARCHY_BASE="/usr/share/omarchy/install/omarchy-base.packages"
-MISE_CONFIG="$REPO_ROOT/packages/mise/.config/mise/config.toml"
+include_base=false
+machine=""
+usage() {
+  echo 'Usage: find-untracked-packages.sh [--include-base] [--machine NAME]'
+}
+while (($#)); do
+  case "$1" in
+    --include-base) include_base=true ;;
+    --machine)
+      [[ $# -ge 2 && -n "$2" && -z "$machine" ]] || { usage >&2; exit 2; }
+      machine="$2"
+      shift
+      ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; exit 2 ;;
+  esac
+  shift
+done
+command -v pacman >/dev/null || { echo 'pacman is required' >&2; exit 1; }
 
-# Check if running on Arch-based system
-if ! command -v pacman &> /dev/null; then
-    echo "Error: This script requires pacman (Arch-based system)"
-    exit 1
-fi
-
-# Check if required files exist
-if [[ ! -f "$PACKAGES_TXT" ]]; then
-    echo "Error: packages.txt not found at $PACKAGES_TXT"
-    exit 1
-fi
-
-if [[ ! -f "$OMARCHY_BASE" ]]; then
-    echo "Warning: omarchy-base.packages not found at $OMARCHY_BASE"
-    echo "Skipping Omarchy default packages filter"
-    OMARCHY_BASE=""
-fi
-
-if [[ ! -f "$MISE_CONFIG" ]]; then
-    echo "Warning: mise config not found at $MISE_CONFIG"
-    echo "Skipping mise-managed packages filter"
-    MISE_CONFIG=""
-fi
-
-echo "Analyzing installed packages..."
-echo ""
-
-# Get all explicitly installed packages
-installed=$(pacman -Qqen | sort)
-
-# Get tracked packages (from both files)
 tracked=""
-if [[ -f "$PACKAGES_TXT" ]]; then
-    tracked=$(grep -v '^#' "$PACKAGES_TXT" | grep -v '^$' | sort -u)
-fi
-if [[ -f "$PACKAGES_GUI_TXT" ]]; then
-    gui_tracked=$(grep -v '^#' "$PACKAGES_GUI_TXT" | grep -v '^$' | sort -u)
-    tracked=$(echo -e "$tracked\n$gui_tracked" | sort -u)
-fi
+files="$(package_list_files "$repo_root/packages/pacman" "$machine" system gui aur)"
+while IFS= read -r file; do
+  parsed="$(read_package_list "$file")"
+  tracked+=$'\n'"$parsed"
+done <<< "$files"
+tracked="$(printf '%s\n' "$tracked" | LC_ALL=C sort -u)"
 
-# Get Omarchy base packages (if available)
-omarchy_base=""
-if [[ -n "$OMARCHY_BASE" && -f "$OMARCHY_BASE" ]]; then
-    omarchy_base=$(grep -v '^#' "$OMARCHY_BASE" | grep -v '^$' | sort -u)
-fi
-
-# Get mise-managed packages (if available)
-mise_packages=""
-if [[ -n "$MISE_CONFIG" && -f "$MISE_CONFIG" ]]; then
-    # Extract tool names from mise config (lines like "tool = "version"")
-    mise_packages=$(grep -E '^\w+\s*=' "$MISE_CONFIG" | cut -d'=' -f1 | tr -d ' ' | sort -u)
+base=""
+if [[ "$include_base" == false ]]; then
+  if [[ -f "$omarchy_base" ]]; then
+    base="$(read_package_list "$omarchy_base")"
+  else
+    echo "Warning: Omarchy base list not found: $omarchy_base" >&2
+  fi
 fi
 
-# Find untracked packages
-untracked=$(comm -23 <(echo "$installed" | sort) <(echo "$tracked" | sort))
+report() {
+  local label="$1" installed="$2" untracked
+  untracked="$(LC_ALL=C comm -23 \
+    <(printf '%s\n' "$installed" | LC_ALL=C sort -u) \
+    <(printf '%s\n%s\n' "$tracked" "$base" | LC_ALL=C sort -u))"
+  printf '\n%s:\n' "$label"
+  if [[ -n "$untracked" ]]; then
+    printf '%s\n' "$untracked"
+  else
+    echo '(none)'
+  fi
+}
 
-# Filter out Omarchy base packages if available
-if [[ -n "$omarchy_base" ]]; then
-    untracked=$(comm -23 <(echo "$untracked" | sort) <(echo "$omarchy_base" | sort))
+# pacman returns 1 with no output when a filter matches no packages. Preserve
+# real errors (including stderr), rather than treating them as an empty list.
+query_packages() {
+  local output status
+  if output="$(pacman "$@" 2>&1)"; then
+    printf '%s\n' "$output"
+  else
+    status=$?
+    [[ "$status" == 1 && -z "$output" ]] && return 0
+    printf '%s\n' "$output" >&2
+    return "$status"
+  fi
+}
+native="$(query_packages -Qqen)"
+foreign="$(query_packages -Qqem)"
+report 'Untracked repository packages' "$native"
+report 'Untracked foreign packages (AUR or manually installed)' "$foreign"
+
+printf '\nDirect dependencies should be tracked even if preinstalled.\n'
+if [[ "$include_base" == false ]]; then
+  echo 'Omarchy base names are excluded; use --include-base to include them.'
 fi
-
-# Filter out mise-managed packages if available
-if [[ -n "$mise_packages" ]]; then
-    untracked=$(comm -23 <(echo "$untracked" | sort) <(echo "$mise_packages" | sort))
-fi
-
-# Display results
-if [[ -z "$untracked" ]]; then
-    echo "✓ All installed packages are tracked!"
-    exit 0
-fi
-
-echo "Found $(echo "$untracked" | wc -l) untracked packages:"
-echo ""
-echo "$untracked"
-echo ""
-echo "Consider adding these to:"
-echo "  - packages/pacman/packages.txt (system/CLI packages)"
-echo "  - packages/pacman/packages-gui.txt (GUI applications)"
-echo ""
-echo "Or add them to mise if they're dev tools:"
-echo "  - packages/mise/.config/mise/config.toml"
+echo 'mise tools are NOT filtered out: overlaps need review, not concealment.'
+echo 'Compare with mise ls --current and mise config ls; package and tool names may differ.'

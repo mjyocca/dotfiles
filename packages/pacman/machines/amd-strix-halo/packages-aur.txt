@@ -1,0 +1,4 @@
+# AMD Strix Halo-specific dependencies; not installed on other machines.
+# Legacy package matching the existing installation. Its AUR entry is orphaned
+# and out-of-date: review the PKGBUILD and hardware support before reinstalling.
+llama-cpp-rocm-git

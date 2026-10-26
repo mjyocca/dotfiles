@@ -18,7 +18,9 @@ Cross-platform package management conventions for this dotfiles repo. Platform-s
 2. **Version-switched or coupled to a fast-moving cloud API?** Use mise, unless the tool must be available independently of mise per rule 1. Examples: kubectl, gh, hunk, opencode. Language runtimes (such as Go) and tools such as Terraform will move to mise in a separate migration; runtimes remain in asdf for now.
 3. **Neither rule settles ownership?** Keep the existing owner unless there is a reason to change it. For an optional CLI/TUI, use mise if its backend supports both platforms and it has no session/OS dependency (e.g., gitleaks, lazydocker, yq, glow, lsd, dua, superfile, television, yazi). Otherwise use the platform manager and document the exception. If both options still fit, first compare similar tools in our Brewfile, pacman lists, and mise config; then, if still ambiguous, use the package-management skill's upstream lookup. Neither tie-breaker overrides the primary criteria.
 
-Explicitly track direct dependencies in `packages/pacman/packages.txt` even if the OS already installed them; `pacman -S --needed` skips installed packages. Do not put the same tool in both our shared mise config and a platform package list. Check system-provided mise defaults and packages before changing ownership; do not uninstall packages the OS itself requires to eliminate a duplicate.
+Explicitly track direct dependencies in the appropriate `packages/pacman/packages*.txt` list even if the OS already installed them; `--needed` skips up-to-date targets. Repository system/CLI and GUI packages use their respective lists; all AUR packages use `packages-aur.txt`. See the Omarchy instructions for the installer and list format. Do not put the same tool in both our shared mise config and a platform package list. Check system-provided mise defaults and packages before changing ownership; do not uninstall packages the OS itself requires to eliminate a duplicate.
+
+Hardware-specific direct dependencies belong in `packages/pacman/machines/<name>/`, using the same list filenames. Explicitly select the overlay with `--machine <name>` in both the Omarchy installer and discovery helper; shared lists remain the default and are always included.
 
 ## mise Tools
 
@@ -33,6 +35,13 @@ mise current
 
 Check `mise registry <tool>` and supported platforms before adding a tool. A blanket `mise install` may also read `~/.tool-versions` and install duplicate asdf runtimes until the separate migration is complete.
 
+On macOS and Omarchy, `make mise_install` runs the shared Bash helper `scripts/install-mise-tools.sh`. It uses mise's TOML parser to read only `packages/mise/.config/mise/config.toml`, then installs explicit tool/version requests using `mise --no-config install`. It does not require stowing first, change existing user config, or install tools inherited from global/system/project config and `~/.tool-versions`. Run `make dotfiles` to activate the shared configuration afterward. Only simple string-version entries are supported; complex tool options are rejected rather than silently ignored.
+
+Preview without installing (requires mise):
+```bash
+bash scripts/install-mise-tools.sh --dry-run
+```
+
 ## Language Runtimes (Interim: asdf)
 
 Language runtimes are currently version-managed through `packages/tool-versions/.tool-versions`.
@@ -40,7 +49,7 @@ Language runtimes are currently version-managed through `packages/tool-versions/
 ```bash
 asdf install
 asdf install <lang> <version>
-asdf global <lang> <version>
+asdf set -u <lang> <version> # asdf 0.16+; older versions used asdf global
 asdf current <lang>
 ```
 

@@ -1,4 +1,7 @@
+# AUR-only packages, including GUI apps. Installed with yay as a normal user.
+# One package per line, with optional # comments.
+
+asdf-vm # Interim runtime manager; the executable is named asdf.
 heroic-games-launcher
-llama-cpp-rocm-git
 ngrok
 woeusb-ng

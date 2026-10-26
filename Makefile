@@ -165,7 +165,11 @@ apply_defaults_osx:
 # Target: install_mise
 # Purpose: Install mise if not already present (idempotent)
 install_mise:
+ifeq ($(PROFILE),omarchy)
+	@command -v mise >/dev/null || { echo "mise is missing; run make install_linux_tools to install mise-bin." >&2; exit 1; }
+else
 	@bash ./scripts/install-mise.sh
+endif
 
 # Target: bootstrap_osx
 # Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
@@ -189,7 +193,16 @@ brew_bundle:
 # 
 # Omarchy installs curated lists; other Linux profiles retain their existing setup.
 
-bootstrap_linux: update_linux_packages install_linux_tools install_mise mise_install install_git_hooks zellij-plugins
+# Recursive makes enforce provisioning order even with make -j.
+.PHONY: bootstrap_linux update_linux_packages install_linux_tools install_mise mise_install install_git_hooks
+bootstrap_linux:
+	$(MAKE) update_linux_packages
+	$(MAKE) install_linux_tools
+	$(MAKE) install_mise
+	$(MAKE) mise_install
+	$(MAKE) install_git_hooks
+	$(MAKE) zellij-plugins
+	@echo "Packages installed. Run make dotfiles to activate the repository configuration."
 
 update_linux_packages:
 	@echo "Updating Linux-specific packages ..."
@@ -208,8 +221,6 @@ else
 	$(INSTALL_CMD) stow
 	$(INSTALL_CMD) gitleaks
 endif
-	@echo "Installing git hooks..."
-	@bash ./scripts/install-git-hooks.sh
 
 install_git_hooks:
 	@echo "Installing git hooks..."
@@ -221,7 +232,7 @@ install_git_hooks:
 
 mise_install:
 	@echo "Installing mise-managed dev tools..."
-	@mise install
+	@bash ./scripts/install-mise-tools.sh
 
 mise_update:
 	@echo "Updating mise-managed dev tools..."

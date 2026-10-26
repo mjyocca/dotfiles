@@ -8,7 +8,7 @@ set -euo pipefail
 # Check if gitleaks is available
 if ! command -v gitleaks &> /dev/null; then
   echo "⚠️  gitleaks not found. Skipping secret scan."
-  echo "   Install with: sudo pacman -S gitleaks (Arch) or brew install gitleaks (macOS)"
+  echo "   After make dotfiles, install with: mise install gitleaks"
   exit 0
 fi
 

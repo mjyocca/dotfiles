@@ -23,7 +23,7 @@ Load `docs/instructions/package-management.md` first. Classify the *tool*, not j
 **Tie-breakers for a tool that could reasonably use either manager:**
 
 1. Check how *this repo* owns the tool or similar tools: `packages/homebrew/Brewfile`, `packages/pacman/packages.txt` (and GUI/AUR lists), and `packages/mise/.config/mise/config.toml`. Prefer consistency with an existing comparable tool when the primary criteria do not decide; do not copy an old choice that contradicts them.
-2. If still unclear, inspect how the installed Omarchy version provides it when available (`/usr/share/omarchy/install/omarchy-base.packages` and `/etc/mise/conf.d/omarchy-tools.toml`). Otherwise consult the upstream sources at the bottom of this skill.
+2. If still unclear, inspect how the installed Omarchy version provides it when available (`/usr/share/omarchy/install/omarchy-base.packages`, `/etc/mise/conf.d/*.toml`, and `mise config ls`). Default filenames vary by version. Otherwise consult the upstream sources at the bottom of this skill.
 
 These lookups break ties; they do not replace our ownership rules. For a still-ambiguous tool, prefer platform ownership if it is in the upstream pacman base list, or mise if it is in upstream mise defaults. If it appears in both, apply the primary criteria and check how the system uses it; do not create a duplicate by default. Absence from either list does not mean the tool is unavailable in pacman or mise. Check actual package availability and the *effective* mise configuration (system defaults may apply) before adding a second installation. Do not uninstall OS-required packages merely to resolve an overlap.
 
@@ -39,11 +39,18 @@ omarchy pkg add <package>
 ./scripts/omarchy/find-untracked-packages.sh
 
 # 3. Track direct dependencies even if already installed by the OS
-# - packages/pacman/packages.txt (system/CLI)
-# - packages/pacman/packages-gui.txt (GUI apps)
+# - packages/pacman/packages.txt (repository system/CLI)
+# - packages/pacman/packages-gui.txt (repository GUI apps)
+# - packages/pacman/packages-aur.txt (all AUR packages, including GUI)
 # Apply one list (system, gui, or aur), or omit the argument for all three.
-# The script ignores comments and uses --needed to skip up-to-date packages.
+# Preview with --dry-run; the installer validates names and strips comments.
+# --needed skips up-to-date packages; it is not version pinning.
 bash ./scripts/omarchy/install-packages.sh system
+# Hardware-specific dependencies belong in packages/pacman/machines/<name>/.
+# Explicit selection adds that overlay to shared lists; absent files are OK.
+bash ./scripts/omarchy/install-packages.sh --machine amd-strix-halo --dry-run
+# Use the same selection when auditing installed packages:
+./scripts/omarchy/find-untracked-packages.sh --machine amd-strix-halo
 
 # 4. Commit the change
 git add packages/pacman/packages.txt
@@ -97,7 +104,7 @@ asdf install <lang> <version>
 # e.g., asdf install nodejs 20.10.0
 
 # 2. Set global version
-asdf global <lang> <version>
+asdf set -u <lang> <version> # asdf 0.16+; older versions used asdf global
 
 # 3. This updates packages/tool-versions/.tool-versions
 
@@ -130,6 +137,8 @@ When setting up a new machine, install in this order:
 
 4. **Eligible mise tools** (install only what is needed; avoid duplicate runtimes)
    ```bash
+   make mise_install # macOS/Omarchy: only tools declared in the shared repo config
+   # Or install an individual configured tool:
    mise install <tool>
    ```
 
@@ -138,7 +147,9 @@ When setting up a new machine, install in this order:
    asdf install
    ```
 
-`make bootstrap` on Omarchy runs `pacman -Syu` and the list installer, which uses `--needed` to skip up-to-date targets; new versions are still upgraded. Bootstrap also runs a blanket `mise install` before stowing; ensure the mise config is available first, or verify it afterward. A blanket install can duplicate asdf runtimes from `~/.tool-versions`; this does not change runtime ownership.
+`make mise_install` uses `scripts/install-mise-tools.sh` on both macOS and Omarchy. Preview with `bash scripts/install-mise-tools.sh --dry-run`. It installs only explicit tool/version requests from the repository's shared mise config using `mise --no-config install`, avoiding existing effective config and asdf runtimes.
+
+`make bootstrap` on Omarchy runs `pacman -Syu`, the list installer, mise availability check, repository-only mise installation, git hooks, and Zellij plugins sequentially, even with `make -j`. System/GUI lists go to pacman; AUR goes to yay as a normal user. It does not stow or install runtimes: run `make dotfiles`, then `asdf install` as needed. See `docs/instructions/omarchy.md` for list syntax, providers, preview commands, and discovery limitations.
 
 ## Omarchy Sources (Secondary Tie-Breaker Only)
 

@@ -100,6 +100,8 @@ brew install --cask <app>
 
 See [package management instructions](./package-management.md) for mise and asdf conventions, commands, and troubleshooting.
 
+`make mise_install` uses the shared Bash helper `scripts/install-mise-tools.sh` to install only tools declared in the repository's mise config, without picking up asdf runtimes or existing global/project config. Preview with `bash scripts/install-mise-tools.sh --dry-run`; run `make dotfiles` afterward to activate the shared configuration.
+
 ## Troubleshooting
 
 ### GUI app vs system package?
