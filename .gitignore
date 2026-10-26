@@ -28,3 +28,5 @@ opencode.json
 opencode.jsonc
 
 .opencode/plans/**
+.opencode/plan/**
+packages/opencode/.opencode/plan/**
