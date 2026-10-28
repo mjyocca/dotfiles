@@ -102,7 +102,7 @@ cask 'font-symbols-only-nerd-font'
 
 ###############
 # Mac App Store
-mas 'system-color-picker', id: 1545870783
+mas 'system-color-picker', id: _1545870783
 
 ###############
 # Hooks
