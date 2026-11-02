@@ -32,10 +32,11 @@ packages/          # Stow packages (each maps to $HOME paths)
   ssh/             # SSH config
   starship/        # Prompt theme
   ghostty/         # Terminal emulator
-  pacman/          # System packages (Omarchy: packages.txt, packages-gui.txt, packages-aur.txt)
   homebrew/        # System packages (macOS: Brewfile)
   mise/            # Dev tools (cross-platform: config.toml)
   tool-versions/   # Language runtimes (cross-platform: .tool-versions)
+manifests/         # Repository-only provisioning manifests (not stowed)
+  pacman/          # Shared package lists and machine-specific overlays
 profiles/          # OS profile allow-lists (one package name per line)
   macos            # Packages to stow on macOS
   omarchy          # Packages to stow on Omarchy Linux
@@ -87,10 +88,12 @@ Per-machine ignore list: `.stow-ignore.local` (git-ignored).
 
 ## Package Management Architecture
 
-Three layers: system packages (Homebrew/pacman), dev tools (mise), language runtimes (asdf). For architecture, decision matrix, commands, and conventions load:
+Choose by dependency: mission-critical, session-critical, or OS-integrated tools → Homebrew/pacman; version-switched or fast-moving cloud API tools → mise (unless needed independently of mise). Optional tools use mise when suitable; if both managers fit, first compare our existing package lists/config, then consult the package-management skill's upstream lookup if still ambiguous. Runtimes stay on asdf until their separate migration to mise. Track direct pacman dependencies explicitly; apply the curated lists with `bash scripts/omarchy/install-packages.sh` (`--dry-run` previews). Repository CLI/system and GUI lists use pacman; all AUR packages use the AUR list and yay. `--needed` skips up-to-date targets, not all installed packages. For details load:
 - Cross-platform → `@docs/instructions/package-management.md`
 - macOS → `@docs/instructions/macos.md`
 - Omarchy → `@docs/instructions/omarchy.md`
+
+Pacman lists live in `manifests/pacman/` and are read directly from the repository, not stowed. Machine-specific dependencies live in `manifests/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
 
 ## Skills
 

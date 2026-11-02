@@ -1,4 +1,12 @@
 # ================================================================
+# mise — dev tool activation
+# ================================================================
+# Must precede every tool init below (starship, direnv, fzf, zoxide...):
+# mise-managed binaries replace the former brew copies.
+# Mirrors packages/bash/.bashrc on Omarchy.
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
+
+# ================================================================
 # Starship.io (see https://starship.rs/guide/)
 # ================================================================
 # Load starship prompt first before other tools

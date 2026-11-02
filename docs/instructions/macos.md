@@ -4,7 +4,7 @@ This file captures macOS-specific conventions, override paths, package managemen
 
 ## Key Concepts
 
-- **Package management**: Homebrew for system packages, mise for dev tools, asdf for language runtimes
+- **Package management**: Homebrew for platform/session tools, mise for optional/version-sensitive tools, asdf for language runtimes (interim)
 - **Shell**: Zsh is default shell on macOS
 - **Dotfiles management**: GNU Stow for symlink management
 - **System defaults**: Managed via `defaults write` in `scripts/macos/`
@@ -54,7 +54,7 @@ colima status             # Check status
 
 ### System Packages (Homebrew)
 
-Homebrew is for **system packages only** (infrastructure, build deps, GUI apps).
+Homebrew owns mission-critical, session-critical, and OS-integrated tools (infrastructure, build dependencies, GUI apps, and shell/session utilities). See [package management instructions](./package-management.md) for ownership decisions.
 
 **Config location:** `packages/homebrew/Brewfile` (stowed to `~/Brewfile`)
 
@@ -82,7 +82,7 @@ brew install --cask <app>
 **❌ Do NOT add to Brewfile:**
 
 1. **Packages managed by mise**
-   - Dev tools like gitleaks, lazygit, jq, ripgrep, etc.
+   - Version-sensitive/optional tools like gitleaks, gh, kubectl, opencode, television
    - These belong in `packages/mise/.config/mise/config.toml`
 
 2. **Language runtimes in system packages**
@@ -93,12 +93,14 @@ brew install --cask <app>
 1. **System infrastructure** you depend on (git, curl, stow, build tools)
 2. **System services** you use (docker, colima)
 3. **GUI applications** you launch from app menu
-4. **Dev tools** in mise (cross-platform CLI/TUI tools)
-5. **Language runtimes** in asdf (version-managed)
+4. **Session-critical and other platform-managed CLI/TUI tools** (starship, direnv, fzf, jq, lazygit, ripgrep, tmux)
+5. **Optional/version-sensitive tools** in mise; **language runtimes** in asdf until the separate migration
 
 ## Dev Tools & Language Runtimes
 
 See [package management instructions](./package-management.md) for mise and asdf conventions, commands, and troubleshooting.
+
+`make mise_install` uses the shared Bash helper `scripts/install-mise-tools.sh` to install only tools declared in the repository's mise config, without picking up asdf runtimes or existing global/project config. Preview with `bash scripts/install-mise-tools.sh --dry-run`; run `make dotfiles` afterward to activate the shared configuration.
 
 ## Troubleshooting
 
@@ -106,7 +108,7 @@ See [package management instructions](./package-management.md) for mise and asdf
 
 **Rule of thumb:**
 - If it has a GUI and you launch it from `/Applications/` → Homebrew cask
-- If it's a CLI tool or system service → Homebrew formula
+- If it's a system service or a platform-managed CLI tool → Homebrew formula; classify other CLIs with the [ownership criteria](./package-management.md)
 
 **Examples:**
 - ✅ alacritty (terminal emulator with GUI) → cask

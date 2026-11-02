@@ -1,5 +1,6 @@
 # GUI Applications
-# Desktop applications with graphical interfaces
+# Repository desktop applications (including the Omarchy repository).
+# AUR applications belong in packages-aur.txt, not here.
 # One package per line, comments with #
 
 1password

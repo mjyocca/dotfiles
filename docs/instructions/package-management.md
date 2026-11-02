@@ -1,137 +1,63 @@
 # Package Management Instructions
 
-Cross-platform package management conventions for this dotfiles repo.
-Platform-specific system package details are in `@docs/instructions/omarchy.md` and `@docs/instructions/macos.md`.
+Cross-platform package management conventions for this dotfiles repo. Platform-specific details are in `@docs/instructions/omarchy.md` and `@docs/instructions/macos.md`.
 
----
+## Current Layers
 
-## Three-Layer Architecture
+| Manager | Role | Config |
+|---------|------|--------|
+| Homebrew / pacman | Mission-critical, session-critical, and OS-integrated packages | `packages/homebrew/Brewfile`, `manifests/pacman/packages.txt` |
+| mise | Version-switched, fast-moving cloud API, and eligible optional tools | `packages/mise/.config/mise/config.toml` |
+| asdf (interim) | Language runtimes | `packages/tool-versions/.tool-versions` |
 
-| Layer | Manager | Scope | Config File |
-|-------|---------|-------|-------------|
-| System Packages | Homebrew / pacman | OS-specific | `Brewfile`, `packages.txt` |
-| Dev Tools | mise | Cross-platform | `config.toml` |
-| Language Runtimes | asdf | Cross-platform | `.tool-versions` |
+**Planned separately:** move language runtimes from asdf to mise, then retire asdf. Do not change runtime ownership as part of other package migrations. Until then, asdf owns runtime versions; avoid installing duplicate runtimes through mise.
 
-### Decision Matrix
+## Choosing an Owner
 
-| Category | Manager | Example |
-|----------|---------|---------|
-| System infrastructure | Homebrew/pacman | git, curl, gcc |
-| GUI applications | Homebrew/pacman | vscode, alacritty |
-| Dev CLI tools | mise | gitleaks, lazygit, jq |
-| Language runtimes | asdf | node, ruby, go |
+1. **Mission-critical, session-critical, or OS-integrated?** Use Homebrew/pacman for services, GUI apps, libraries, build dependencies, and commands required for a usable shell or desktop. Examples: git, Docker, starship, fzf, direnv, zoxide, tmux, zellij.
+2. **Version-switched or coupled to a fast-moving cloud API?** Use mise, unless the tool must be available independently of mise per rule 1. Examples: kubectl, gh, hunk, opencode. Language runtimes (such as Go) and tools such as Terraform will move to mise in a separate migration; runtimes remain in asdf for now.
+3. **Neither rule settles ownership?** Keep the existing owner unless there is a reason to change it. For an optional CLI/TUI, use mise if its backend supports both platforms and it has no session/OS dependency (e.g., gitleaks, lazydocker, yq, glow, lsd, dua, superfile, television, yazi). Otherwise use the platform manager and document the exception. If both options still fit, first compare similar tools in our Brewfile, pacman lists, and mise config; then, if still ambiguous, use the package-management skill's upstream lookup. Neither tie-breaker overrides the primary criteria.
 
----
+Explicitly track direct dependencies in the appropriate `manifests/pacman/packages*.txt` list even if the OS already installed them; `--needed` skips up-to-date targets. These provisioning manifests are read directly from the repository and are not stowed. Repository system/CLI and GUI packages use their respective lists; all AUR packages use `packages-aur.txt`. See the Omarchy instructions for the installer and list format. Do not put the same tool in both our shared mise config and a platform package list. Check system-provided mise defaults and packages before changing ownership; do not uninstall packages the OS itself requires to eliminate a duplicate.
 
-## Dev Tools (mise)
+Hardware-specific direct dependencies belong in `manifests/pacman/machines/<name>/`, using the same list filenames. Explicitly select the overlay with `--machine <name>` in both the Omarchy installer and discovery helper; shared lists remain the default and are always included.
 
-Dev tools are managed via mise — cross-platform, available on both macOS and Omarchy.
+## mise Tools
 
-**Config location:** `packages/mise/.config/mise/config.toml` (stowed to `~/.config/mise/config.toml`)
-
-**Auto-updates (Omarchy):** The `post-update` hook runs `mise up` to keep tools current:
-```bash
-~/.config/omarchy/hooks/post-update.d/99-mise-update
-```
-
-### Commands
+The shared config is stowed to `~/.config/mise/config.toml`. System mise defaults may also apply; only add tools to the shared config when they meet the criteria above.
 
 ```bash
-# Install all dev tools
-mise install
-
-# Update all dev tools
-mise update
-
-# Add new tool
-mise use -g <tool>@latest
-
-# List installed tools
+mise install <tool>      # install an eligible tool without also installing asdf runtimes
+mise use -g <tool>@latest # add an eligible tool to global config
 mise list
-
-# Check tool versions
 mise current
-
-# Force update now
-MISE_MINIMUM_RELEASE_AGE=0 mise up --yes
 ```
 
----
+Check `mise registry <tool>` and supported platforms before adding a tool. A blanket `mise install` may also read `~/.tool-versions` and install duplicate asdf runtimes until the separate migration is complete.
 
-## Language Runtimes (asdf)
+On macOS and Omarchy, `make mise_install` runs the shared Bash helper `scripts/install-mise-tools.sh`. It uses mise's TOML parser to read only `packages/mise/.config/mise/config.toml`, then installs explicit tool/version requests using `mise --no-config install`. It does not require stowing first, change existing user config, or install tools inherited from global/system/project config and `~/.tool-versions`. Run `make dotfiles` to activate the shared configuration afterward. Only simple string-version entries are supported; complex tool options are rejected rather than silently ignored.
 
-Language runtimes are managed via asdf — cross-platform, version-managed.
+Preview without installing (requires mise):
+```bash
+bash scripts/install-mise-tools.sh --dry-run
+```
 
-**Config location:** `packages/tool-versions/.tool-versions` (stowed to `~/.tool-versions`)
+## Language Runtimes (Interim: asdf)
 
-### Commands
+Language runtimes are currently version-managed through `packages/tool-versions/.tool-versions`.
 
 ```bash
-# Install all language runtimes
 asdf install
-
-# Add new runtime
 asdf install <lang> <version>
-
-# Set global version
-asdf global <lang> <version>
-
-# List installed versions
-asdf list <lang>
-
-# Check current version
+asdf set -u <lang> <version> # asdf 0.16+; older versions used asdf global
 asdf current <lang>
 ```
 
----
+## Resolving Duplicates
 
-## Cross-Platform Rules
-
-### What NOT to put in system packages (Brewfile / packages.txt)
-
-- **Dev tools managed by mise** — gitleaks, lazygit, jq, ripgrep, etc. belong in `config.toml`
-- **Language runtimes** — node, ruby, go belong in asdf, not system packages
-
-### What belongs in system packages
-
-- System infrastructure (git, curl, stow, build tools)
-- System services (docker)
-- GUI applications launched from app menu
-
-### GUI app vs CLI tool?
-
-- Has a GUI and launches from app menu → system package (GUI list)
-- CLI tool or system service → system package (infrastructure list)
-
----
-
-## Troubleshooting
-
-### Package in both system packages and mise
-
-**Problem:** A tool like gitleaks appears in both Brewfile/packages.txt and mise config.
-
-**Fix:** Remove from the system package file. It belongs in `packages/mise/.config/mise/config.toml` only.
-
-### mise tool not installing
-
-1. Check the tool name is correct in the mise registry
-2. Try updating mise: `mise self-update`
-3. Check mise logs for specific error messages
-
-### asdf plugin not found
-
-```bash
-asdf plugin add <lang>   # e.g., asdf plugin add nodejs
-asdf install <lang> <version>
-```
-
----
+If a tool is in both mise and a system package list, classify it using the rules above. Install and verify the chosen provider before removing the other. Distinguish packages required by the OS itself from packages explicitly tracked in our list. Verify with `command -v <tool>` in a fresh shell and check mise's effective configuration before pruning old installs.
 
 ## Sources
 
-- [mise documentation](https://mise.jdx.dev/) — dev tool manager
-- [asdf documentation](https://asdf-vm.com/) — language runtime manager
-
-_Last synced: 2026-01-23_
+- [mise documentation](https://mise.jdx.dev/)
+- [asdf documentation](https://asdf-vm.com/)
