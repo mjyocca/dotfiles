@@ -182,11 +182,11 @@ pre_install_osx:
 
 install_osx_tools:
 	@echo "Installing macOS-specific tools..."
-	@brew bundle --file="~/Brewfile"
+	@brew bundle --file="$(CURDIR)/packages/homebrew/Brewfile"
 	@bash ./scripts/plugins.sh
 
 brew_bundle:
-	@brew bundle --file="~/Brewfile"
+	@brew bundle --file="$(CURDIR)/packages/homebrew/Brewfile"
 # ======================
 ## LINUX SPECIFIC TARGETs
 # ======================
