@@ -1,64 +1,66 @@
-# Package Management Instructions
+# Package Ownership Policy
 
-Cross-platform package management conventions for this dotfiles repo. Platform-specific details are in `@docs/instructions/omarchy.md` and `@docs/instructions/macos.md`.
+This is the canonical ownership policy. Use the `package-management` skill for
+the workflow; read only the applicable platform guide for platform-specific work.
 
-## Current Layers
+## Sources of Truth
 
-| Manager | Role | Config |
-|---------|------|--------|
-| mise bootstrap | System packages (Homebrew on macOS, pacman on Linux) | `.config/mise/config.<platform>.toml` |
-| mise | Version-switched, fast-moving cloud API, and eligible optional tools | `packages/mise/.config/mise/config.toml` |
-| asdf (interim) | Language runtimes | `packages/tool-versions/.tool-versions` |
+| Owner | Repository declaration |
+|---|---|
+| System packages via mise bootstrap | `.config/mise/config.toml` plus `config.macos.toml` or `config.omarchy.toml` in the same directory, under `[bootstrap.packages]` |
+| Shared mise dev tools | `packages/mise/.config/mise/config.toml`, under `[tools]`; intended home destination: `~/.config/mise/config.toml` |
+| Language runtimes via asdf (interim) | `packages/tool-versions/.tool-versions` |
 
-**Planned separately:** move language runtimes from asdf to mise, then retire asdf. Do not change runtime ownership as part of other package migrations. Until then, asdf owns runtime versions; avoid installing duplicate runtimes through mise.
+The repository bootstrap config and deployed dev-tool config have different roles.
+Inspect effective mise configuration and environment selection before installing;
+system defaults (notably `/etc/mise/conf.d/` on Omarchy) may also provide tools.
 
 ## Choosing an Owner
 
-1. **System packages?** Use mise bootstrap with `brew:` (macOS) or platform package manager (Linux). Examples: git, Docker, starship, fzf, direnv, zoxide, tmux, zellij.
-2. **Version-switched or coupled to a fast-moving cloud API?** Use mise dev tools, unless the tool must be available independently of mise per rule 1. Examples: kubectl, gh, hunk, opencode. Language runtimes (such as Go) and tools such as Terraform will move to mise in a separate migration; runtimes remain in asdf for now.
-3. **Neither rule settles ownership?** Keep the existing owner unless there is a reason to change it. For an optional CLI/TUI, use mise if its backend supports both platforms and it has no session/OS dependency (e.g., gitleaks, lazydocker, yq, glow, lsd, dua, superfile, television, yazi). Otherwise use the platform package manager and document the exception. If both options still fit, first compare similar tools in our mise config, pacman lists, and Homebrew packages; then, if still ambiguous, use the package-management skill's upstream lookup. Neither tie-breaker overrides the primary criteria.
+1. **OS-integrated or session-critical:** use system packages via bootstrap
+   (`brew:` / `brew-cask:` on macOS, `pacman:` on Omarchy). This includes services,
+   libraries, shell startup dependencies, prompts, and session managers.
+2. **Version-switched or tied to a fast-moving cloud API:** use mise dev tools,
+   unless availability independent of mise is required by rule 1.
+3. **Otherwise:** keep existing ownership. An optional CLI/TUI may use mise if its
+   backend supports both platforms and it has no OS/session dependency; otherwise
+   use the platform manager and document the exception.
 
-Explicitly track direct dependencies in the appropriate `manifests/pacman/packages*.txt` list even if the OS already installed them; `--needed` skips up-to-date targets. These provisioning manifests are read directly from the repository and are not deployed to `$HOME`. Repository system/CLI and GUI packages use their respective lists; all AUR packages use `packages-aur.txt`. See the Omarchy instructions for the installer and list format. Do not put the same tool in both our shared mise config and a platform package list. Check system-provided mise defaults and packages before changing ownership; do not uninstall packages the OS itself requires to eliminate a duplicate.
+Language runtimes remain on asdf until a separately scoped migration. Do not
+install duplicate mise runtimes or move runtime ownership incidentally; Terraform
+ownership changes are also a separate migration, not implied by these rules.
 
-Hardware-specific direct dependencies belong in `manifests/pacman/machines/<name>/`, using the same list filenames. Explicitly select the overlay with `--machine <name>` in both the Omarchy installer and discovery helper; shared lists remain the default and are always included.
+When criteria do not settle a choice, compare similar tracked tools, then inspect
+the installed OS's package and mise defaults or version-matched upstream sources.
+These are tie-breakers, not overrides. Package names and executable names can differ.
+Do not remove OS-required packages merely to eliminate an overlap; build dependencies
+may legitimately require a system runtime alongside the selected asdf version.
 
-## mise Tools
+## Declaration and Installation Boundaries
 
-The shared config is deployed to `~/.config/mise/config.toml`. System mise defaults may also apply; only add tools to the shared config when they meet the criteria above.
+- Put shared system dependencies in `.config/mise/config.toml`; platform-only
+  dependencies go in the corresponding platform file. Avoid duplicate declarations.
+- Shared dev tools belong in `packages/mise/.config/mise/config.toml`; verify the
+  backend/platform support before adding one. Do not put optional dev tools into
+  platform bootstrap just because they are CLI applications.
+- Track runtime version changes directly in `packages/tool-versions/.tool-versions`.
+  Do not assume a global manager command edits the tracked file on this machine.
+- Retained `manifests/pacman/` lists are audit inputs, not inputs to current mise
+  package installation. AUR has competing lists and a broken consumer path; read
+  `docs/instructions/omarchy.md` before editing AUR declarations or audit overlays.
+- `make tools` runs blanket `mise install`, which may also read `~/.tool-versions`
+  and install duplicate asdf runtimes. Prefer a targeted install when authorized;
+  inspect effective configuration rather than assuming runtime migration is done.
 
-Tools are installed via the tools layer:
+## Ownership Changes
 
-```bash
-make tools  # Install all dev tools via mise
-mise list
-mise current
-```
+Inspect declarations, installed packages, and command resolution first. When
+installation/removal is authorized, verify the new provider before removing the old
+user-managed one. Preserve OS dependencies and unrelated edits. Check resolution in
+a fresh shell with `command -v <tool>` and inspect `mise config ls`, `mise current`,
+or `asdf current` as applicable. Do not infer successful installation from a text edit.
 
-Check `mise registry <tool>` and supported platforms before adding a tool. A blanket `mise install` may also read `~/.tool-versions` and install duplicate asdf runtimes until the separate migration is complete.
+## Upstream References
 
-To add a new dev tool, edit the appropriate config file:
-- Shared tools: `packages/mise/.config/mise/config.toml`
-- macOS-only: `.config/mise/config.macos.toml`
-- Omarchy-only: `.config/mise/config.omarchy.toml`
-
-Then run `make tools` to install.
-
-## Language Runtimes (Interim: asdf)
-
-Language runtimes are currently version-managed through `packages/tool-versions/.tool-versions`.
-
-```bash
-asdf install
-asdf install <lang> <version>
-asdf set -u <lang> <version> # asdf 0.16+; older versions used asdf global
-asdf current <lang>
-```
-
-## Resolving Duplicates
-
-If a tool is in both mise and a system package list, classify it using the rules above. Install and verify the chosen provider before removing the other. Distinguish packages required by the OS itself from packages explicitly tracked in our list. Verify with `command -v <tool>` in a fresh shell and check mise's effective configuration before pruning old installs.
-
-## Sources
-
-- [mise documentation](https://mise.jdx.dev/)
-- [asdf documentation](https://asdf-vm.com/)
+- [mise](https://mise.jdx.dev/) — registry, backends, effective configuration
+- [asdf](https://asdf-vm.com/) — runtime installation and version selection

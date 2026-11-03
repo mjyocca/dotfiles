@@ -4,9 +4,9 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 
 ## Never commit secrets or credentials
 
-- Secrets, API keys, and tokens belong in `~/.zshrc.local` (git-ignored)
-- Never put real values in `.zshenv` or `.zshrc` — those are committed
-- The `.zshrc.local` bootstrap in `.zshrc` exists specifically for this
+- Secrets, API keys, and tokens belong in git-ignored `~/.zshrc.local` or `~/.bashrc.local`
+- Never put real values in shared shell startup files — those are committed
+- Both interactive shell configs bootstrap and source their local override file
 
 ## Never hardcode usernames or absolute paths
 
@@ -32,37 +32,18 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 
 ## git-ignore all per-machine local files
 
-- `.stow-ignore.local` — machine-specific package ignore list (deprecated: use mise config environments instead)
-- `packages/zsh/.zshrc.local` — machine-specific shell overrides
-- `packages/zsh/.global_env.sh` — legacy, replaced by `.zshrc.local`
+- Keep shell-local overrides ignored, including `packages/zsh/.zshrc.local` and `packages/bash/.bashrc.local` when they reside in the source tree
+- Check effective deployment filtering before assuming an ignored file cannot be deployed; tracked mise group declarations are currently missing
+- `.stow-ignore.local` and `packages/zsh/.global_env.sh` are legacy conventions, not current deployment configuration
 
 ## Gitleaks — secret scanning
 
-**Automatic:** Pre-commit hook scans staged changes on every `git commit`. Install with `make install_git_hooks`.
+`make hooks` installs a pre-commit hook only when gitleaks is available. The hook
+currently invokes `gitleaks protect --staged --verbose` and skips scanning with a
+warning if the binary is missing. Installation is not proof every commit is scanned;
+inspect the active hook and installed CLI compatibility when auditing enforcement.
 
-**Manual usage:**
-
-```bash
-# Scan staged changes (what the pre-commit hook does)
-gitleaks protect --staged
-
-# Scan entire repository history
-gitleaks detect --source . --log-level info
-
-# Scan specific commit
-gitleaks detect --source . --commit <sha>
-
-# Scan uncommitted changes (working directory)
-gitleaks protect --verbose
-
-# Scan a specific file or directory
-gitleaks dir <path>
-```
-
-**When to use manually:**
-- Before pushing to verify no secrets in recent commits
-- When reviewing a PR from another contributor
-- To audit repository history after adding new sensitive files
-- To scan a specific branch: `gitleaks detect --source . --log-opts <branch>..HEAD`
-
-**Configuration:** `.gitleaks.toml` in repo root (allowlists specific paths, custom patterns)
+For manual scans, consult the installed version's help and
+[upstream Gitleaks guidance](https://github.com/gitleaks/gitleaks) instead of copying
+version-sensitive command recipes. Check `.gitleaks.toml` in the repository root
+for local allowlists and patterns. Review scan output for secrets before sharing it.

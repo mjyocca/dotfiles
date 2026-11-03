@@ -1,139 +1,55 @@
-# macOS Instructions
+# macOS Conventions
 
-This file captures macOS-specific conventions, override paths, package management, and troubleshooting. Keep content lean — link out, don't duplicate.
+Use for macOS integration, defaults, containers, and desktop automation. Load
+`docs/instructions/zsh.md` only for shell changes; for package changes consult the
+canonical `docs/instructions/package-management.md` policy.
 
-## Key Concepts
+## Configuration Sources
 
-- **Package management**: Homebrew for platform/session tools, mise for optional/version-sensitive tools, asdf for language runtimes (interim)
-- **Shell**: Zsh is default shell on macOS
-- **Dotfiles management**: mise for dotfile management
-- **System defaults**: Managed via `defaults write` in `scripts/macos/`
-- **Docker**: Colima for container runtime (macOS-only)
+- `.config/mise/config.macos.toml` adds platform system packages to the shared
+  `.config/mise/config.toml` bootstrap declarations. Formulas use `brew:`, casks
+  use `brew-cask:` under `[bootstrap.packages]`.
+- Shared dev tools and interim asdf runtime versions have separate declarations
+  identified in the package policy; runtime migration to mise is not complete.
+- `scripts/macos/config.sh` uses `apply-user-defaults`, when available, with
+  `scripts/macos/defaults.yml` and `scripts/macos/defaults.apps.yml`.
+  `make config` (also `make apply_settings`) applies them; it is not a read-only
+  validation command and may skip defaults if the utility is absent.
+- User configuration uses XDG paths under `~/.config/`; LaunchAgents live under
+  `~/Library/LaunchAgents/`. Discover the Homebrew prefix with `brew --prefix`
+  rather than assuming an Apple Silicon or Intel installation path.
 
-## System Configuration
+## Containers and Virtualization
 
-### Override Paths
-- **User config**: `~/.config/` (XDG standard)
-- **Applications**: `/Applications/`
-- **Homebrew prefix**: `/opt/homebrew/` (Apple Silicon) or `/usr/local/` (Intel)
-- **LaunchAgents**: `~/Library/LaunchAgents/`
+Colima is the preferred Docker runtime here, with Lima providing the VM layer.
+`packages/colima/.config/colima/_templates/default.yaml` selects `vmType: vz`
+(Apple's Virtualization framework) and `mountType: virtiofs`. This describes the
+template, **not** the effective backend of every existing profile. Inspect a
+profile before changing it; template edits do not prove an existing VM migrated.
 
-### macOS Defaults
-System preferences are managed via `apply-user-defaults` using YAML files:
-- `scripts/macos/defaults.yml` — System defaults
-- `scripts/macos/defaults.apps.yml` — Application-specific defaults
+Review host mounts and their write access before running untrusted workloads.
+Neither a VM backend nor container use alone establishes safe isolation from
+mounted host files. See `docs/reference/security.md` for local mount considerations.
 
-**Apply defaults:**
-```bash
-make apply_settings
-# or directly:
-apply-user-defaults ./scripts/macos/defaults.yml
-apply-user-defaults ./scripts/macos/defaults.apps.yml
-```
+- [Apple Virtualization framework](https://developer.apple.com/documentation/virtualization)
+- [Colima](https://github.com/abiosoft/colima)
+- [Lima VM backends](https://lima-vm.io/docs/config/vmtype/)
 
-### Common Tasks
+## Agentic Tooling
 
-**Install dotfiles:**
-```bash
-make link  # Deploys dotfiles via mise
-```
+[Vercel Labs agent-desktop](https://github.com/vercel-labs/agent-desktop) provides
+desktop automation through the OS accessibility tree. Before use, consult its
+upstream instructions and version-matched desktop/platform guides. Accessibility
+access requires user approval; snapshots, screenshots, clipboard reads, and debug
+artifacts may expose private content. Keep them out of public logs and uploads.
 
-**Install all packages:**
-```bash
-make packages  # Uses mise bootstrap to install Homebrew packages
-```
+This reference is not authorization to install tooling, grant permissions, or
+operate desktop apps. Accessibility automation does not itself provide VM isolation.
 
-**Colima (Docker):**
-```bash
-colima start              # Start Docker daemon
-colima stop               # Stop Docker daemon
-colima status             # Check status
-```
+## Platform Boundaries
 
-## Package Management
-
-### System Packages (Homebrew)
-
-All system packages are managed via mise bootstrap in `.config/mise/config.macos.toml`. Homebrew packages are declared with `brew:` prefix, and GUI apps use `brew-cask:` prefix.
-
-**Config location:** `.config/mise/config.macos.toml` under `[bootstrap.packages]`
-
-#### Commands
-
-```bash
-# Install all packages via mise bootstrap
-make packages
-# or directly:
-mise bootstrap
-
-# Update all packages
-brew update && brew upgrade
-
-# List installed packages
-brew list
-
-# Install a single package (add to config.macos.toml, then run make packages)
-brew install <package>
-
-# Install a GUI app (cask)
-brew install --cask <app>
-```
-
-#### What NOT to Track
-
-**❌ Do NOT add to mise config (as Homebrew packages):**
-
-1. **Tools managed by mise as dev tools**
-   - Version-sensitive/optional tools like gitleaks, gh, kubectl, opencode, television
-   - These belong in `packages/mise/.config/mise/config.toml` under `tools`
-
-2. **Language runtimes**
-   - Don't install node, ruby, go via Homebrew
-   - Use mise for version management
-
-**✅ DO track as Homebrew packages:**
-1. **System infrastructure** you depend on (git, curl, stow, build tools)
-2. **System services** you use (docker, colima)
-3. **GUI applications** you launch from app menu
-4. **Session-critical and other platform-managed CLI/TUI tools** (starship, direnv, fzf, jq, lazygit, ripgrep, tmux)
-5. **Optional/version-sensitive tools** in mise; **language runtimes** in mise
-
-## Dev Tools & Language Runtimes
-
-Dev tools and language runtimes are managed through mise. Tools are installed via the tools layer:
-
-```bash
-make tools  # Installs dev tools via mise
-```
-
-This runs `mise install` which reads tool versions from the mise configuration. Language runtimes (node, python, ruby, etc.) are also managed via mise using the asdf plugin system.
-
-See [package management instructions](./package-management.md) for details on adding new tools and managing versions.
-
-## Troubleshooting
-
-### GUI app vs system package?
-
-**Rule of thumb:**
-- If it has a GUI and you launch it from `/Applications/` → Homebrew cask
-- If it's a system service or a platform-managed CLI tool → Homebrew formula; classify other CLIs with the [ownership criteria](./package-management.md)
-
-**Examples:**
-- ✅ alacritty (terminal emulator with GUI) → cask
-- ✅ git (CLI tool) → formula
-- ✅ docker (system service) → formula
-- ✅ vscode (GUI editor) → cask
-
-## Warnings
-
-- **SIP (System Integrity Protection)**: Cannot modify system files in `/System/`
-- **File permissions**: macOS has strict permissions for certain directories
-- **Code signing**: Some applications require code signing or notarization
-
-## Sources
-
-- [Apple Developer Documentation](https://developer.apple.com/documentation/) — system frameworks and APIs
-- [Homebrew Documentation](https://docs.brew.sh/) — package manager
-- [macOS User Guide](https://support.apple.com/guide/mac-help) — Apple's official user documentation
-
-_Last synced: 2026-11-03_
+Respect macOS privacy permissions and protected system paths; do not bypass them
+to make automation work. For platform behavior, consult the relevant section of
+[Apple documentation](https://developer.apple.com/documentation/), the
+[macOS User Guide](https://support.apple.com/guide/mac-help), or
+[Homebrew documentation](https://docs.brew.sh/) rather than maintaining local manuals.

@@ -1,149 +1,49 @@
-# Skill: mise-dotfiles
+# mise Dotfile Deployment
 
-Configuration guidance for deploying dotfiles with mise's `[dotfile_groups]` system.
+Use for deployment wiring, not package ownership or general mise tutorials.
 
-## Key Configuration Rules
+## Repository Layout and Current Gap
 
-**Group declarations require explicit fields.** Empty tables like `[dotfile_groups.nvim]` don't work. Each group needs:
+- `packages/<name>/` mirrors paths under `$HOME`.
+- `make link` runs `mise dotfiles apply` from the repository root.
+- `.config/mise/config.toml` and its platform files currently declare bootstrap
+  packages, **not** dotfile groups or a `settings.dotfiles` root. The deployed
+  `packages/mise/.config/mise/config.toml` declares dev tools only.
+- Therefore tracked configuration alone does not establish package deployment.
+  Inspect effective configuration (`mise config ls`) and `mise dotfiles status`
+  before promising what will be linked. Machine-local declarations may exist.
+  Missing deployment wiring is an implementation follow-up, not permission to
+  create ad hoc symlinks or invent group selections during another task.
 
-```toml
-[dotfile_groups.nvim]
-root = "nvim"
-mode = "symlink-each"
-manifest = "git"
-```
+## Editing Deployment Configuration
 
-**Settings structure matters.** Use `[settings.dotfiles]` with `default_mode` (not just `mode`):
+Consult [mise groups](https://mise.jdx.dev/dotfiles/groups.html) and the
+[dotfiles reference](https://mise.jdx.dev/dotfiles/reference.html) for the installed
+version before adding declarations. Do not copy historical sample TOML as current
+configuration. In particular:
 
-```toml
-[settings.dotfiles]
-root = "../../packages"  # relative path from .config/mise/
-default_mode = "symlink-each"
-```
+- Verify root resolution, group selection, and defaults upstream; platform files
+  do not currently contain the previously documented group selections.
+- `MISE_ENV` selects environment files, not an OS automatically. Zsh currently
+  exports `macos` in `packages/zsh/.zshenv`; confirm the effective value elsewhere.
+- Account for tracked versus ignored/local files before selecting a deployment
+  manifest. Do not deploy credentials or add agent metadata to a package tree
+  without checking whether it will be copied into `$HOME`.
+- Inspect target collisions and existing user edits before apply. Deselecting a
+  group is not proof that old files were removed; pruning/unapply are separate,
+  potentially destructive operations requiring explicit scope and authorization.
 
-**Relative paths resolve from the config file location.** If config is at `.config/mise/config.toml` and sources are at `packages/`, use `root = "../../packages"`.
+## Command Boundaries
 
-## Platform Selection
+`make bootstrap` runs prerequisites, packages, tools, plugins, config, and hooks;
+the Makefile has no explicit link step. Package scripts invoke `mise bootstrap`,
+whose behavior depends on effective mise declarations—do not assume it never
+deploys files when machine-local dotfile configuration exists.
 
-Use `MISE_ENV` to select platform configs:
+`make sync` runs packages, link, and plugins only. It does not run tools, config,
+or hooks. Use the narrow task-appropriate layer rather than treating sync as full
+provisioning. Deployment still requires authorized `make link` with valid wiring.
 
-- `MISE_ENV=macos`: loads `config.macos.toml`
-- `MISE_ENV=omarchy`: loads `config.omarchy.toml`
-- No env: all declared groups apply by default
-
-Each platform config contains `[bootstrap] dotfile_groups = [...]` listing which groups to apply.
-
-## Behavior Validated in Testing
-
-✅ **Git filtering works**: `manifest = "git"` excludes files in `.gitignore` from deployment
-✅ **Executable bits preserved**: Scripts deployed via symlinks maintain executable permissions
-✅ **Group deselection handles orphans**: Switching platforms removes platform-specific groups correctly
-✅ **Unapply provides reversibility**: `mise dot unapply --group <name>` removes deployed files
-
-## Common Pitfalls
-
-- ❌ Don't use `dotfiles.root = "packages"` at top-level — use `[settings.dotfiles]` section
-- ❌ Don't use `mode` in settings — use `default_mode`
-- ❌ Don't create empty group tables — always specify `root`, `mode`, `manifest`
-- ❌ Don't assume `~` expands in paths — use explicit relative or absolute paths
-
-## Provisioning Workflow
-
-### Clean Slate Bootstrap
-```bash
-# 1. Clone repo
-git clone <dotfiles-repo> ~/dotfiles
-cd ~/dotfiles
-
-# 2. Bootstrap (installs everything)
-make bootstrap
-# Installs: mise, deploys dotfiles, installs tools, plugins
-
-# 3. Verify
-mise dotfiles status  # Should show all up to date
-```
-
-### Post-Pull Sync
-```bash
-# 1. Pull latest changes
-git pull
-
-# 2. Check what changed
-git diff --stat
-
-# 3. Selective operations:
-
-# Only packages changed (mise config, packages.txt)?
-make packages
-
-# Only dotfiles changed (packages/*)?
-make link
-
-# Only plugins changed?
-make plug
-
-# 4. Or sync everything:
-make sync
-```
-
-### Make Targets
-- `make pack` - Install system packages (platform-aware)
-- `make link` - Deploy dotfiles via mise
-- `make plug` - Install plugins (zellij, etc.)
-- `make sync` - Run all provisioning steps
-- `make bootstrap` - Full system bootstrap (clean slate)
-
-## Official Documentation
-
-- [Groups](https://mise.jdx.dev/dotfiles/groups.html) — group declaration and selection
-- [Managed files](https://mise.jdx.dev/dotfiles/managed.html) — modes, templates, edits
-- [Config environments](https://mise.jdx.dev/configuration/environments.html) — MISE_ENV and platform selection
-- [Dotfiles reference](https://mise.jdx.dev/dotfiles/reference.html) — all entry keys and modes
-- [Templates](https://mise.jdx.dev/templates.html) — Tera template variables and functions
-
-## Example Configuration
-
-Base config (`.config/mise/config.toml`):
-
-```toml
-[settings.dotfiles]
-root = "../../packages"
-default_mode = "symlink-each"
-
-[dotfile_groups.nvim]
-root = "nvim"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.zsh]
-root = "zsh"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.bash]
-root = "bash"
-mode = "symlink-each"
-manifest = "git"
-```
-
-macOS config (`.config/mise/config.macos.toml`):
-
-```toml
-[bootstrap]
-dotfile_groups = [
-  "nvim",
-  "zsh",
-  # ... other groups
-]
-```
-
-Omarchy config (`.config/mise/config.omarchy.toml`):
-
-```toml
-[bootstrap]
-dotfile_groups = [
-  "nvim",
-  "bash",
-  # ... other groups
-]
-```
+For documentation-only checks, inspect declarations and Make recipes without
+running apply, bootstrap, prune, or unapply. Runtime deployment behavior has not
+been established by a text audit.
