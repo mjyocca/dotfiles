@@ -1,7 +1,7 @@
 # Bash Agent Instructions
 
 Instructions and conventions for working on the bash configuration.
-All files live under `packages/bash/` and are stowed to `$HOME`.
+All files live under `packages/bash/` and are deployed to `$HOME`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Personal Dotfiles Config Project
 
-Dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/). Configuration lives in `packages/` and is symlinked to `$HOME` via `make dotfiles`.
+Dotfiles managed with [mise](https://mise.jdx.dev/). Configuration lives in `packages/` and is deployed to `$HOME` via `make link`.
 
 ## External File Loading
 
@@ -13,9 +13,10 @@ When you encounter a file reference (e.g., @docs/instructions/macos.md), use you
 
 | Command | Description |
 |---|---|
-| `make dotfiles` | Stow packages for current OS profile into `$HOME` |
-| `make dotfiles PROFILE=omarchy` | Force a specific profile |
-| `make stow PKG=<name>` | Stow a single package by name |
+| `make link` | Deploy dotfiles via mise to `$HOME` |
+| `make pack` | Install system packages for current platform |
+| `make plug` | Install plugins (zellij, etc.) |
+| `make sync` | Run `make pack link plug` |
 | `make bootstrap` | Full machine provisioning (platform-aware) |
 | `make apply_settings` | Apply OS-level defaults |
 | `make install_git_hooks` | Install gitleaks pre-commit hook |
@@ -23,7 +24,7 @@ When you encounter a file reference (e.g., @docs/instructions/macos.md), use you
 ## Project Structure
 
 ```
-packages/          # Stow packages (each maps to $HOME paths)
+packages/          # Dotfile packages (each maps to $HOME paths)
   nvim/            # Neovim config
   bash/            # Shell config (Omarchy default)
   zsh/             # Shell config (macOS default)
@@ -35,16 +36,12 @@ packages/          # Stow packages (each maps to $HOME paths)
   homebrew/        # System packages (macOS: Brewfile)
   mise/            # Dev tools (cross-platform: config.toml)
   tool-versions/   # Language runtimes (cross-platform: .tool-versions)
-manifests/         # Repository-only provisioning manifests (not stowed)
+manifests/         # Repository-only provisioning manifests (not deployed to $HOME)
   pacman/          # Shared package lists and machine-specific overlays
-profiles/          # OS profile allow-lists (one package name per line)
-  macos            # Packages to stow on macOS
-  omarchy          # Packages to stow on Omarchy Linux
 scripts/
   macos/           # macOS bootstrap, defaults, config scripts
   omarchy/         # Omarchy-specific utility scripts
   detect-os.sh     # OS detection and profile selection
-  stow.sh          # Stow orchestration
   install-git-hooks.sh  # Gitleaks pre-commit hook installer
 docs/
   instructions/    # OS-specific conventions (load on demand)
@@ -69,22 +66,20 @@ Platform-specific and tool-specific instructions are in `docs/instructions/`:
 
 Load these when working on the respective components.
 
-## OS Detection & Profiles
+## OS Detection & Platforms
 
 ```bash
 ./scripts/detect-os.sh --print  # outputs: macos | omarchy | ubuntu | etc.
 ```
 
-Profiles are allow-lists in `profiles/<name>`. Each lists which packages to stow on that OS.
+Platforms are defined in mise config files (`.config/mise/config.<platform>.toml`). Each platform config selects which dotfile groups to deploy via `[bootstrap] dotfile_groups = [...]`.
 
-| OS | Profile | Notes |
+| OS | Platform | Notes |
 |---|---|---|
 | macOS | `macos` | Includes `homebrew`, `colima` |
 | Omarchy | `omarchy` | Excludes `homebrew`, `colima` |
 
-To add a package to a profile, edit the relevant `profiles/<name>` file.
-
-Per-machine ignore list: `.stow-ignore.local` (git-ignored).
+To add a package to a platform, edit the relevant `.config/mise/config.<platform>.toml` file and add the group name to the `[bootstrap] dotfile_groups` array.
 
 ## Package Management Architecture
 
@@ -93,7 +88,7 @@ Choose by dependency: mission-critical, session-critical, or OS-integrated tools
 - macOS → `@docs/instructions/macos.md`
 - Omarchy → `@docs/instructions/omarchy.md`
 
-Pacman lists live in `manifests/pacman/` and are read directly from the repository, not stowed. Machine-specific dependencies live in `manifests/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
+Pacman lists live in `manifests/pacman/` and are read directly from the repository, not deployed to `$HOME`. Machine-specific dependencies live in `manifests/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
 
 ## Skills
 
@@ -113,7 +108,7 @@ For detailed security practices (VM mounts, SSH includes, git email), see `@docs
 
 ## Conventions
 
-- Each `packages/<name>/` mirrors `$HOME` structure for Stow
-- No manual symlinks — always use `make dotfiles`
+- Each `packages/<name>/` mirrors `$HOME` structure for mise
+- No manual symlinks — always use `make link`
 - Platform-specific scripts belong in `scripts/macos/` or `scripts/omarchy/`
 - Cross-platform scripts stay in `scripts/`

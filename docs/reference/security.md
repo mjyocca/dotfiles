@@ -32,7 +32,7 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 
 ## git-ignore all per-machine local files
 
-- `.stow-ignore.local` — machine-specific package ignore list
+- `.stow-ignore.local` — machine-specific package ignore list (deprecated: use mise config environments instead)
 - `packages/zsh/.zshrc.local` — machine-specific shell overrides
 - `packages/zsh/.global_env.sh` — legacy, replaced by `.zshrc.local`
 

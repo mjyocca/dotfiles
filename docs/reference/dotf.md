@@ -1,6 +1,6 @@
 # dotf — Daily-Use Toolbox
 
-`dotf` is a dispatcher script stowed to `~/.local/bin/dotf`. It routes subcommands to individual scripts in `~/.local/bin/dotf.d/`.
+`dotf` is a dispatcher script deployed to `~/.local/bin/dotf`. It routes subcommands to individual scripts in `~/.local/bin/dotf.d/`.
 
 ## Source Location
 
@@ -23,7 +23,7 @@ Running `dotf --help` auto-lists all commands with their one-line descriptions (
 1. Create an executable file at `packages/scripts/.local/bin/dotf.d/<name>`
 2. Line 1: `#!/usr/bin/env bash`
 3. Line 2: a `# <one-line description>` comment — this is what `dotf --help` prints
-4. Run `make dotfiles` to stow it into `~/.local/bin/dotf.d/`
+4. Run `make link` to deploy it to `~/.local/bin/dotf.d/`
 
 ---
 
@@ -38,6 +38,6 @@ Running `dotf --help` auto-lists all commands with their one-line descriptions (
 | Manages external tools (docker, colima, editors…) | no | yes |
 | Accepts dynamic arguments / flags | awkward | natural |
 
-**Use a Makefile target when** the command is about the dotfiles project: provisioning a machine, stowing packages, applying OS defaults, installing tools. These run once or rarely and operate on the repo itself.
+**Use a Makefile target when** the command is about the dotfiles project: provisioning a machine, deploying packages, applying OS defaults, installing tools. These run once or rarely and operate on the repo itself.
 
 **Use a `dotf` subcommand when** the script is a general-purpose utility that should be available anywhere in a shell session: switching runtimes, managing containers, scaffolding projects, or any workflow tool that travels with the developer rather than the repo.

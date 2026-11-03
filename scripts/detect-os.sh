@@ -67,7 +67,7 @@ fi
 # Export for subprocesses
 export DOTFILES_OS DOTFILES_PROFILE
 
-# Verify profile exists (if called standalone, not sourced)
+# Print detection results (if called standalone, not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if [[ "${1:-}" == "--print" ]]; then
     # Machine-readable output for Makefile integration
@@ -75,12 +75,4 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     exit 0
   fi
   info "Detected: OS=${DOTFILES_OS:-unknown}, Profile=$DOTFILES_PROFILE"
-  PROFILE_FILE="${DOTFILES_ROOT:-.}/profiles/${DOTFILES_PROFILE}"
-  if [[ -f "$PROFILE_FILE" ]]; then
-    success "Profile exists: $PROFILE_FILE"
-  else
-    warn "No profile found: $PROFILE_FILE"
-    warn "Available profiles:"
-    ls -1 "${DOTFILES_ROOT:-.}/profiles" 2>/dev/null | sed 's/^/  /' || echo "  (no profiles/ directory)"
-  fi
 fi

@@ -47,6 +47,52 @@ Each platform config contains `[bootstrap] dotfile_groups = [...]` listing which
 - ❌ Don't create empty group tables — always specify `root`, `mode`, `manifest`
 - ❌ Don't assume `~` expands in paths — use explicit relative or absolute paths
 
+## Provisioning Workflow
+
+### Clean Slate Bootstrap
+```bash
+# 1. Clone repo
+git clone <dotfiles-repo> ~/dotfiles
+cd ~/dotfiles
+
+# 2. Bootstrap (installs everything)
+make bootstrap
+# Installs: mise, deploys dotfiles, installs tools, plugins
+
+# 3. Verify
+mise dotfiles status  # Should show all up to date
+```
+
+### Post-Pull Sync
+```bash
+# 1. Pull latest changes
+git pull
+
+# 2. Check what changed
+git diff --stat
+
+# 3. Selective operations:
+
+# Only packages changed (Brewfile, packages.txt)?
+make pack
+
+# Only dotfiles changed (packages/*)?
+make link
+
+# Only plugins changed?
+make plug
+
+# 4. Or sync everything:
+make sync
+```
+
+### Make Targets
+- `make pack` - Install system packages (platform-aware)
+- `make link` - Deploy dotfiles via mise
+- `make plug` - Install plugins (zellij, etc.)
+- `make sync` - Run all provisioning steps
+- `make bootstrap` - Full system bootstrap (clean slate)
+
 ## Official Documentation
 
 - [Groups](https://mise.jdx.dev/dotfiles/groups.html) — group declaration and selection

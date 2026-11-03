@@ -92,26 +92,45 @@ zellij-plugins:
 		https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm
 	@echo "✓ zellij-autolock v0.2.2 installed"
 
-# Target: dotfiles
-# Purpose: GNU Stow packages for current OS profile into $HOME.
-#          Profile detection happens automatically (macOS → macos, Omarchy → omarchy).
-#          Override with: make dotfiles PROFILE=omarchy
-#          Packages in .stow-ignore.local are subtracted from the profile.
-# Usage: Run `make dotfiles`.
-dotfiles:
-	@echo "Stowing Dotfile Packages..."
-	@echo "Profile: $(PROFILE)"
-	@bash ./scripts/stow.sh
+# Target: pack
+# Purpose: Install system packages for current platform
+# Usage: make pack
+#        make pack PROFILE=omarchy  # force platform
+.PHONY: pack
+pack:
+ifeq ($(OS), Darwin)
+	@echo "Installing macOS packages..."
+	@brew bundle --file=packages/homebrew/Brewfile
+else ifeq ($(PROFILE), omarchy)
+	@echo "Installing Omarchy packages..."
+	@bash scripts/omarchy/install-packages.sh
+else
+	@echo "Unknown platform: $(PROFILE)" >&2
+	@exit 1
+endif
 
-# Target: stow
-# Purpose: Stow one or more specific packages by name, with optional stow flags.
-# Usage: make stow PKG=<name>                    — single package
-#        make stow PKG="nvim zsh tmux"           — multiple packages
-#        make stow PKG=zsh FLAGS=--adopt         — adopt existing files first
-#        make stow PKG=nvim FLAGS=--simulate     — dry-run
-#        make stow PKG=zsh FLAGS="--adopt --no-folding"
-stow:
-	@bash ./scripts/stow.sh $(FLAGS) $(PKG)
+# Target: link
+# Purpose: Deploy dotfile symlinks via mise
+# Usage: make link
+.PHONY: link
+link:
+	@echo "Linking dotfiles via mise..."
+	@mise dotfiles apply
+
+# Target: plug
+# Purpose: Install plugins managed outside mise
+# Usage: make plug
+.PHONY: plug
+plug:
+	@echo "Installing plugins..."
+	@$(MAKE) zellij-plugins
+
+# Target: sync
+# Purpose: Install packages + link dotfiles + install plugins
+# Usage: make sync
+.PHONY: sync
+sync: pack link plug
+	@echo "✓ System synced"
 
 # Target: apply_settings
 # Purpose: Apply operating system/GUI application settings that can configured through CLI/declarative means.
@@ -121,11 +140,11 @@ ifeq ($(PLATFORM), "OSX")
 	$(MAKE) apply_defaults_osx 
 else
 	## TODO: Implement OS-specific settings application for Linux profiles
-	## For Omarchy: most user settings are in ~/.config/ and managed via stow.
+	## For Omarchy: most user settings are in ~/.config/ and managed via mise.
 	## Consider adding: gsettings, dconf, or profile-specific setting scripts.
 	@echo "Linux settings application not yet implemented for profile: $(PROFILE)"
-	@echo "Most settings are managed via stow in ~/.config/"
-	@echo "See: profiles/$(PROFILE) and AGENTS.md for Omarchy conventions."
+	@echo "Most settings are managed via mise in ~/.config/"
+	@echo "See: .config/mise/config.omarchy.toml and AGENTS.md for Omarchy conventions."
 endif
 
 # ======================

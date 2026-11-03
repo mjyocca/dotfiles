@@ -11,9 +11,6 @@ packages/zsh/.zshrc.local
 # Per-machine bash overrides — not committed
 packages/bash/.bashrc.local
 
-# Per-machine stow ignore list — not committed
-.stow-ignore.local
-
 # Colima: ignore all runtime envs, keep tracked example config
 packages/colima/.config/**
 !packages/colima/.config/colima/

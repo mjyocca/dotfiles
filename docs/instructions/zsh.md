@@ -1,7 +1,7 @@
 # Zsh Agent Instructions
 
 Instructions and conventions for working on the zsh configuration.
-All files live under `packages/zsh/` and are stowed to `$HOME`.
+All files live under `packages/zsh/` and are deployed to `$HOME`.
 
 ---
 

@@ -5,7 +5,7 @@ This file captures Omarchy-specific conventions, override paths, package managem
 ## Key Concepts
 
 - **Override model**: User configs in `~/.config/`, system defaults in `/usr/share/omarchy/` (read-only)
-- **Dotfiles management**: Stow is endorsed by Omarchy for backup/management
+- **Dotfiles management**: mise is used for dotfile management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
 - **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
 - **Package tracking**: Track direct dependencies in all three `manifests/pacman/packages*.txt` lists, including packages already installed by the OS
@@ -54,7 +54,7 @@ See [Plugin Development Guide](https://plugins.omarchy.org/develop.html)
 
 ### System Packages (pacman/AUR)
 
-System packages are tracked in three repository-only provisioning manifests (not stowed):
+System packages are tracked in three repository-only provisioning manifests (not deployed to $HOME):
 
 - **`manifests/pacman/packages.txt`** — Repository system/CLI packages
 - **`manifests/pacman/packages-gui.txt`** — Repository GUI applications
@@ -104,7 +104,7 @@ pacman -Qqem
 
 The installer validates every selected list and required command before installation, deduplicates targets, and rejects repository/AUR cross-list collisions. System and GUI targets go to `sudo pacman -S --needed`; AUR targets go to `yay -S --needed --aur` as your normal user. AUR builds remain interactive so you can review build instructions; installed packages are never pruned.
 
-`--needed` skips up-to-date targets, not all installed targets. New versions can still be installed; repeatable installation is not version pinning. Run a full system update before installing against refreshed databases—never use `pacman -Sy` alone. `make bootstrap` runs `pacman -Syu` first, then the lists, repository-declared mise tools, git hooks, and Zellij plugins in order, including with `make -j`. It does not stow configs or install asdf runtimes; run `make dotfiles` afterward, then `asdf install` as needed.
+`--needed` skips up-to-date targets, not all installed targets. New versions can still be installed; repeatable installation is not version pinning. Run a full system update before installing against refreshed databases—never use `pacman -Sy` alone. `make bootstrap` runs `pacman -Syu` first, then the lists, repository-declared mise tools, git hooks, and Zellij plugins in order, including with `make -j`. It does not deploy configs or install asdf runtimes; run `make link` afterward, then `asdf install` as needed.
 
 `make mise_install` uses the cross-platform Bash helper `scripts/install-mise-tools.sh`, shared with macOS. See [package management instructions](./package-management.md) for its repository-only installation behavior, supported config format, and dry-run command.
 
@@ -160,7 +160,7 @@ See [package management instructions](./package-management.md) for mise and asdf
 
 ## Warnings
 
-- **Collision risk**: Stowing packages replaces Omarchy-seeded configs in `~/.config/`
+- **Collision risk**: Deploying packages replaces Omarchy-seeded configs in `~/.config/`
 - **Stale configs**: After Omarchy updates, check for `.bak` files and re-run `make dotfiles`
 - **Read-only source**: Never edit `/usr/share/omarchy/` directly
 

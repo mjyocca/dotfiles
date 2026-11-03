@@ -16,13 +16,16 @@ bash installer.sh
 
 **Omarchy (Linux)**
 ```bash
-# Prerequisites: git, stow
-sudo pacman -S git stow
+# Prerequisites: git
+sudo pacman -S git
 
 git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-make dotfiles  # Auto-detects Omarchy profile
+make bootstrap  # Auto-detects Omarchy profile
 ```
 
-The `make dotfiles` command stows packages based on your OS profile (macOS or Omarchy).
-Override with `PROFILE=<name>` if needed.
+The `make bootstrap` command sets up everything. For incremental updates:
+- `make pack` - Install system packages
+- `make link` - Deploy dotfiles via mise
+- `make plug` - Install plugins
+- `make sync` - All of the above

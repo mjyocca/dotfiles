@@ -6,7 +6,7 @@ This file captures macOS-specific conventions, override paths, package managemen
 
 - **Package management**: Homebrew for platform/session tools, mise for optional/version-sensitive tools, asdf for language runtimes (interim)
 - **Shell**: Zsh is default shell on macOS
-- **Dotfiles management**: GNU Stow for symlink management
+- **Dotfiles management**: mise for dotfile management
 - **System defaults**: Managed via `defaults write` in `scripts/macos/`
 - **Docker**: Colima for container runtime (macOS-only)
 
@@ -35,7 +35,7 @@ apply-user-defaults ./scripts/macos/defaults.apps.yml
 
 **Install dotfiles:**
 ```bash
-make dotfiles  # Runs stow to create symlinks
+make link  # Deploys dotfiles via mise
 ```
 
 **Install all packages:**
@@ -56,7 +56,7 @@ colima status             # Check status
 
 Homebrew owns mission-critical, session-critical, and OS-integrated tools (infrastructure, build dependencies, GUI apps, and shell/session utilities). See [package management instructions](./package-management.md) for ownership decisions.
 
-**Config location:** `packages/homebrew/Brewfile` (stowed to `~/Brewfile`)
+**Config location:** `packages/homebrew/Brewfile` (deployed to `~/Brewfile`)
 
 #### Commands
 
