@@ -4,7 +4,9 @@ Use for deployment wiring, not package ownership or general mise tutorials.
 
 ## Repository Layout and Current Gap
 
-- `packages/<name>/` mirrors paths under `$HOME`.
+- Dotfile directories under `packages/<name>/` mirror paths under `$HOME`.
+  Exception: `packages/aur/` is repository-only installation data. Never select
+  it as a dotfile group or include it through broad package-directory discovery.
 - `make link` runs `mise dotfiles apply` from the repository root.
 - `.config/mise/config.toml` and its platform files currently declare bootstrap
   packages, **not** dotfile groups or a `settings.dotfiles` root. The deployed

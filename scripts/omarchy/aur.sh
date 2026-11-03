@@ -18,7 +18,8 @@ if ! command_exists yay; then
 fi
 
 # Read AUR package list
-aur_list="$(dirname "${BASH_SOURCE[0]}")/../manifests/aur/packages-aur.txt"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+aur_list="$repo_root/packages/aur/packages.txt"
 
 if [[ ! -f "$aur_list" ]]; then
     warn "AUR package list not found at $aur_list"
@@ -29,12 +30,12 @@ fi
 # Parse and install AUR packages interactively
 info "Reading AUR package list from $aur_list"
 
-# Read packages from list (skip comments and empty lines)
+# Read packages from list (strip inline comments and whitespace)
 packages=()
 while IFS= read -r line; do
-    # Skip comments and empty lines
-    [[ "$line" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "${line// }" ]] && continue
+    line="${line%%#*}"
+    line="${line//[[:space:]]/}"
+    [[ -z "$line" ]] && continue
     packages+=("$line")
 done < "$aur_list"
 
@@ -48,7 +49,7 @@ info "Installing ${#packages[@]} AUR packages..."
 # Install packages interactively (yay will prompt for PKGBUILD review)
 for pkg in "${packages[@]}"; do
     info "Installing $pkg..."
-    yay -S --needed "$pkg"
+    yay -S --needed --review -- "$pkg"
 done
 
 success "AUR packages installed"

@@ -8,6 +8,7 @@ the workflow; read only the applicable platform guide for platform-specific work
 | Owner | Repository declaration |
 |---|---|
 | System packages via mise bootstrap | `.config/mise/config.toml` plus `config.macos.toml` or `config.omarchy.toml` in the same directory, under `[bootstrap.packages]` |
+| AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
 | Shared mise dev tools | `packages/mise/.config/mise/config.toml`, under `[tools]`; intended home destination: `~/.config/mise/config.toml` |
 | Language runtimes via asdf (interim) | `packages/tool-versions/.tool-versions` |
 
@@ -45,9 +46,9 @@ may legitimately require a system runtime alongside the selected asdf version.
   platform bootstrap just because they are CLI applications.
 - Track runtime version changes directly in `packages/tool-versions/.tool-versions`.
   Do not assume a global manager command edits the tracked file on this machine.
-- Retained `manifests/pacman/` lists are audit inputs, not inputs to current mise
-  package installation. AUR has competing lists and a broken consumer path; read
-  `docs/instructions/omarchy.md` before editing AUR declarations or audit overlays.
+- AUR installation reads `packages/aur/packages.txt`, outside mise bootstrap and
+  dotfile deployment. Machine lists are tracking-only, not automatic installation
+  overlays; read `docs/instructions/omarchy.md` before editing them.
 - `make tools` runs blanket `mise install`, which may also read `~/.tool-versions`
   and install duplicate asdf runtimes. Prefer a targeted install when authorized;
   inspect effective configuration rather than assuming runtime migration is done.

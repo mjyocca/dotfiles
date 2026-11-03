@@ -1,8 +1,10 @@
 # Personal Dotfiles
 
-`packages/<name>/` mirrors `$HOME`; `make link` invokes mise deployment.
+Dotfile directories under `packages/<name>/` mirror `$HOME`; `packages/aur/` is
+repository-only installation data, never a mise dotfile group. `make link` invokes
+mise deployment.
 `Makefile` is the command entrypoint. Inspect current consumers before treating
-retained manifests or older documentation as installation inputs.
+package lists or older documentation as installation inputs.
 
 ## Load Only Relevant Guidance
 
@@ -43,7 +45,7 @@ Use `scripts/shared/detect-os.sh` to inspect platform detection.
 ## Project Conventions
 
 - System bootstrap declarations: `.config/mise/`; shared dev tools: `packages/mise/.config/mise/config.toml`.
-- `manifests/` stays repository-only. Verify which script consumes each list.
+- AUR lists live in `packages/aur/`; exclude this directory from all dotfile deployment selections.
 - Scripts are organized by domain layer, not package type. Shared helpers live in `scripts/shared/`.
 - Platform scripts live in `scripts/macos/`, `scripts/linux/`, and `scripts/omarchy/`; Make's dispatcher falls back to Linux when a platform layer is missing.
 - Keep layers idempotent and independently testable. Use the deployment entrypoint, not manual symlinks.

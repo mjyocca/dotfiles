@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Interactive AUR package installer with PKGBUILD review
-# Reads from manifests/aur/packages-aur.txt and installs via yay with review prompts
+# Reads from packages/aur/packages.txt and installs via yay with review prompts
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-aur_list="$repo_root/manifests/aur/packages-aur.txt"
+aur_list="$repo_root/packages/aur/packages.txt"
 
 # Check if yay is available
 if ! command -v yay &>/dev/null; then
@@ -60,7 +60,7 @@ if [[ ${#not_installed[@]} -eq 0 ]]; then
     exit 0
 fi
 
-echo "Packages to install (${#not_installed[@)}):"
+echo "Packages to install (${#not_installed[@]}):"
 printf '  - %s\n' "${not_installed[@]}"
 echo ""
 

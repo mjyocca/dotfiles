@@ -49,5 +49,5 @@
 "pacman:xournalpp" = "latest"
 
 # Note: AUR packages are NOT installed by mise bootstrap
-# They are installed interactively by scripts/linux/aur-installer.sh
+# The Omarchy packages layer installs packages/aur/packages.txt via scripts/omarchy/aur.sh
 # which prompts for PKGBUILD review before installation

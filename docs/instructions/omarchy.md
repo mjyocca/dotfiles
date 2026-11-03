@@ -10,22 +10,19 @@ before authorized redeployment. `make link` is the deployment entrypoint, but
 current tracked deployment declarations are missing; see
 `docs/instructions/mise-dotfiles.md` when working on deployment.
 
-## Installation Versus Audit Inputs
+## Installation Inputs
 
 Ownership rules live in `docs/instructions/package-management.md`; this section
 describes actual consumers, not another ownership policy.
 
 - `scripts/linux/packages.sh` invokes `mise bootstrap`. Pacman declarations live
-  in `.config/mise/config.toml` and `.config/mise/config.omarchy.toml`; the script
-  does **not** install from `manifests/pacman/`.
+  in `.config/mise/config.toml` and `.config/mise/config.omarchy.toml`.
 - `scripts/omarchy/packages.sh` invokes the Linux layer, then `aur.sh`. The AUR
-  script intends to read `manifests/aur/packages-aur.txt`, but currently resolves
-  beneath `scripts/manifests/aur/` and skips installation when that file is absent.
-  Do not claim AUR installation works or silently repair it during another task.
-- `manifests/pacman/packages.txt`, `packages-gui.txt`, and `packages-aur.txt` are
-  retained tracking/audit lists, not active bootstrap inputs. Their AUR list is
-  distinct from `manifests/aur/packages-aur.txt`; do not present them as equivalent
-  installation sources or synchronize them without a scoped consumer decision.
+  script reads `packages/aur/packages.txt` and invokes yay with review prompts.
+  `scripts/linux/aur-installer.sh` is a standalone interactive alternative using
+  the same list. Neither installer automatically includes machine-specific lists.
+- `packages/aur/` contains repository-only data, not home-relative dotfiles.
+  Never add it to mise dotfile groups or deployment selections.
 - `scripts/omarchy/installer.sh` currently invokes generic `bootstrap_linux`, not
   `bootstrap_omarchy`, and does not implement machine overlay selection. Do not
   document `--machine` as an installer feature.
@@ -40,16 +37,12 @@ not by automatically approving prompts or running yay as root.
 
 ## Discovery and Hardware Tracking
 
-`scripts/omarchy/find-untracked-packages.sh` queries explicit native/foreign
-packages and compares them with the retained pacman lists. It currently sources
-missing `scripts/omarchy/package-lists.sh`, so discovery is broken before querying
-packages. Do not claim parser validation or working overlays until repaired.
+The obsolete manifest-based audit helper has been removed along with the duplicate
+pacman lists. Use the declarations above when comparing installed packages.
 
-The helper exposes `--include-base` (otherwise Omarchy base names are excluded)
-and `--machine NAME` for audit selection. Retained machine lists live beneath
-`manifests/pacman/machines/`; these are not automatically installed. Keep
-hardware-specific direct dependencies out of shared declarations. The retained
-`amd-strix-halo/packages-aur.txt` records `llama-cpp-rocm-git`; tracking is not proof
+Machine lists live beneath `packages/aur/machines/`; these are not automatically
+installed. Keep hardware-specific direct dependencies out of shared declarations.
+`amd-strix-halo/packages.txt` records `llama-cpp-rocm-git`; tracking is not proof
 of package maintenance or fresh-build support. Check upstream before reinstalling.
 
 For read-only inspection on the target machine, `pacman -Qqen` and `pacman -Qqem`
