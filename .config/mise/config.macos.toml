@@ -13,9 +13,25 @@ adopt = true
 # Version Managers (except mise - Makefile installs it)
 "brew:asdf" = "latest"
 
-# macOS-specific utilities
+# System infrastructure and general utilities
+"brew:autoconf" = "latest"
+"brew:cmake" = "latest"
+"brew:curl" = "latest"
 "brew:coreutils" = "latest"
+"brew:gcc" = "latest"
+"brew:gmp" = "latest"
+"brew:git" = "latest"
+"brew:libyaml" = "latest"
+"brew:make" = "latest"
 "brew:mas" = "latest"
+"brew:openssl" = "latest"
+"brew:readline" = "latest"
+"brew:sqlite" = "latest"
+"brew:stow" = "latest"
+"brew:unzip" = "latest"
+"brew:pv" = "latest"
+"brew:tree" = "latest"
+"brew:wget" = "latest"
 
 # macOS-specific CLI tools
 "brew:figlet" = "latest"
@@ -24,11 +40,32 @@ adopt = true
 "brew:zsh-autosuggestions" = "latest"
 "brew:zero-sh/tap/apply-user-defaults" = "latest"
 
-# macOS-specific platform-managed tools
+# Platform-managed CLI/TUI tools
 "brew:ffmpeg" = "latest"
 "brew:herdr" = "latest"
+"brew:bat" = "latest"
+"brew:btop" = "latest"
+"brew:eza" = "latest"
+"brew:fd" = "latest"
+"brew:fzf" = "latest"
+"brew:jq" = "latest"
+"brew:lazygit" = "latest"
+"brew:neovim" = "latest"
+"brew:ripgrep" = "latest"
+"brew:starship" = "latest"
+"brew:tmux" = "latest"
+"brew:tree-sitter-cli" = "latest"
+"brew:zoxide" = "latest"
+
+# Additional session-critical tools
+"brew:direnv" = "latest"
+"brew:git-delta" = "latest"
+"brew:zellij" = "latest"
 
 # System Services
+"brew:docker" = "latest"
+"brew:docker-compose" = "latest"
+"brew:docker-buildx" = "latest"
 "brew:lima" = "latest"
 "brew:colima" = "latest"
 "brew:qemu" = "latest"
