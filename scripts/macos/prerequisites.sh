@@ -39,4 +39,6 @@ if ! command_exists git; then
     brew install git
 fi
 
+bash "$(dirname "${BASH_SOURCE[0]}")/../install-mise.sh"
+
 success "Prerequisites installed"

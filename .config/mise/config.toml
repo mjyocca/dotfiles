@@ -1,9 +1,132 @@
 # Base mise configuration for all platforms
-# This file defines packages common to macOS and Omarchy Linux
-# Platform-specific packages go in config.macos.toml or config.omarchy.toml
+# Shared bootstrap packages and dotfile deployment rules.
+# Platform configurations select packages and dotfile groups via MISE_ENV.
+
+[settings.dotfiles]
+root = "../../packages"
+default_mode = "symlink-each"
+
+# Deploy only tracked files; keep repository-only packages/aur out of these groups.
+[dotfile_groups.asdf]
+root = "asdf"
+manifest = "git"
+
+[dotfile_groups.bash]
+root = "bash"
+manifest = "git"
+
+[dotfile_groups.bat]
+root = "bat"
+manifest = "git"
+
+[dotfile_groups.btop]
+root = "btop"
+manifest = "git"
+
+[dotfile_groups.colima]
+root = "colima"
+manifest = "git"
+
+[dotfile_groups.colima-scripts]
+root = "colima-scripts"
+manifest = "git"
+
+[dotfile_groups.ghostty]
+root = "ghostty"
+manifest = "git"
+
+[dotfile_groups.ghostty.entries]
+"~/.config/ghostty/config" = { mode = "template" }
+
+[dotfile_groups.gitconfig]
+root = "gitconfig"
+manifest = "git"
+
+[dotfile_groups.gitconfig.entries]
+"~/.gitconfig" = { mode = "template" }
+
+[dotfile_groups.herdr]
+root = "herdr"
+manifest = "git"
+
+[dotfile_groups.hunk]
+root = "hunk"
+manifest = "git"
+
+[dotfile_groups.lazygit]
+root = "lazygit"
+manifest = "git"
+
+[dotfile_groups.mise]
+root = "mise"
+manifest = "git"
+
+[dotfile_groups.nvim]
+root = "nvim"
+manifest = "git"
+
+[dotfile_groups.nvim-next]
+root = "nvim-next"
+manifest = "git"
+
+[dotfile_groups.opencode]
+root = "opencode"
+manifest = "git"
+
+[dotfile_groups.pnpm]
+root = "pnpm"
+manifest = "git"
+
+[dotfile_groups.scripts]
+root = "scripts"
+manifest = "git"
+
+[dotfile_groups.ssh]
+root = "ssh"
+manifest = "git"
+
+[dotfile_groups.ssh.entries]
+"~/.ssh/config" = { mode = "template" }
+
+[dotfile_groups.starship]
+root = "starship"
+manifest = "git"
+
+[dotfile_groups.superfile]
+root = "superfile"
+manifest = "git"
+
+[dotfile_groups.tmux]
+root = "tmux"
+manifest = "git"
+
+[dotfile_groups.tool-versions]
+root = "tool-versions"
+manifest = "git"
+
+[dotfile_groups.yazi]
+root = "yazi"
+manifest = "git"
+
+[dotfile_groups.zed]
+root = "zed"
+manifest = "git"
+
+[dotfile_groups.zellij]
+root = "zellij"
+manifest = "git"
+
+[dotfile_groups.zellij.entries]
+"~/.config/zellij/config.kdl" = { mode = "template" }
+
+[dotfile_groups.zsh]
+root = "zsh"
+manifest = "git"
 
 [bootstrap]
-# mise itself is NOT in bootstrap.packages because the Makefile installs it before bootstrap runs
+# Select a platform environment before deploying; no implicit all-platform apply.
+dotfile_groups = []
+# mise itself is installed by the prerequisites layer before bootstrap runs
 # This avoids chicken-and-egg problems during fresh installation
 
 [bootstrap.brew]
@@ -13,7 +136,7 @@ adopt = true
 
 [bootstrap.packages]
 # Common packages for all platforms (brew on macOS, pacman on Omarchy)
-# IMPORTANT: Do NOT include mise - Makefile installs it before bootstrap
+# IMPORTANT: Do NOT include mise - prerequisites install it before bootstrap
 
 # Core Infrastructure
 "brew:curl" = "latest"

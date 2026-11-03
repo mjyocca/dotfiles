@@ -2,20 +2,24 @@
 
 Use for deployment wiring, not package ownership or general mise tutorials.
 
-## Repository Layout and Current Gap
+## Repository Layout
 
 - Dotfile directories under `packages/<name>/` mirror paths under `$HOME`.
   Exception: `packages/aur/` is repository-only installation data. Never select
   it as a dotfile group or include it through broad package-directory discovery.
 - `make link` runs `mise dotfiles apply` from the repository root.
-- `.config/mise/config.toml` and its platform files currently declare bootstrap
-  packages, **not** dotfile groups or a `settings.dotfiles` root. The deployed
-  `packages/mise/.config/mise/config.toml` declares dev tools only.
-- Therefore tracked configuration alone does not establish package deployment.
-  Inspect effective configuration (`mise config ls`) and `mise dotfiles status`
-  before promising what will be linked. Machine-local declarations may exist.
-  Missing deployment wiring is an implementation follow-up, not permission to
-  create ad hoc symlinks or invent group selections during another task.
+- `.config/mise/config.toml` declares bootstrap packages, `settings.dotfiles.root`
+  (`../../packages`), and explicit Git-filtered dotfile groups. Keep package and
+  deployment declarations together; neither replaces the other.
+- `config.macos.toml` and `config.omarchy.toml` select groups under
+  `[bootstrap] dotfile_groups`. The base selection is empty for safety until a
+  platform environment is selected. Make exports `MISE_ENV` from platform detection
+  unless already set; direct mise commands need `-E macos` or `-E omarchy`.
+- Git, SSH, Ghostty, and Zellij have template overrides; their deployed files are
+  rendered copies, not source symlinks. Other group files use `symlink-each`.
+- The deployed `packages/mise/.config/mise/config.toml` declares dev tools only.
+  Inspect `mise config ls` and `mise dotfiles status` before deployment;
+  machine-local declarations may also affect the effective configuration.
 
 ## Editing Deployment Configuration
 
@@ -24,8 +28,8 @@ Consult [mise groups](https://mise.jdx.dev/dotfiles/groups.html) and the
 version before adding declarations. Do not copy historical sample TOML as current
 configuration. In particular:
 
-- Verify root resolution, group selection, and defaults upstream; platform files
-  do not currently contain the previously documented group selections.
+- Verify root resolution, group selection, and defaults upstream. Preserve explicit
+  platform selections and `manifest = "git"` filtering when changing package setup.
 - `MISE_ENV` selects environment files, not an OS automatically. Zsh currently
   exports `macos` in `packages/zsh/.zshenv`; confirm the effective value elsewhere.
 - Account for tracked versus ignored/local files before selecting a deployment
@@ -37,15 +41,16 @@ configuration. In particular:
 
 ## Command Boundaries
 
-`make bootstrap` runs prerequisites, packages, tools, plugins, config, and hooks;
-the Makefile has no explicit link step. Package scripts invoke `mise bootstrap`,
-whose behavior depends on effective mise declarations—do not assume it never
-deploys files when machine-local dotfile configuration exists.
+`make bootstrap` runs prerequisites (including mise installation), packages, tools,
+plugins, config, and hooks; the Makefile has no explicit link step. Package scripts
+invoke `mise bootstrap`, which also applies the selected dotfile groups. Therefore
+`make packages` is not a package-only operation.
 
 `make sync` runs packages, link, and plugins only. It does not run tools, config,
 or hooks. Use the narrow task-appropriate layer rather than treating sync as full
-provisioning. Deployment still requires authorized `make link` with valid wiring.
+provisioning. Use authorized `make link` for deployment without installing packages.
 
 For documentation-only checks, inspect declarations and Make recipes without
-running apply, bootstrap, prune, or unapply. Runtime deployment behavior has not
-been established by a text audit.
+running apply, bootstrap, prune, or unapply. Check status and `apply --dry-run`
+before authorized deployment. Never broadly prune while declarations are missing:
+previously deployed groups appear orphaned even though their files are still useful.

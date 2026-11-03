@@ -16,6 +16,10 @@ DISTRO := $(shell bash ./scripts/shared/detect-os.sh 2>/dev/null || echo unknown
 PROFILE ?= $(DISTRO)
 export PROFILE
 
+# Select platform mise configuration even before shell dotfiles are deployed.
+MISE_ENV ?= $(DISTRO)
+export MISE_ENV
+
 # ======================
 # INHERITANCE HELPER
 # ======================

@@ -33,7 +33,7 @@ Run from the repository root; these commands change the machine, not just the re
 | Command | Purpose |
 |---|---|
 | `make bootstrap` | Runs prerequisites → packages → tools → plugins → config → hooks; no explicit link step |
-| `make packages` | Runs mise bootstrap; Omarchy also invokes the AUR layer (see platform limitations) |
+| `make packages` | Runs mise bootstrap (packages and selected dotfiles); Omarchy also invokes the AUR layer |
 | `make tools` | Runs mise install for dev tools; see runtime-duplication warning in package policy |
 | `make link` | Runs `mise dotfiles apply`; requires effective deployment declarations |
 | `make sync` | Packages, link, plugins only—not full provisioning |
@@ -55,7 +55,7 @@ Use `scripts/shared/detect-os.sh` to inspect platform detection.
 - Never commit secrets. Use git-ignored `~/.bashrc.local` or `~/.zshrc.local` for machine-local credentials.
 - Do not hardcode usernames or user-specific absolute paths; use `$HOME` or `~`.
 - Preserve unrelated changes. Do not provision, deploy, install software, grant permissions, or commit unless authorized by the task.
-- Before deployment, inspect effective mise configuration and target collisions; tracked group declarations are currently missing (see deployment guidance).
+- Before deployment, inspect effective mise configuration, platform group selection, and target collisions (see deployment guidance).
 - For documentation changes, check paths, Make targets, consumers, and `git diff --check` without running provisioning.
 - For script/config changes, use applicable syntax checks and focused tests; report untested platform behavior and implementation defects separately.
 - Consult `docs/reference/security.md` when changing VM mounts, SSH includes, or Git identity handling.

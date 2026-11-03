@@ -1,6 +1,14 @@
 # macOS-specific mise configuration
 # Extends base config.toml with macOS-only packages
-# Platform detected via mise's config.macos.toml convention
+# Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
+
+[bootstrap]
+dotfile_groups = [
+  "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
+  "gitconfig", "herdr", "hunk", "lazygit", "mise", "nvim", "nvim-next",
+  "opencode", "pnpm", "scripts", "ssh", "starship", "superfile", "tmux",
+  "tool-versions", "yazi", "zed", "zellij", "zsh",
+]
 
 [bootstrap.brew]
 # Prevents errors when reinstalling casks (fonts, apps) that already exist
@@ -10,7 +18,7 @@ adopt = true
 [bootstrap.packages]
 # macOS-only packages (Homebrew)
 
-# Version Managers (except mise - Makefile installs it)
+# Version Managers (except mise - prerequisites install it)
 "brew:asdf" = "latest"
 
 # System infrastructure and general utilities

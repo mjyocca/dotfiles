@@ -42,4 +42,6 @@ case "$distro" in
         ;;
 esac
 
+bash "$(dirname "${BASH_SOURCE[0]}")/../install-mise.sh"
+
 success "Prerequisites installed"

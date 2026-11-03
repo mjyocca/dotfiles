@@ -33,7 +33,7 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 ## git-ignore all per-machine local files
 
 - Keep shell-local overrides ignored, including `packages/zsh/.zshrc.local` and `packages/bash/.bashrc.local` when they reside in the source tree
-- Check effective deployment filtering before assuming an ignored file cannot be deployed; tracked mise group declarations are currently missing
+- Dotfile groups use `manifest = "git"`; preserve this filtering and check effective configuration before assuming ignored files cannot be deployed
 - `.stow-ignore.local` and `packages/zsh/.global_env.sh` are legacy conventions, not current deployment configuration
 
 ## Gitleaks — secret scanning

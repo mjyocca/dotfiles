@@ -1,12 +1,20 @@
 # Omarchy-specific mise configuration
 # Extends base config.toml with Omarchy/Arch Linux-only packages
-# Platform detected via mise's config.omarchy.toml convention
+# Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
+
+[bootstrap]
+dotfile_groups = [
+  "asdf", "bash", "bat", "btop", "ghostty", "gitconfig", "herdr", "hunk",
+  "lazygit", "mise", "nvim", "nvim-next", "opencode", "pnpm", "scripts",
+  "ssh", "starship", "superfile", "tmux", "tool-versions", "yazi", "zed",
+  "zellij",
+]
 
 [bootstrap.packages]
 # Omarchy-only packages (pacman)
 
 # IMPORTANT: Do NOT include mise/mise-bin here
-# The Makefile installs mise via `sudo pacman -S mise` before bootstrap runs
+# The prerequisites layer ensures mise is available before bootstrap runs
 
 # Containers & Virtualization (Omarchy-specific)
 "pacman:qemu-base" = "latest"

@@ -6,8 +6,8 @@ files before assuming a particular upstream layout. Bash is the desktop shell;
 load `docs/instructions/bash.md` only for shell changes.
 
 After Omarchy updates, inspect replaced configs, backups, and target collisions
-before authorized redeployment. `make link` is the deployment entrypoint, but
-current tracked deployment declarations are missing; see
+before authorized redeployment. `make link` is the deployment entrypoint; Make
+selects the detected platform environment unless `MISE_ENV` is already set. See
 `docs/instructions/mise-dotfiles.md` when working on deployment.
 
 ## Installation Inputs
