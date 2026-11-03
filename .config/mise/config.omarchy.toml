@@ -1,30 +1,53 @@
-# Omarchy platform config
-# Selects shared groups plus Omarchy-specific groups
+# Omarchy-specific mise configuration
+# Extends base config.toml with Omarchy/Arch Linux-only packages
+# Platform detected via mise's config.omarchy.toml convention
 
-[bootstrap]
-dotfile_groups = [
-  # Shared groups (all packages except zsh, colima, colima-scripts, homebrew)
-  "asdf",
-  "bash",
-  "bat",
-  "btop",
-  "ghostty",
-  "gitconfig",
-  "herdr",
-  "hunk",
-  "lazygit",
-  "mise",
-  "nvim",
-  "nvim-next",
-  "opencode",
-  "pnpm",
-  "scripts",
-  "ssh",
-  "starship",
-  "superfile",
-  "tmux",
-  "tool-versions",
-  "yazi",
-  "zed",
-  "zellij",
-]
+[bootstrap.packages]
+# Omarchy-only packages (pacman)
+
+# IMPORTANT: Do NOT include mise/mise-bin here
+# The Makefile installs mise via `sudo pacman -S mise` before bootstrap runs
+
+# Containers & Virtualization (Omarchy-specific)
+"pacman:qemu-base" = "latest"
+
+# General Utilities (Omarchy-specific)
+"pacman:ffmpeg" = "latest"
+
+# Platform-managed CLI/TUI tools (Omarchy-specific)
+"pacman:herdr" = "latest"
+
+# GUI Applications (from official repositories, NOT AUR)
+"pacman:1password" = "latest"
+"pacman:aether" = "latest"
+"pacman:alacritty" = "latest"
+"pacman:blender" = "latest"
+"pacman:brave-bin" = "latest"
+"pacman:chromium" = "latest"
+"pacman:evince" = "latest"
+"pacman:ghostty" = "latest"
+"pacman:gnome-disk-utility" = "latest"
+"pacman:imv" = "latest"
+"pacman:kdenlive" = "latest"
+"pacman:libreoffice-fresh" = "latest"
+"pacman:localsend" = "latest"
+"pacman:lutris" = "latest"
+"pacman:moonlight-qt" = "latest"
+"pacman:mpv" = "latest"
+"pacman:nautilus" = "latest"
+"pacman:nautilus-python" = "latest"
+"pacman:obs-studio" = "latest"
+"pacman:obsidian" = "latest"
+"pacman:pinta" = "latest"
+"pacman:signal-desktop" = "latest"
+"pacman:spotify" = "latest"
+"pacman:steam" = "latest"
+"pacman:sunshine" = "latest"
+"pacman:system-config-printer" = "latest"
+"pacman:typora" = "latest"
+"pacman:udiskie" = "latest"
+"pacman:xournalpp" = "latest"
+
+# Note: AUR packages are NOT installed by mise bootstrap
+# They are installed interactively by scripts/linux/aur-installer.sh
+# which prompts for PKGBUILD review before installation

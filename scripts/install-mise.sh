@@ -3,7 +3,9 @@
 set -e
 
 # Idempotent mise installation script
-# Installs mise if not already present, safe to run multiple times
+# Installs mise via package managers (not curl installer)
+# - macOS: uses Homebrew
+# - Linux: uses system package manager (pacman for Omarchy/Arch)
 
 if command -v mise &> /dev/null; then
     echo "✓ mise is already installed: $(mise --version)"
@@ -12,20 +14,27 @@ fi
 
 echo "Installing mise..."
 
-# Detect OS and install accordingly
+# Detect OS and install via package manager
 case "$(uname -s)" in
     Darwin)
-        # macOS - should be installed via Homebrew, but fallback to installer if needed
-        if command -v brew &> /dev/null; then
-            brew install mise
-        else
-            echo "Error: Homebrew not found. Please install Homebrew first or add mise to Brewfile."
+        # macOS - use Homebrew
+        if ! command -v brew &> /dev/null; then
+            echo "Error: Homebrew not found. Please install Homebrew first."
+            echo "Run: scripts/macos/installer.sh"
             exit 1
         fi
+        brew install mise
         ;;
     Linux)
-        # Linux - use official installer
-        curl https://mise.run | sh
+        # Linux - detect package manager
+        if command -v pacman &> /dev/null; then
+            # Omarchy/Arch - use pacman
+            sudo pacman -S --needed --noconfirm mise
+        else
+            echo "Error: Unsupported Linux package manager"
+            echo "mise must be installed via package manager (pacman for Omarchy/Arch)"
+            exit 1
+        fi
         ;;
     *)
         echo "Error: Unsupported platform $(uname -s)"

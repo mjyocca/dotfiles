@@ -1,162 +1,102 @@
-# Base mise config for dotfiles
-# This file declares all dotfile groups and their settings
-# Platform-specific group selection happens in config.macos.toml and config.omarchy.toml
+# Base mise configuration for all platforms
+# This file defines packages common to macOS and Omarchy Linux
+# Platform-specific packages go in config.macos.toml or config.omarchy.toml
 
-[settings.dotfiles]
-root = "../../packages"
-default_mode = "symlink-each"
+[bootstrap]
+# mise itself is NOT in bootstrap.packages because the Makefile installs it before bootstrap runs
+# This avoids chicken-and-egg problems during fresh installation
 
-# =============================================================================
-# Shared groups (apply to all platforms unless overridden)
-# =============================================================================
+[bootstrap.brew]
+# Prevents errors when reinstalling casks (fonts, apps) that already exist
+# Fixed in mise PR #13262 (Sep 2026) - now works correctly in all bootstrap paths
+adopt = true
 
-[dotfile_groups.asdf]
-root = "asdf"
-mode = "symlink-each"
-manifest = "git"
+[bootstrap.packages]
+# Common packages for all platforms (brew on macOS, pacman on Omarchy)
+# IMPORTANT: Do NOT include mise - Makefile installs it before bootstrap
 
-[dotfile_groups.bat]
-root = "bat"
-mode = "symlink-each"
-manifest = "git"
+# Core Infrastructure
+"brew:curl" = "latest"
+"brew:git" = "latest"
+"brew:stow" = "latest"
+"brew:unzip" = "latest"
+"brew:wget" = "latest"
 
-[dotfile_groups.btop]
-root = "btop"
-mode = "symlink-each"
-manifest = "git"
+"pacman:curl" = "latest"
+"pacman:git" = "latest"
+"pacman:stow" = "latest"
+"pacman:unzip" = "latest"
+"pacman:wget" = "latest"
 
-[dotfile_groups.ghostty]
-root = "ghostty"
-mode = "symlink-each"
-manifest = "git"
+# Build Tools
+"brew:autoconf" = "latest"
+"brew:cmake" = "latest"
+"brew:gcc" = "latest"
+"brew:gmp" = "latest"
+"brew:libyaml" = "latest"
+"brew:make" = "latest"
+"brew:openssl" = "latest"
+"brew:readline" = "latest"
+"brew:sqlite" = "latest"
 
-[dotfile_groups.ghostty.entries]
-"~/.config/ghostty/config" = { mode = "template" }
+"pacman:autoconf" = "latest"
+"pacman:base-devel" = "latest"
+"pacman:cmake" = "latest"
+"pacman:gcc" = "latest"
+"pacman:gmp" = "latest"
+"pacman:libyaml" = "latest"
+"pacman:make" = "latest"
+"pacman:openssl" = "latest"
+"pacman:readline" = "latest"
+"pacman:sqlite" = "latest"
 
-[dotfile_groups.gitconfig]
-root = "gitconfig"
-mode = "symlink-each"
-manifest = "git"
+# Containers & Virtualization
+"brew:docker" = "latest"
+"brew:docker-compose" = "latest"
+"brew:docker-buildx" = "latest"
 
-[dotfile_groups.gitconfig.entries]
-"~/.gitconfig" = { mode = "template" }
+"pacman:docker" = "latest"
+"pacman:docker-buildx" = "latest"
+"pacman:docker-compose" = "latest"
 
-[dotfile_groups.herdr]
-root = "herdr"
-mode = "symlink-each"
-manifest = "git"
+# General Utilities
+"brew:bat" = "latest"
+"brew:btop" = "latest"
+"brew:eza" = "latest"
+"brew:fd" = "latest"
+"brew:fzf" = "latest"
+"brew:jq" = "latest"
+"brew:lazygit" = "latest"
+"brew:neovim" = "latest"
+"brew:pv" = "latest"
+"brew:ripgrep" = "latest"
+"brew:starship" = "latest"
+"brew:tmux" = "latest"
+"brew:tree" = "latest"
+"brew:tree-sitter-cli" = "latest"
+"brew:zoxide" = "latest"
 
-[dotfile_groups.hunk]
-root = "hunk"
-mode = "symlink-each"
-manifest = "git"
+"pacman:bat" = "latest"
+"pacman:btop" = "latest"
+"pacman:eza" = "latest"
+"pacman:fd" = "latest"
+"pacman:fzf" = "latest"
+"pacman:jq" = "latest"
+"pacman:lazygit" = "latest"
+"pacman:neovim" = "latest"
+"pacman:pv" = "latest"
+"pacman:ripgrep" = "latest"
+"pacman:starship" = "latest"
+"pacman:tmux" = "latest"
+"pacman:tree" = "latest"
+"pacman:tree-sitter-cli" = "latest"
+"pacman:zoxide" = "latest"
 
-[dotfile_groups.lazygit]
-root = "lazygit"
-mode = "symlink-each"
-manifest = "git"
+# Additional session-critical tools
+"brew:direnv" = "latest"
+"brew:git-delta" = "latest"
+"brew:zellij" = "latest"
 
-[dotfile_groups.mise]
-root = "mise"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.nvim]
-root = "nvim"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.nvim-next]
-root = "nvim-next"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.opencode]
-root = "opencode"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.pnpm]
-root = "pnpm"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.scripts]
-root = "scripts"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.ssh]
-root = "ssh"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.ssh.entries]
-"~/.ssh/config" = { mode = "template" }
-
-[dotfile_groups.starship]
-root = "starship"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.superfile]
-root = "superfile"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.tmux]
-root = "tmux"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.tool-versions]
-root = "tool-versions"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.yazi]
-root = "yazi"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.zed]
-root = "zed"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.zellij]
-root = "zellij"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.zellij.entries]
-"~/.config/zellij/config.kdl" = { mode = "template" }
-
-# =============================================================================
-# Platform-specific groups (declared here, selected in platform configs)
-# =============================================================================
-
-[dotfile_groups.bash]
-root = "bash"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.colima]
-root = "colima"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.colima-scripts]
-root = "colima-scripts"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.homebrew]
-root = "homebrew"
-mode = "symlink-each"
-manifest = "git"
-
-[dotfile_groups.zsh]
-root = "zsh"
-mode = "symlink-each"
-manifest = "git"
+"pacman:direnv" = "latest"
+"pacman:git-delta" = "latest"
+"pacman:zellij" = "latest"

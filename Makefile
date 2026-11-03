@@ -85,29 +85,27 @@ endif
 # Target: zellij-plugins
 # Purpose: Download zellij wasm plugins from their release pages.
 #          Runs during bootstrap; can also be called manually.
+#          Idempotent - skips download if plugin already exists.
 .PHONY: zellij-plugins
 zellij-plugins:
 	@mkdir -p $(HOME)/.config/zellij/plugins
-	@curl -fSL -o $(HOME)/.config/zellij/plugins/zellij-autolock.wasm \
-		https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm
-	@echo "✓ zellij-autolock v0.2.2 installed"
+	@if [ ! -f $(HOME)/.config/zellij/plugins/zellij-autolock.wasm ]; then \
+		echo "Downloading zellij-autolock..."; \
+		curl -fSL -o $(HOME)/.config/zellij/plugins/zellij-autolock.wasm \
+			https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm; \
+		echo "✓ zellij-autolock v0.2.2 installed"; \
+	else \
+		echo "✓ zellij-autolock v0.2.2 already installed"; \
+	fi
 
 # Target: pack
-# Purpose: Install system packages for current platform
+# Purpose: Install system packages for current platform via mise bootstrap
 # Usage: make pack
 #        make pack PROFILE=omarchy  # force platform
 .PHONY: pack
 pack:
-ifeq ($(OS), Darwin)
-	@echo "Installing macOS packages..."
-	@brew bundle --file=packages/homebrew/Brewfile
-else ifeq ($(PROFILE), omarchy)
-	@echo "Installing Omarchy packages..."
-	@bash scripts/omarchy/install-packages.sh
-else
-	@echo "Unknown platform: $(PROFILE)" >&2
-	@exit 1
-endif
+	@echo "Installing system packages via mise bootstrap..."
+	@mise bootstrap
 
 # Target: link
 # Purpose: Deploy dotfile symlinks via mise
@@ -182,27 +180,40 @@ apply_defaults_osx:
 	apply-user-defaults ./scripts/macos/defaults.apps.yml
 
 # Target: install_mise
-# Purpose: Install mise if not already present (idempotent)
+# Purpose: Install mise via package manager (not curl installer)
+# - macOS: brew install mise
+# - Omarchy: sudo pacman -S mise
+# Idempotent - skips if already installed
 install_mise:
-ifeq ($(PROFILE),omarchy)
-	@command -v mise >/dev/null || { echo "mise is missing; run make install_linux_tools to install mise-bin." >&2; exit 1; }
-else
 	@bash ./scripts/install-mise.sh
-endif
 
 # Target: bootstrap_osx
 # Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
-bootstrap_osx: pre_install_osx install_osx_tools install_mise mise_install zellij-plugins
+# New flow: prerequisites → mise → bootstrap packages → dev tools → plugins
+bootstrap_osx: pre_install_osx install_mise mise_bootstrap mise_install zellij-plugins
 
 pre_install_osx:
 	@echo "Initializing macOS-specific tools..."
 	@bash ./scripts/macos/core-utils.sh
 	@bash ./scripts/macos/config.sh
 
-install_osx_tools:
-	@echo "Installing macOS-specific tools..."
-	@brew bundle --file="$(CURDIR)/packages/homebrew/Brewfile"
-	@bash ./scripts/plugins.sh
+# Target: mise_bootstrap
+# Purpose: Install system packages via mise's [bootstrap.packages]
+# Reads .config/mise/config.toml + config.macos.toml (or config.omarchy.toml)
+mise_bootstrap:
+	@echo "Installing system packages via mise bootstrap..."
+	@mise bootstrap
+
+# Target: aur_install
+# Purpose: Install AUR packages interactively with PKGBUILD review (Omarchy only)
+# Runs after mise bootstrap to handle user-submitted packages
+aur_install:
+ifeq ($(PROFILE),omarchy)
+	@echo "Installing AUR packages interactively..."
+	@bash ./scripts/linux/aur-installer.sh
+else
+	@echo "AUR packages not applicable on this platform"
+endif
 
 brew_bundle:
 	@brew bundle --file="$(CURDIR)/packages/homebrew/Brewfile"
@@ -216,8 +227,9 @@ brew_bundle:
 .PHONY: bootstrap_linux update_linux_packages install_linux_tools install_mise mise_install install_git_hooks
 bootstrap_linux:
 	$(MAKE) update_linux_packages
-	$(MAKE) install_linux_tools
 	$(MAKE) install_mise
+	$(MAKE) mise_bootstrap
+	$(MAKE) aur_install
 	$(MAKE) mise_install
 	$(MAKE) install_git_hooks
 	$(MAKE) zellij-plugins
@@ -231,14 +243,14 @@ update_linux_packages:
 install_linux_tools:
 	@echo "Installing Linux-specific tools..."
 	@echo "Profile: $(PROFILE) | DISTRO: $(DISTRO)"
-ifeq ($(PROFILE),omarchy)
-	@bash ./scripts/omarchy/install-packages.sh
-else
+ifneq ($(PROFILE),omarchy)
 	$(INSTALL_CMD) git
 	$(INSTALL_CMD) curl
 	$(INSTALL_CMD) vim
 	$(INSTALL_CMD) stow
 	$(INSTALL_CMD) gitleaks
+else
+	@echo "Omarchy packages are managed by mise bootstrap (see mise_bootstrap target)"
 endif
 
 install_git_hooks:

@@ -1,34 +1,67 @@
-# macOS platform config
-# Selects shared groups plus macOS-specific groups
+# macOS-specific mise configuration
+# Extends base config.toml with macOS-only packages
+# Platform detected via mise's config.macos.toml convention
 
-[bootstrap]
-dotfile_groups = [
-  # Shared groups (all packages)
-  "asdf",
-  "bash",
-  "bat",
-  "btop",
-  "colima",
-  "colima-scripts",
-  "ghostty",
-  "gitconfig",
-  "herdr",
-  "homebrew",
-  "hunk",
-  "lazygit",
-  "mise",
-  "nvim",
-  "nvim-next",
-  "opencode",
-  "pnpm",
-  "scripts",
-  "ssh",
-  "starship",
-  "superfile",
-  "tmux",
-  "tool-versions",
-  "yazi",
-  "zed",
-  "zellij",
-  "zsh",
-]
+[bootstrap.brew]
+# Prevents errors when reinstalling casks (fonts, apps) that already exist
+# Fixed in mise PR #13262 (Sep 2026) - now works correctly in all bootstrap paths
+adopt = true
+
+[bootstrap.packages]
+# macOS-only packages (Homebrew)
+
+# Version Managers (except mise - Makefile installs it)
+"brew:asdf" = "latest"
+
+# macOS-specific utilities
+"brew:coreutils" = "latest"
+"brew:mas" = "latest"
+
+# macOS-specific CLI tools
+"brew:figlet" = "latest"
+"brew:cmatrix" = "latest"
+"brew:sl" = "latest"
+"brew:zsh-autosuggestions" = "latest"
+"brew:zero-sh/tap/apply-user-defaults" = "latest"
+
+# macOS-specific platform-managed tools
+"brew:ffmpeg" = "latest"
+"brew:herdr" = "latest"
+
+# System Services
+"brew:lima" = "latest"
+"brew:colima" = "latest"
+"brew:qemu" = "latest"
+"brew:tailscale" = "latest"
+
+# GUI Applications (Casks)
+"brew-cask:zen" = "latest"
+"brew-cask:slack" = "latest"
+"brew-cask:spotify" = "latest"
+"brew-cask:notion" = "latest"
+"brew-cask:1password" = "latest"
+"brew-cask:1password-cli" = "latest"
+"brew-cask:qmk-toolbox" = "latest"
+"brew-cask:MonitorControl" = "latest"
+"brew-cask:rectangle" = "latest"
+"brew-cask:alt-tab" = "latest"
+"brew-cask:raycast" = "latest"
+"brew-cask:cleanshot" = "latest"
+"brew-cask:screen-studio" = "latest"
+"brew-cask:keycastr" = "latest"
+
+# Development Tools
+"brew-cask:ghostty" = "latest"
+"brew-cask:warp" = "latest"
+"brew-cask:visual-studio-code" = "latest"
+"brew-cask:tower" = "latest"
+"brew-cask:gitbutler" = "latest"
+"brew-cask:orbstack" = "latest"
+
+# Fonts (Nerd Fonts and Symbols)
+"brew-cask:font-fira-code-nerd-font" = "latest"
+"brew-cask:font-symbols-only-nerd-font" = "latest"
+
+# Note: Mac App Store packages (mas) are not yet supported by mise bootstrap
+# They should be installed separately or via a post-install hook
+# mas 'system-color-picker', id: 1545870783

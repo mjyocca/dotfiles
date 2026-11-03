@@ -57,6 +57,28 @@ install_homebrew() {
 	fi
 }
 
+# Idempotent repository handling
+clone_or_update_repo() {
+	if [[ -d "$REPO_PATH" ]]; then
+		info "Repository already exists at $REPO_PATH"
+		cd "$REPO_PATH"
+		
+		# Check if it's a git repository
+		if git rev-parse --git-dir > /dev/null 2>&1; then
+			info "Updating existing repository..."
+			git pull --ff-only || warn "Failed to update repository (continuing anyway)"
+		else
+			warn "$REPO_PATH exists but is not a git repository"
+			warn "Please remove it manually and re-run this script"
+			exit 1
+		fi
+	else
+		info "Cloning repo $REPO_URL into $REPO_PATH"
+		git clone "$REPO_URL" "$REPO_PATH"
+		cd "$REPO_PATH"
+	fi
+}
+
 # Check if the script is being run directly or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	info "### DOTFILES ###"
@@ -68,11 +90,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	info "Installing Git..."
 	brew install git
 
-	info "Cloning repo $REPO_URL into $REPO_PATH"
-	git clone "$REPO_URL" "$REPO_PATH"
-
-	info "Change path to $REPO_PATH"
-	cd "$REPO_PATH" >/dev/null
+	clone_or_update_repo
 
 	info "Installing dependencies..."
 	make bootstrap_osx
