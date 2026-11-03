@@ -11,21 +11,30 @@ fi
 
 info "Applying macOS configuration..."
 
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+config_dir="$repo_root/.config/macos"
+
 # Apply macOS defaults via apply-user-defaults
 if command_exists apply-user-defaults; then
     info "Applying system defaults..."
-    
-    if [[ -f "scripts/macos/defaults.yml" ]]; then
-        apply-user-defaults scripts/macos/defaults.yml
+
+    applied=false
+    for defaults_file in "$config_dir/defaults.yml" "$config_dir/defaults.apps.yml"; do
+        if [[ -f "$defaults_file" ]]; then
+            apply-user-defaults "$defaults_file"
+            applied=true
+        else
+            warn "Defaults file not found: $defaults_file"
+        fi
+    done
+
+    if [[ "$applied" == true ]]; then
+        success "macOS defaults applied"
+    else
+        warn "No macOS defaults files found, skipping defaults"
     fi
-    
-    if [[ -f "scripts/macos/defaults.apps.yml" ]]; then
-        apply-user-defaults scripts/macos/defaults.apps.yml
-    fi
-    
-    success "macOS defaults applied"
 else
     warn "apply-user-defaults not found, skipping macOS defaults"
 fi
 
-success "macOS configuration applied"
+info "macOS configuration step complete"

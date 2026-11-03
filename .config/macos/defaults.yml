@@ -4,8 +4,6 @@
 com.apple.dock:
   # System Preferences > Dock > Automatically hide and show the Dock.
   autohide: true
-  # hide icons from desktop
-  CreateDesktop: false
   # System Preferences > Dock > Show indicators for open applications.
   show-process-indicators: true
 
@@ -14,6 +12,7 @@ NSGlobalDomain:
   _HIHideMenuBar: true
 
 com.apple.finder:
+  # Hide icons from desktop.
+  CreateDesktop: false
   # defaults write com.apple.finder "AppleShowAllFiles" -bool true
   AppleShowAllFiles: true
-

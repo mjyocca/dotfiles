@@ -12,9 +12,14 @@ canonical `docs/instructions/package-management.md` policy.
 - Shared dev tools and interim asdf runtime versions have separate declarations
   identified in the package policy; runtime migration to mise is not complete.
 - `scripts/macos/config.sh` uses `apply-user-defaults`, when available, with
-  `scripts/macos/defaults.yml` and `scripts/macos/defaults.apps.yml`.
+  `.config/macos/defaults.yml` and `.config/macos/defaults.apps.yml`, resolved
+  relative to the repository rather than the caller's working directory.
   `make config` (also `make apply_settings`) applies them; it is not a read-only
-  validation command and may skip defaults if the utility is absent.
+  validation command and may skip defaults if the utility or input files are absent.
+- `.config/macos/` is repository-only configuration, not a mise dotfile deployment
+  source. Its `launchagents/` directory retains inactive plist files; no tracked
+  step installs or loads them. The SSH key loader's `/var/log/addssh/` logging
+  path needs review before any future activation.
 - User configuration uses XDG paths under `~/.config/`; LaunchAgents live under
   `~/Library/LaunchAgents/`. Discover the Homebrew prefix with `brew --prefix`
   rather than assuming an Apple Silicon or Intel installation path.
