@@ -3,8 +3,9 @@
 
 [bootstrap]
 dotfile_groups = [
-  # Shared groups (all packages except bash)
+  # Shared groups (all packages)
   "asdf",
+  "bash",
   "bat",
   "btop",
   "colima",
