@@ -1,0 +1,30 @@
+# Omarchy platform config
+# Selects shared groups plus Omarchy-specific groups
+
+[bootstrap]
+dotfile_groups = [
+  # Shared groups (all packages except zsh, colima, colima-scripts, homebrew)
+  "asdf",
+  "bash",
+  "bat",
+  "btop",
+  "ghostty",
+  "gitconfig",
+  "herdr",
+  "hunk",
+  "lazygit",
+  "mise",
+  "nvim",
+  "nvim-next",
+  "opencode",
+  "pnpm",
+  "scripts",
+  "ssh",
+  "starship",
+  "superfile",
+  "tmux",
+  "tool-versions",
+  "yazi",
+  "zed",
+  "zellij",
+]

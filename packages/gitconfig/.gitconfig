@@ -12,7 +12,9 @@
 
 [alias]
 	fza = "!git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add"
-	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
+{% if os() == "macos" %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
+{% else %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | xclip -selection clipboard"
+{% endif %}
 
 [interactive]
   diffFilter = delta --color-only

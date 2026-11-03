@@ -1,0 +1,33 @@
+# macOS platform config
+# Selects shared groups plus macOS-specific groups
+
+[bootstrap]
+dotfile_groups = [
+  # Shared groups (all packages except bash)
+  "asdf",
+  "bat",
+  "btop",
+  "colima",
+  "colima-scripts",
+  "ghostty",
+  "gitconfig",
+  "herdr",
+  "homebrew",
+  "hunk",
+  "lazygit",
+  "mise",
+  "nvim",
+  "nvim-next",
+  "opencode",
+  "pnpm",
+  "scripts",
+  "ssh",
+  "starship",
+  "superfile",
+  "tmux",
+  "tool-versions",
+  "yazi",
+  "zed",
+  "zellij",
+  "zsh",
+]

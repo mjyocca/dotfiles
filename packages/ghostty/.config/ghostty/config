@@ -14,6 +14,7 @@ window-title-font-family = "FiraCode Nerd Font"
 window-save-state = always
 macos-titlebar-style = tabs
 
+
 # Theming
 theme = GitHub Dark Default
 palette-generate = true
@@ -87,5 +88,6 @@ keybind = ctrl+s>shift+7=close_surface
 
 # Reload Config
 keybind = cmd+shift+r=reload_config
+
 
 custom-shader = ./shaders/cursor_warp.glsl
