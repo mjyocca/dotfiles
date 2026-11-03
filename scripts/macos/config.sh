@@ -1,47 +1,31 @@
 #!/usr/bin/env bash
+# Config layer: Apply macOS-specific configuration
+# macOS implementation
+set -euo pipefail
 
-. $PWD/scripts/utils.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../shared/utils.sh"
 
-setup_osx_launchctl() {
-	info "Configuring MacOS launchagents"
-
-	info "Enabling ssh agent on setup"
-	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-	info "Enabling ssh agent on setup"
-	cp "$SCRIPT_DIR/com.openssh.ssh-agent.plist" "$HOME/Library/LaunchAgents/"
-	launchctl unload "$HOME/Library/LaunchAgents/com.openssh.ssh-agent.plist"
-	launchctl load "$HOME/Library/LaunchAgents/com.openssh.ssh-agent.plist"
-	launchctl enable gui/$(id -u)/com.openssh.ssh-agent
-
-	info "Remapping Caps to Esc"
-	cp "$SCRIPT_DIR/com.local.remap_caps_lock.plist" "$HOME/Library/LaunchAgents/"
-	launchctl unload "$HOME/Library/LaunchAgents/com.local.remap_caps_lock.plist"
-	launchctl load "$HOME/Library/LaunchAgents/com.local.remap_caps_lock.plist"
-	launchctl enable gui/$(id -u)/com.local.remap_caps_lock
-}
-
-remap_keyboard_shortcut() {
-  devices_json="$(hidutil list -m 'keyboard' -n)"
-  keyboard_devices=$(echo "$devices_json" | jq -s 'group_by(.ProductID) | map({Product: .[0].Product, ProductID: .[0].ProductID, VendorID: .[0].VendorID }) | del(.[] | select(.ProductID==0 or .ProductID==null))')
-  echo "$keyboard_devices"
-
-  # echo "$keyboard_devices" | jq -c '.[]' | while read -r item; do
-  #   # Extract values using jq
-  #   product_name=$(echo "$item" | jq '.Product')
-  #   product_id=$(echo "$item" | jq '.ProductID')
-  #   vendor_id=$(echo "$item" | jq '.VendorID')
-
-  #   # Print the id and value
-  #   echo "Product: $product_name, ProductID: $product_id, VendorID: $vendor_id"
-  #   defaults -currentHost write -g com.apple.keyboard.modifiermapping."$vendor_id"-"$product_id"-0 -array-add '{"HIDKeyboardModifierMappingDst"=30064771113; "HIDKeyboardModifierMappingSrc"=30064771129; }'
-  # done
-  # info "Writing mapping for built-in"
-  # defaults -currentHost write -g com.apple.keyboard.modifiermapping.0-0-0 -array-add '{"HIDKeyboardModifierMappingDst"=0x700000029; "HIDKeyboardModifierMappingSrc"=0x700000039; }'
-}
-
-# Check if the script is being run directly or sourced
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-	# Script is being run directly, so call the function
-  setup_osx_launchctl
+if ! is_macos; then
+    fatal "This script is for macOS only"
 fi
+
+info "Applying macOS configuration..."
+
+# Apply macOS defaults via apply-user-defaults
+if command_exists apply-user-defaults; then
+    info "Applying system defaults..."
+    
+    if [[ -f "scripts/macos/defaults.yml" ]]; then
+        apply-user-defaults scripts/macos/defaults.yml
+    fi
+    
+    if [[ -f "scripts/macos/defaults.apps.yml" ]]; then
+        apply-user-defaults scripts/macos/defaults.apps.yml
+    fi
+    
+    success "macOS defaults applied"
+else
+    warn "apply-user-defaults not found, skipping macOS defaults"
+fi
+
+success "macOS configuration applied"
