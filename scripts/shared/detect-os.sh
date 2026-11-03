@@ -3,19 +3,29 @@
 # Can be sourced or executed
 
 get_os() {
+    if [[ -n "${PROFILE:-}" ]]; then
+        printf '%s\n' "$PROFILE"
+        return
+    fi
+
     case "$(uname -s)" in
         Darwin)
             echo "macos"
             ;;
         Linux)
+            # Omarchy normally retains ID=arch; do not classify all Arch as Omarchy.
+            if [[ -d /usr/share/omarchy ]]; then
+                echo "omarchy"
+                return
+            fi
             # Check for specific distributions
             if [[ -f /etc/os-release ]]; then
                 source /etc/os-release
                 case "${ID:-}" in
-                    arch)
-                        echo "arch"
+                    arch|manjaro)
+                        echo "$ID"
                         ;;
-                    manjaro|omarchy)
+                    omarchy)
                         echo "omarchy"
                         ;;
                     ubuntu)
@@ -27,7 +37,7 @@ get_os() {
                     *)
                         # Fallback to ID_LIKE
                         if [[ "${ID_LIKE:-}" == *"arch"* ]]; then
-                            echo "omarchy"
+                            echo "arch"
                         elif [[ "${ID_LIKE:-}" == *"ubuntu"* || "${ID_LIKE:-}" == *"debian"* ]]; then
                             echo "ubuntu"
                         else

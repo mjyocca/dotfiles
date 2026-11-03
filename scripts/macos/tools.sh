@@ -15,6 +15,6 @@ if ! command_exists mise; then
     fatal "mise is not installed. Run prerequisites first."
 fi
 
-mise install
+bash "$(dirname "${BASH_SOURCE[0]}")/../shared/install-mise-tools.sh" "$@"
 
 success "Dev tools installed"

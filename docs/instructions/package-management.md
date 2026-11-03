@@ -49,9 +49,10 @@ may legitimately require a system runtime alongside the selected asdf version.
 - AUR installation reads `packages/aur/packages.txt`, outside mise bootstrap and
   dotfile deployment. Machine lists are tracking-only, not automatic installation
   overlays; read `docs/instructions/omarchy.md` before editing them.
-- `make tools` runs blanket `mise install`, which may also read `~/.tool-versions`
-  and install duplicate asdf runtimes. Prefer a targeted install when authorized;
-  inspect effective configuration rather than assuming runtime migration is done.
+- `make tools` installs only explicit requests parsed from the tracked shared
+  `[tools]` declaration, using `mise --no-config` to exclude asdf/effective defaults.
+  Package bootstrap skips its tools phase. Preserve both safeguards; a blanket
+  `mise install` or unfiltered bootstrap can install duplicate asdf runtimes.
 
 ## Ownership Changes
 

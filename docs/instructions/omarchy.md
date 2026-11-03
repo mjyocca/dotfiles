@@ -7,25 +7,29 @@ load `docs/instructions/bash.md` only for shell changes.
 
 After Omarchy updates, inspect replaced configs, backups, and target collisions
 before authorized redeployment. `make link` is the deployment entrypoint; Make
-selects the detected platform environment unless `MISE_ENV` is already set. See
-`docs/instructions/mise-dotfiles.md` when working on deployment.
+selects `PROFILE` (detected by default) as its environment unless `MISE_ENV` is
+already set. See `docs/instructions/mise-dotfiles.md` when working on deployment.
 
 ## Installation Inputs
 
 Ownership rules live in `docs/instructions/package-management.md`; this section
 describes actual consumers, not another ownership policy.
 
-- `scripts/linux/packages.sh` invokes `mise bootstrap`. Pacman declarations live
-  in `.config/mise/config.toml` and `.config/mise/config.omarchy.toml`.
+- `scripts/linux/packages.sh` invokes `mise bootstrap --skip tools`. Pacman
+  declarations live in `.config/mise/config.toml` and
+  `.config/mise/config.omarchy.toml`.
 - `scripts/omarchy/packages.sh` invokes the Linux layer, then `aur.sh`. The AUR
   script reads `packages/aur/packages.txt` and invokes yay with review prompts.
   `scripts/linux/aur-installer.sh` is a standalone interactive alternative using
   the same list. Neither installer automatically includes machine-specific lists.
 - `packages/aur/` contains repository-only data, not home-relative dotfiles.
   Never add it to mise dotfile groups or deployment selections.
-- `scripts/omarchy/installer.sh` currently invokes generic `bootstrap_linux`, not
-  `bootstrap_omarchy`, and does not implement machine overlay selection. Do not
-  document `--machine` as an installer feature.
+- `scripts/omarchy/installer.sh` invokes `make bootstrap PROFILE=omarchy`, selecting
+  the Omarchy flow and AUR layer. Detection recognizes explicit `ID=omarchy` or
+  `/usr/share/omarchy/`; plain Arch and Manjaro are not automatically Omarchy.
+  `PROFILE=omarchy` overrides both dispatch and the default mise environment.
+  Machine overlay selection is not implemented; do not document `--machine` as
+  an installer feature.
 
 Use real package names, not executable names (`git-delta` provides `delta`).
 Verify repository availability against the installed Omarchy version rather than

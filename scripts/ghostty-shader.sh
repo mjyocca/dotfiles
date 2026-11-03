@@ -21,8 +21,8 @@ set -euo pipefail
 
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# shellcheck source=utils.sh
-source "${DOTFILES_ROOT}/scripts/utils.sh"
+# shellcheck source=shared/utils.sh
+source "${DOTFILES_ROOT}/scripts/shared/utils.sh"
 
 # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -171,7 +171,7 @@ EOF
   fi
 
   printf "\n"
-  success "Done. Run 'make stow PKG=ghostty' if symlinks need refreshing."
+  success "Done. Review 'mise dotfiles apply --dry-run', then run 'make link' to deploy changes."
 }
 
 main "$@"

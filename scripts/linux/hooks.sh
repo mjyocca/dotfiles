@@ -17,29 +17,29 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 0
 fi
 
-# Get git hooks directory
-HOOKS_DIR="$(git rev-parse --show-toplevel)/.git/hooks"
-
-# Install pre-commit hook for gitleaks
-# Direct installation of gitleaks pre-commit hook
-if command_exists gitleaks; then
-    info "Installing gitleaks pre-commit hook..."
-    cat > "$HOOKS_DIR/pre-commit" << 'EOF'
-#!/usr/bin/env bash
-# Pre-commit hook: Run gitleaks to detect secrets
-set -euo pipefail
-
-if command -v gitleaks &> /dev/null; then
-    echo "Running gitleaks..."
-    gitleaks protect --staged --verbose
-else
-    echo "Warning: gitleaks not found, skipping secret detection"
-fi
-EOF
-    chmod +x "$HOOKS_DIR/pre-commit"
-    success "gitleaks pre-commit hook installed"
-else
+if ! command_exists gitleaks; then
     warn "gitleaks not found, skipping pre-commit hook installation"
+    exit 0
+fi
+
+# Let Git resolve worktrees and core.hooksPath rather than assuming .git/hooks.
+repo_root="$(git rev-parse --show-toplevel)"
+hooks_dir="$(git -C "$repo_root" rev-parse --path-format=absolute --git-path hooks)"
+source_hook="$repo_root/.githooks/pre-commit"
+target_hook="$hooks_dir/pre-commit"
+
+[[ -f "$source_hook" && -x "$source_hook" ]] || fatal "Missing executable hook: $source_hook"
+
+if [[ -L "$target_hook" && "$target_hook" -ef "$source_hook" ]]; then
+    info "pre-commit hook already installed"
+elif [[ -f "$target_hook" ]] && cmp -s "$source_hook" "$target_hook"; then
+    info "pre-commit hook already installed"
+elif [[ -e "$target_hook" || -L "$target_hook" ]]; then
+    fatal "Existing pre-commit hook left untouched: $target_hook. Review it before replacing it."
+else
+    mkdir -p "$hooks_dir"
+    ln -s "$source_hook" "$target_hook"
+    success "gitleaks pre-commit hook installed"
 fi
 
 success "Git hooks installed"

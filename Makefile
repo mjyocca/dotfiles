@@ -17,7 +17,7 @@ PROFILE ?= $(DISTRO)
 export PROFILE
 
 # Select platform mise configuration even before shell dotfiles are deployed.
-MISE_ENV ?= $(DISTRO)
+MISE_ENV ?= $(PROFILE)
 export MISE_ENV
 
 # ======================
@@ -42,16 +42,15 @@ endef
 
 # Platform-aware bootstrap dispatcher
 bootstrap:
-ifeq ($(OS),Darwin)
+ifeq ($(PROFILE),macos)
 	@echo "Bootstrapping macOS..."
 	@$(MAKE) bootstrap_macos
-else ifeq ($(OS),Linux)
-	@echo "Bootstrapping Linux ($(DISTRO))..."
-ifeq ($(DISTRO),omarchy)
+else ifeq ($(PROFILE),omarchy)
+	@echo "Bootstrapping Omarchy..."
 	@$(MAKE) bootstrap_omarchy
-else
+else ifeq ($(OS),Linux)
+	@echo "Bootstrapping Linux ($(PROFILE))..."
 	@$(MAKE) bootstrap_linux
-endif
 else
 	@echo "Error: Unsupported platform: $(OS)" >&2
 	@exit 1
@@ -114,25 +113,25 @@ sync: pack link plug
 .PHONY: prerequisites packages tools plugins config hooks aur
 
 prerequisites:
-	$(call run_script,$(DISTRO),prerequisites)
+	$(call run_script,$(PROFILE),prerequisites)
 
 packages:
-	$(call run_script,$(DISTRO),packages)
+	$(call run_script,$(PROFILE),packages)
 
 aur:
 	$(call run_script,omarchy,aur)
 
 tools:
-	$(call run_script,$(DISTRO),tools)
+	$(call run_script,$(PROFILE),tools)
 
 plugins:
-	$(call run_script,$(DISTRO),plugins)
+	$(call run_script,$(PROFILE),plugins)
 
 config:
-	$(call run_script,$(DISTRO),config)
+	$(call run_script,$(PROFILE),config)
 
 hooks:
-	$(call run_script,$(DISTRO),hooks)
+	$(call run_script,$(PROFILE),hooks)
 
 # ======================
 # FRESH INSTALL
@@ -140,9 +139,9 @@ hooks:
 .PHONY: fresh-install
 
 fresh-install:
-ifeq ($(OS),Darwin)
+ifeq ($(PROFILE),macos)
 	@bash ./scripts/macos/installer.sh
-else ifeq ($(DISTRO),omarchy)
+else ifeq ($(PROFILE),omarchy)
 	@bash ./scripts/omarchy/installer.sh
 else
 	@bash ./scripts/linux/installer.sh
@@ -161,7 +160,8 @@ install_mise:
 apply_settings: config
 
 # Zellij plugins (kept for backward compatibility)
-zellij-plugins: plugins
+zellij-plugins:
+	@bash ./scripts/shared/install-zellij-plugin.sh
 
 # Ghostty shader installer
 ghostty-shader:

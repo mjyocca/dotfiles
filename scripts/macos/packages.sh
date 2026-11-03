@@ -15,6 +15,7 @@ if ! command_exists mise; then
     fatal "mise is not installed. Run prerequisites first."
 fi
 
-mise bootstrap
+# Tool installation is isolated in the tools layer to preserve asdf ownership.
+mise bootstrap --skip tools
 
 success "System packages installed"

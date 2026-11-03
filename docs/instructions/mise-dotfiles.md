@@ -13,8 +13,9 @@ Use for deployment wiring, not package ownership or general mise tutorials.
   deployment declarations together; neither replaces the other.
 - `config.macos.toml` and `config.omarchy.toml` select groups under
   `[bootstrap] dotfile_groups`. The base selection is empty for safety until a
-  platform environment is selected. Make exports `MISE_ENV` from platform detection
-  unless already set; direct mise commands need `-E macos` or `-E omarchy`.
+  platform environment is selected. Make exports `MISE_ENV` from `PROFILE` (which
+  defaults to detection) unless already set; direct mise commands need `-E macos`
+  or `-E omarchy`.
 - Git, SSH, Ghostty, and Zellij have template overrides; their deployed files are
   rendered copies, not source symlinks. Other group files use `symlink-each`.
 - The deployed `packages/mise/.config/mise/config.toml` declares dev tools only.
@@ -43,8 +44,9 @@ configuration. In particular:
 
 `make bootstrap` runs prerequisites (including mise installation), packages, tools,
 plugins, config, and hooks; the Makefile has no explicit link step. Package scripts
-invoke `mise bootstrap`, which also applies the selected dotfile groups. Therefore
-`make packages` is not a package-only operation.
+invoke `mise bootstrap --skip tools`, which also applies the selected dotfile groups.
+Therefore `make packages` is not a package-only operation. The separate tools layer
+installs only the tracked shared dev tools, excluding asdf runtime defaults.
 
 `make sync` runs packages, link, and plugins only. It does not run tools, config,
 or hooks. Use the narrow task-appropriate layer rather than treating sync as full

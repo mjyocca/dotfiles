@@ -34,7 +34,7 @@ Run from the repository root; these commands change the machine, not just the re
 |---|---|
 | `make bootstrap` | Runs prerequisites → packages → tools → plugins → config → hooks; no explicit link step |
 | `make packages` | Runs mise bootstrap (packages and selected dotfiles); Omarchy also invokes the AUR layer |
-| `make tools` | Runs mise install for dev tools; see runtime-duplication warning in package policy |
+| `make tools` | Installs only tracked shared dev tools; excludes asdf runtime defaults |
 | `make link` | Runs `mise dotfiles apply`; requires effective deployment declarations |
 | `make sync` | Packages, link, plugins only—not full provisioning |
 | `make hooks` | Installs the gitleaks pre-commit hook when gitleaks is available |

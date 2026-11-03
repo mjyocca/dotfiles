@@ -86,10 +86,10 @@ main() {
 	clone_or_update_repo
 	
 	info "Running bootstrap..."
-	make bootstrap_linux
+	make bootstrap PROFILE=omarchy
 	
 	success "Bootstrap complete!"
-	info "You may need to restart your shell or run: source ~/.zshrc"
+	info "You may need to restart your shell or run: source ~/.bashrc"
 }
 
 # Run if executed directly

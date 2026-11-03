@@ -7,6 +7,10 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 - Secrets, API keys, and tokens belong in git-ignored `~/.zshrc.local` or `~/.bashrc.local`
 - Never put real values in shared shell startup files — those are committed
 - Both interactive shell configs bootstrap and source their local override file
+- `scripts/github-ssh.sh` accepts passphrases only through ssh-keygen's interactive
+  prompt, not `SSH_PASSPHRASE`, command arguments, or key comments. Existing key
+  paths are never overwritten. If the old helper was used with a real passphrase,
+  treat it as exposed through terminal output and the public key's comment.
 
 ## Never hardcode usernames or absolute paths
 
@@ -38,10 +42,13 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 
 ## Gitleaks — secret scanning
 
-`make hooks` installs a pre-commit hook only when gitleaks is available. The hook
-currently invokes `gitleaks protect --staged --verbose` and skips scanning with a
-warning if the binary is missing. Installation is not proof every commit is scanned;
-inspect the active hook and installed CLI compatibility when auditing enforcement.
+`make hooks` links the canonical `.githooks/pre-commit` only when gitleaks is
+available. It resolves Git's hooks directory (including worktrees and
+`core.hooksPath`), preserves matching hooks, and refuses unfamiliar existing hooks.
+The hook invokes `gitleaks protect --staged --redact --verbose` and skips scanning
+with a warning if the binary is missing. Installation is not proof every commit is
+scanned; inspect the active hook and installed CLI compatibility when auditing
+enforcement. Never write through an existing hook symlink to replace its source.
 
 For manual scans, consult the installed version's help and
 [upstream Gitleaks guidance](https://github.com/gitleaks/gitleaks) instead of copying
