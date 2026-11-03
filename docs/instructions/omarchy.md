@@ -7,7 +7,7 @@ This file captures Omarchy-specific conventions, override paths, package managem
 - **Override model**: User configs in `~/.config/`, system defaults in `/usr/share/omarchy/` (read-only)
 - **Dotfiles management**: mise is used for dotfile management
 - **Shell**: Bash-first at desktop level (zsh included but interactive tools assume bash)
-- **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make dotfiles`
+- **Config refresh**: After `omarchy update` or `omarchy reinstall configs`, re-run `make link`
 - **Package tracking**: Track direct dependencies in all three `manifests/pacman/packages*.txt` lists, including packages already installed by the OS
 - **Security**: Gitleaks pre-commit hook scans for secrets
 
@@ -44,7 +44,7 @@ This file captures Omarchy-specific conventions, override paths, package managem
 **Update dotfiles after Omarchy update:**
 ```bash
 omarchy update
-make dotfiles  # Re-establish symlinks
+make link  # Re-establish symlinks
 ```
 
 **Plugin development:**
@@ -75,20 +75,17 @@ The selected overlay adds to the shared lists, with the same validation, routing
 #### Commands
 
 ```bash
-# Install all curated lists (also run by make bootstrap on Omarchy)
-bash ./scripts/omarchy/install-packages.sh
+# Install all system packages (pacman + AUR) via mise bootstrap
+make packages
 
-# Preview without invoking package managers (also works off-machine)
-bash ./scripts/omarchy/install-packages.sh --dry-run
+# Or run specific layers
+make prerequisites  # Install base tools (git, curl, make, etc.)
+make packages       # Install system packages via mise bootstrap
+make tools          # Install dev tools via mise
 
-# Or choose one list: system, gui, or aur
-bash ./scripts/omarchy/install-packages.sh system
-bash ./scripts/omarchy/install-packages.sh gui
-bash ./scripts/omarchy/install-packages.sh aur
-
-# Shared lists plus the explicitly selected machine overlay
-bash ./scripts/omarchy/install-packages.sh --machine amd-strix-halo --dry-run
-bash ./scripts/omarchy/install-packages.sh --machine amd-strix-halo
+# Install pacman packages directly (for advanced use)
+# The install-packages.sh script has been replaced by layer scripts
+# See scripts/linux/packages.sh and scripts/omarchy/packages.sh
 
 # Find untracked packages
 ./scripts/omarchy/find-untracked-packages.sh
@@ -102,11 +99,11 @@ pacman -Qqen
 pacman -Qqem
 ```
 
-The installer validates every selected list and required command before installation, deduplicates targets, and rejects repository/AUR cross-list collisions. System and GUI targets go to `sudo pacman -S --needed`; AUR targets go to `yay -S --needed --aur` as your normal user. AUR builds remain interactive so you can review build instructions; installed packages are never pruned.
+The package installation is now handled through the domain layer architecture. `make packages` on Omarchy runs the packages layer which installs pacman packages from the manifests, then handles AUR packages via yay. System and GUI targets go to `sudo pacman -S --needed`; AUR targets go to `yay -S --needed --aur` as your normal user. AUR builds remain interactive so you can review build instructions; installed packages are never pruned.
 
-`--needed` skips up-to-date targets, not all installed targets. New versions can still be installed; repeatable installation is not version pinning. Run a full system update before installing against refreshed databases—never use `pacman -Sy` alone. `make bootstrap` runs `pacman -Syu` first, then the lists, repository-declared mise tools, git hooks, and Zellij plugins in order, including with `make -j`. It does not deploy configs or install asdf runtimes; run `make link` afterward, then `asdf install` as needed.
+`--needed` skips up-to-date targets, not all installed targets. New versions can still be installed; repeatable installation is not version pinning. Run a full system update before installing against refreshed databases—never use `pacman -Sy` alone. `make bootstrap` runs prerequisites, packages (including AUR), tools, plugins, config, and hooks layers in order. It does not deploy configs; run `make link` afterward.
 
-`make mise_install` uses the cross-platform Bash helper `scripts/install-mise-tools.sh`, shared with macOS. See [package management instructions](./package-management.md) for its repository-only installation behavior, supported config format, and dry-run command.
+Dev tools are installed via `make tools` which runs the tools layer script. This uses mise to install version-pinned tools from the configuration. See [package management instructions](./package-management.md) for details on adding tools and managing versions.
 
 **Workflow:**
 1. Install with `omarchy pkg add <package>` or `sudo pacman -S --needed <package>`
@@ -141,7 +138,21 @@ Discovery reports explicit native and foreign packages separately. Foreign packa
 
 ## Dev Tools & Language Runtimes
 
-See [package management instructions](./package-management.md) for mise and asdf conventions, commands, and troubleshooting.
+Dev tools are installed via `make tools`, which runs the tools layer script. This uses mise to install version-pinned tools from the configuration.
+
+Language runtimes are currently managed through asdf (interim solution). After the separate migration is complete, they will move to mise.
+
+```bash
+# Install dev tools via mise
+make tools
+
+# Language runtimes (interim: asdf)
+asdf install
+asdf install <lang> <version>
+asdf set -u <lang> <version>
+```
+
+See [package management instructions](./package-management.md) for details on adding tools, managing versions, and the ownership criteria.
 
 ## Troubleshooting
 
@@ -161,7 +172,7 @@ See [package management instructions](./package-management.md) for mise and asdf
 ## Warnings
 
 - **Collision risk**: Deploying packages replaces Omarchy-seeded configs in `~/.config/`
-- **Stale configs**: After Omarchy updates, check for `.bak` files and re-run `make dotfiles`
+- **Stale configs**: After Omarchy updates, check for `.bak` files and re-run `make link`
 - **Read-only source**: Never edit `/usr/share/omarchy/` directly
 
 ## Sources
@@ -171,4 +182,4 @@ See [package management instructions](./package-management.md) for mise and asdf
 - [Omarchy Plugin Development](https://plugins.omarchy.org/develop.html) — create custom plugins
 - [Omarchy Source Code](/usr/share/omarchy) — read-only system package (local)
 
-_Last synced: 2026-01-23_
+_Last synced: 2026-11-03_

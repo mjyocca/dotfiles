@@ -73,8 +73,8 @@ git diff --stat
 
 # 3. Selective operations:
 
-# Only packages changed (Brewfile, packages.txt)?
-make pack
+# Only packages changed (mise config, packages.txt)?
+make packages
 
 # Only dotfiles changed (packages/*)?
 make link

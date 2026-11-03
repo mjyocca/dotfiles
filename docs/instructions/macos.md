@@ -40,7 +40,7 @@ make link  # Deploys dotfiles via mise
 
 **Install all packages:**
 ```bash
-brew bundle --file=packages/homebrew/Brewfile
+make packages  # Uses mise bootstrap to install Homebrew packages
 ```
 
 **Colima (Docker):**
@@ -54,15 +54,17 @@ colima status             # Check status
 
 ### System Packages (Homebrew)
 
-Homebrew owns mission-critical, session-critical, and OS-integrated tools (infrastructure, build dependencies, GUI apps, and shell/session utilities). See [package management instructions](./package-management.md) for ownership decisions.
+All system packages are managed via mise bootstrap in `.config/mise/config.macos.toml`. Homebrew packages are declared with `brew:` prefix, and GUI apps use `brew-cask:` prefix.
 
-**Config location:** `packages/homebrew/Brewfile` (deployed to `~/Brewfile`)
+**Config location:** `.config/mise/config.macos.toml` under `[bootstrap.packages]`
 
 #### Commands
 
 ```bash
-# Install from Brewfile
-brew bundle --file=packages/homebrew/Brewfile
+# Install all packages via mise bootstrap
+make packages
+# or directly:
+mise bootstrap
 
 # Update all packages
 brew update && brew upgrade
@@ -70,7 +72,7 @@ brew update && brew upgrade
 # List installed packages
 brew list
 
-# Install a single package
+# Install a single package (add to config.macos.toml, then run make packages)
 brew install <package>
 
 # Install a GUI app (cask)
@@ -79,28 +81,34 @@ brew install --cask <app>
 
 #### What NOT to Track
 
-**❌ Do NOT add to Brewfile:**
+**❌ Do NOT add to mise config (as Homebrew packages):**
 
-1. **Packages managed by mise**
+1. **Tools managed by mise as dev tools**
    - Version-sensitive/optional tools like gitleaks, gh, kubectl, opencode, television
-   - These belong in `packages/mise/.config/mise/config.toml`
+   - These belong in `packages/mise/.config/mise/config.toml` under `tools`
 
-2. **Language runtimes in system packages**
+2. **Language runtimes**
    - Don't install node, ruby, go via Homebrew
-   - Use asdf instead for version management
+   - Use mise for version management
 
-**✅ DO track:**
+**✅ DO track as Homebrew packages:**
 1. **System infrastructure** you depend on (git, curl, stow, build tools)
 2. **System services** you use (docker, colima)
 3. **GUI applications** you launch from app menu
 4. **Session-critical and other platform-managed CLI/TUI tools** (starship, direnv, fzf, jq, lazygit, ripgrep, tmux)
-5. **Optional/version-sensitive tools** in mise; **language runtimes** in asdf until the separate migration
+5. **Optional/version-sensitive tools** in mise; **language runtimes** in mise
 
 ## Dev Tools & Language Runtimes
 
-See [package management instructions](./package-management.md) for mise and asdf conventions, commands, and troubleshooting.
+Dev tools and language runtimes are managed through mise. Tools are installed via the tools layer:
 
-`make mise_install` uses the shared Bash helper `scripts/install-mise-tools.sh` to install only tools declared in the repository's mise config, without picking up asdf runtimes or existing global/project config. Preview with `bash scripts/install-mise-tools.sh --dry-run`; run `make dotfiles` afterward to activate the shared configuration.
+```bash
+make tools  # Installs dev tools via mise
+```
+
+This runs `mise install` which reads tool versions from the mise configuration. Language runtimes (node, python, ruby, etc.) are also managed via mise using the asdf plugin system.
+
+See [package management instructions](./package-management.md) for details on adding new tools and managing versions.
 
 ## Troubleshooting
 
@@ -128,4 +136,4 @@ See [package management instructions](./package-management.md) for mise and asdf
 - [Homebrew Documentation](https://docs.brew.sh/) — package manager
 - [macOS User Guide](https://support.apple.com/guide/mac-help) — Apple's official user documentation
 
-_Last synced: 2026-01-23_
+_Last synced: 2026-11-03_

@@ -6,7 +6,7 @@ Cross-platform package management conventions for this dotfiles repo. Platform-s
 
 | Manager | Role | Config |
 |---------|------|--------|
-| Homebrew / pacman | Mission-critical, session-critical, and OS-integrated packages | `packages/homebrew/Brewfile`, `manifests/pacman/packages.txt` |
+| mise bootstrap | System packages (Homebrew on macOS, pacman on Linux) | `.config/mise/config.<platform>.toml` |
 | mise | Version-switched, fast-moving cloud API, and eligible optional tools | `packages/mise/.config/mise/config.toml` |
 | asdf (interim) | Language runtimes | `packages/tool-versions/.tool-versions` |
 
@@ -14,9 +14,9 @@ Cross-platform package management conventions for this dotfiles repo. Platform-s
 
 ## Choosing an Owner
 
-1. **Mission-critical, session-critical, or OS-integrated?** Use Homebrew/pacman for services, GUI apps, libraries, build dependencies, and commands required for a usable shell or desktop. Examples: git, Docker, starship, fzf, direnv, zoxide, tmux, zellij.
-2. **Version-switched or coupled to a fast-moving cloud API?** Use mise, unless the tool must be available independently of mise per rule 1. Examples: kubectl, gh, hunk, opencode. Language runtimes (such as Go) and tools such as Terraform will move to mise in a separate migration; runtimes remain in asdf for now.
-3. **Neither rule settles ownership?** Keep the existing owner unless there is a reason to change it. For an optional CLI/TUI, use mise if its backend supports both platforms and it has no session/OS dependency (e.g., gitleaks, lazydocker, yq, glow, lsd, dua, superfile, television, yazi). Otherwise use the platform manager and document the exception. If both options still fit, first compare similar tools in our Brewfile, pacman lists, and mise config; then, if still ambiguous, use the package-management skill's upstream lookup. Neither tie-breaker overrides the primary criteria.
+1. **System packages?** Use mise bootstrap with `brew:` (macOS) or platform package manager (Linux). Examples: git, Docker, starship, fzf, direnv, zoxide, tmux, zellij.
+2. **Version-switched or coupled to a fast-moving cloud API?** Use mise dev tools, unless the tool must be available independently of mise per rule 1. Examples: kubectl, gh, hunk, opencode. Language runtimes (such as Go) and tools such as Terraform will move to mise in a separate migration; runtimes remain in asdf for now.
+3. **Neither rule settles ownership?** Keep the existing owner unless there is a reason to change it. For an optional CLI/TUI, use mise if its backend supports both platforms and it has no session/OS dependency (e.g., gitleaks, lazydocker, yq, glow, lsd, dua, superfile, television, yazi). Otherwise use the platform package manager and document the exception. If both options still fit, first compare similar tools in our mise config, pacman lists, and Homebrew packages; then, if still ambiguous, use the package-management skill's upstream lookup. Neither tie-breaker overrides the primary criteria.
 
 Explicitly track direct dependencies in the appropriate `manifests/pacman/packages*.txt` list even if the OS already installed them; `--needed` skips up-to-date targets. These provisioning manifests are read directly from the repository and are not deployed to `$HOME`. Repository system/CLI and GUI packages use their respective lists; all AUR packages use `packages-aur.txt`. See the Omarchy instructions for the installer and list format. Do not put the same tool in both our shared mise config and a platform package list. Check system-provided mise defaults and packages before changing ownership; do not uninstall packages the OS itself requires to eliminate a duplicate.
 
@@ -26,21 +26,22 @@ Hardware-specific direct dependencies belong in `manifests/pacman/machines/<name
 
 The shared config is deployed to `~/.config/mise/config.toml`. System mise defaults may also apply; only add tools to the shared config when they meet the criteria above.
 
+Tools are installed via the tools layer:
+
 ```bash
-mise install <tool>      # install an eligible tool without also installing asdf runtimes
-mise use -g <tool>@latest # add an eligible tool to global config
+make tools  # Install all dev tools via mise
 mise list
 mise current
 ```
 
 Check `mise registry <tool>` and supported platforms before adding a tool. A blanket `mise install` may also read `~/.tool-versions` and install duplicate asdf runtimes until the separate migration is complete.
 
-On macOS and Omarchy, `make mise_install` runs the shared Bash helper `scripts/install-mise-tools.sh`. It uses mise's TOML parser to read only `packages/mise/.config/mise/config.toml`, then installs explicit tool/version requests using `mise --no-config install`. It does not require deploying first, change existing user config, or install tools inherited from global/system/project config and `~/.tool-versions`. Run `make link` to activate the shared configuration afterward. Only simple string-version entries are supported; complex tool options are rejected rather than silently ignored.
+To add a new dev tool, edit the appropriate config file:
+- Shared tools: `packages/mise/.config/mise/config.toml`
+- macOS-only: `.config/mise/config.macos.toml`
+- Omarchy-only: `.config/mise/config.omarchy.toml`
 
-Preview without installing (requires mise):
-```bash
-bash scripts/install-mise-tools.sh --dry-run
-```
+Then run `make tools` to install.
 
 ## Language Runtimes (Interim: asdf)
 

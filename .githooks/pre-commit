@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-commit hook to scan staged changes for secrets using gitleaks
-# Install: scripts/install-git-hooks.sh
+# Install: make hooks
 # Requires: gitleaks in PATH
 
 set -euo pipefail
@@ -8,7 +8,7 @@ set -euo pipefail
 # Check if gitleaks is available
 if ! command -v gitleaks &> /dev/null; then
   echo "⚠️  gitleaks not found. Skipping secret scan."
-  echo "   After make dotfiles, install with: mise install gitleaks"
+  echo "   After make link, install with: mise install gitleaks"
   exit 0
 fi
 

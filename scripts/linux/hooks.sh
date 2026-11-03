@@ -21,13 +21,10 @@ fi
 HOOKS_DIR="$(git rev-parse --show-toplevel)/.git/hooks"
 
 # Install pre-commit hook for gitleaks
-if [[ -f "scripts/install-git-hooks.sh" ]]; then
-    bash scripts/install-git-hooks.sh
-else
-    # Direct installation of gitleaks pre-commit hook
-    if command_exists gitleaks; then
-        info "Installing gitleaks pre-commit hook..."
-        cat > "$HOOKS_DIR/pre-commit" << 'EOF'
+# Direct installation of gitleaks pre-commit hook
+if command_exists gitleaks; then
+    info "Installing gitleaks pre-commit hook..."
+    cat > "$HOOKS_DIR/pre-commit" << 'EOF'
 #!/usr/bin/env bash
 # Pre-commit hook: Run gitleaks to detect secrets
 set -euo pipefail
@@ -39,11 +36,10 @@ else
     echo "Warning: gitleaks not found, skipping secret detection"
 fi
 EOF
-        chmod +x "$HOOKS_DIR/pre-commit"
-        success "gitleaks pre-commit hook installed"
-    else
-        warn "gitleaks not found, skipping pre-commit hook installation"
-    fi
+    chmod +x "$HOOKS_DIR/pre-commit"
+    success "gitleaks pre-commit hook installed"
+else
+    warn "gitleaks not found, skipping pre-commit hook installation"
 fi
 
 success "Git hooks installed"

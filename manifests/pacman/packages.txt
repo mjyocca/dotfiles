@@ -2,8 +2,8 @@
 # Future Stow option: packages/pacman/.config/dotfiles/packages/pacman/ → ~/.config/dotfiles/packages/pacman/.
 # Curated direct dependencies, including preinstalled packages (git, bat, tmux).
 # GUI/AUR apps are in the sibling lists; optional/versioned tools are in mise.
-# Install all: bash ./scripts/omarchy/install-packages.sh
-# Install this list: bash ./scripts/omarchy/install-packages.sh system
+# Install all: make packages
+# Install this list via mise bootstrap: make packages
 # --needed skips up-to-date packages; newer versions can still be upgraded.
 # Hardware-specific dependencies: machines/<name>/; select with --machine <name>.
 

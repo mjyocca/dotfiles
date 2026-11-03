@@ -13,13 +13,20 @@ When you encounter a file reference (e.g., @docs/instructions/macos.md), use you
 
 | Command | Description |
 |---|---|
+| `make bootstrap` | Full machine provisioning (platform-aware, runs all layers) |
+| `make prerequisites` | Install base tools (git, curl, make, etc.) |
+| `make packages` | Install system packages via mise bootstrap |
+| `make tools` | Install dev tools via mise |
+| `make plugins` | Install zellij, tmux plugins |
+| `make config` | Apply system/app configuration |
+| `make hooks` | Install git hooks (gitleaks) |
 | `make link` | Deploy dotfiles via mise to `$HOME` |
-| `make pack` | Install system packages for current platform |
-| `make plug` | Install plugins (zellij, etc.) |
+| `make pack` | Alias for `packages` |
+| `make plug` | Alias for `plugins` |
 | `make sync` | Run `make pack link plug` |
-| `make bootstrap` | Full machine provisioning (platform-aware) |
 | `make apply_settings` | Apply OS-level defaults |
-| `make install_git_hooks` | Install gitleaks pre-commit hook |
+
+**Layer inheritance:** Scripts in `omarchy/` inherit from `linux/`. If a layer script doesn't exist in `omarchy/`, it falls back to the `linux/` version. This allows platform-specific overrides while sharing common logic.
 
 ## Project Structure
 
@@ -33,16 +40,36 @@ packages/          # Dotfile packages (each maps to $HOME paths)
   ssh/             # SSH config
   starship/        # Prompt theme
   ghostty/         # Terminal emulator
-  homebrew/        # System packages (macOS: Brewfile)
   mise/            # Dev tools (cross-platform: config.toml)
   tool-versions/   # Language runtimes (cross-platform: .tool-versions)
 manifests/         # Repository-only provisioning manifests (not deployed to $HOME)
   pacman/          # Shared package lists and machine-specific overlays
+  aur/             # AUR package list (Omarchy only)
 scripts/
-  macos/           # macOS bootstrap, defaults, config scripts
-  omarchy/         # Omarchy-specific utility scripts
-  detect-os.sh     # OS detection and profile selection
-  install-git-hooks.sh  # Gitleaks pre-commit hook installer
+  shared/          # Common utilities (utils.sh, detect-os.sh)
+  linux/           # Base layer scripts for all Linux distros
+    prerequisites.sh  # git, curl, make, build tools
+    packages.sh       # mise bootstrap
+    tools.sh          # mise tool versions
+    plugins.sh        # zellij, tmux plugins
+    config.sh         # Linux-specific config
+    hooks.sh          # git hooks
+    installer.sh      # Generic Linux fresh install
+  macos/           # macOS layer scripts (standalone, no inheritance)
+    prerequisites.sh  # Xcode CLT, Homebrew
+    packages.sh       # mise bootstrap
+    tools.sh          # mise tool versions
+    plugins.sh        # zellij, tmux plugins
+    config.sh         # macOS defaults
+    hooks.sh          # git hooks
+    installer.sh      # Fresh Mac setup
+  omarchy/         # Omarchy layer scripts (inherits from linux/)
+    prerequisites.sh  # Inherits from linux/
+    packages.sh       # Calls linux/packages.sh then aur.sh
+    aur.sh            # AUR packages (yay, PKGBUILD review)
+    config.sh         # Omarchy-specific config
+    installer.sh      # Fresh Omarchy setup
+    find-untracked.sh # Audit untracked packages
 docs/
   instructions/    # OS-specific conventions (load on demand)
     macos.md       # macOS conventions and package management
@@ -69,26 +96,30 @@ Load these when working on the respective components.
 ## OS Detection & Platforms
 
 ```bash
-./scripts/detect-os.sh --print  # outputs: macos | omarchy | ubuntu | etc.
+./scripts/shared/detect-os.sh  # outputs: macos | ubuntu | fedora | arch | omarchy | unknown
 ```
 
-Platforms are defined in mise config files (`.config/mise/config.<platform>.toml`). Each platform config selects which dotfile groups to deploy via `[bootstrap] dotfile_groups = [...]`.
+Platforms are defined in mise config files (`.config/mise/config.<platform>.toml`). Each platform config selects which packages to install via `[bootstrap.packages]`.
 
 | OS | Platform | Notes |
 |---|---|---|
-| macOS | `macos` | Includes `homebrew`, `colima` |
-| Omarchy | `omarchy` | Excludes `homebrew`, `colima` |
+| macOS | `macos` | Includes Homebrew packages in `config.macos.toml` |
+| Omarchy | `omarchy` | Uses `config.omarchy.toml` + AUR packages |
 
-To add a package to a platform, edit the relevant `.config/mise/config.<platform>.toml` file and add the group name to the `[bootstrap] dotfile_groups` array.
+To add a package to a platform, edit the relevant `.config/mise/config.<platform>.toml` file and add it to the `[bootstrap.packages]` table.
 
 ## Package Management Architecture
 
-Choose by dependency: mission-critical, session-critical, or OS-integrated tools → Homebrew/pacman; version-switched or fast-moving cloud API tools → mise (unless needed independently of mise). Optional tools use mise when suitable; if both managers fit, first compare our existing package lists/config, then consult the package-management skill's upstream lookup if still ambiguous. Runtimes stay on asdf until their separate migration to mise. Track direct pacman dependencies explicitly; apply the curated lists with `bash scripts/omarchy/install-packages.sh` (`--dry-run` previews). Repository CLI/system and GUI lists use pacman; all AUR packages use the AUR list and yay. `--needed` skips up-to-date targets, not all installed packages. For details load:
+All system packages (Homebrew on macOS, pacman on Linux) are managed via mise bootstrap in platform-specific config files:
+- **macOS:** `.config/mise/config.macos.toml` — Homebrew packages and casks
+- **Omarchy:** `.config/mise/config.omarchy.toml` — pacman packages + AUR list in `manifests/aur/packages-aur.txt`
+
+The `make bootstrap` flow runs layers in order: `prerequisites → packages → [aur on Omarchy] → tools → plugins → config → hooks`. Each layer is composable and can be run independently.
+
+For adding packages or resolving ownership conflicts, load:
 - Cross-platform → `@docs/instructions/package-management.md`
 - macOS → `@docs/instructions/macos.md`
 - Omarchy → `@docs/instructions/omarchy.md`
-
-Pacman lists live in `manifests/pacman/` and are read directly from the repository, not deployed to `$HOME`. Machine-specific dependencies live in `manifests/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
 
 ## Skills
 
@@ -110,5 +141,8 @@ For detailed security practices (VM mounts, SSH includes, git email), see `@docs
 
 - Each `packages/<name>/` mirrors `$HOME` structure for mise
 - No manual symlinks — always use `make link`
-- Platform-specific scripts belong in `scripts/macos/` or `scripts/omarchy/`
-- Cross-platform scripts stay in `scripts/`
+- Scripts are organized by **domain layer** (prerequisites, packages, tools, plugins, config, hooks), not by package type
+- Platform-specific scripts live in `scripts/macos/`, `scripts/omarchy/`, or `scripts/linux/`
+- Shared utilities live in `scripts/shared/`
+- Scripts inherit: `omarchy/` falls back to `linux/` if a layer script doesn't exist
+- All layer scripts must be idempotent and testable standalone
