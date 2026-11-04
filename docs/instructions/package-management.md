@@ -9,7 +9,7 @@ the workflow; read only the applicable platform guide for platform-specific work
 |---|---|
 | System packages via mise bootstrap | `.config/mise/config.toml` plus `config.macos.toml` or `config.omarchy.toml` in the same directory, under `[bootstrap.packages]` |
 | AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
-| mise dev tools | `.config/mise/tools.toml` plus platform tool declarations in the same directory |
+| mise dev tools | `.config/mise/global/` shared and platform tool fragments |
 | Language runtimes via asdf (interim) | `packages/tool-versions/.tool-versions` |
 
 See [mise architecture](../architecture/mise.md) for composition and scope.
@@ -44,18 +44,18 @@ may legitimately require a system runtime alongside the selected asdf version.
   dependencies go in the corresponding platform file. Avoid duplicate declarations.
   Shared `brew:` entries must specify `os = "macos"` and `pacman:` entries
   `os = "linux"`: mise's built-in Brew backend also runs on Linux without brew.
-- Shared dev tools belong in `.config/mise/tools.toml`; put platform differences
-  in platform tool declarations. Verify backend/platform support and inspect
-  effective provider exclusions. Do not put optional dev tools into platform
+- Shared dev tools belong in `.config/mise/global/tools.toml`; put platform
+  differences in that directory's platform fragments. Verify backend/platform
+  support and inspect effective provider exclusions. Do not put optional dev tools into platform
   bootstrap just because they are CLI apps.
 - Track runtime version changes directly in `packages/tool-versions/.tool-versions`.
   Do not assume a global manager command edits the tracked file on this machine.
 - AUR installation reads `packages/aur/packages.txt`, outside mise bootstrap and
   dotfile deployment. Machine lists are tracking-only, not automatic installation
   overlays; read `docs/instructions/omarchy.md` before editing them.
-- Use `make tools` for isolated dev-tool installation; preview with
-  `TOOLS_ARGS=--dry-run`. Preserve its scope and bootstrap's skipped tools phase:
-  unscoped installation can include ambient tools and runtime requests.
+- `make tools` uses normal mise discovery, including intentional machine-local
+  requests; preview with `TOOLS_ARGS=--dry-run`. Deploy the global fragments first.
+  Preserve bootstrap's skipped tools phase so deployment precedes installation.
 - Keep mise's `.tool-versions` discovery disabled while asdf owns those files.
   Explicit mise TOML requests remain separate; do not migrate them incidentally.
 - Prerequisites preserve an existing mise provider. On a fresh Mac they install

@@ -75,8 +75,9 @@ case "$response" in
         
         for pkg in "${not_installed[@]}"; do
             echo "--- Installing: $pkg ---"
-            # yay --review enables PKGBUILD review prompts
-            if yay -S --needed --review -- "$pkg"; then
+            # Enable review menus without inheriting saved automatic answers.
+            if yay -S --needed --confirm --diffmenu --editmenu \
+                --noanswerdiff --noansweredit -- "$pkg"; then
                 echo "✓ Installed: $pkg"
             else
                 echo "✗ Failed to install: $pkg" >&2

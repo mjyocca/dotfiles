@@ -49,7 +49,8 @@ info "Installing ${#packages[@]} AUR packages..."
 # Install packages interactively (yay will prompt for PKGBUILD review)
 for pkg in "${packages[@]}"; do
     info "Installing $pkg..."
-    yay -S --needed --review -- "$pkg"
+    yay -S --needed --confirm --diffmenu --editmenu \
+        --noanswerdiff --noansweredit -- "$pkg"
 done
 
 success "AUR packages installed"

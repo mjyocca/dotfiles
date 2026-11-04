@@ -1,6 +1,0 @@
-# Same declarations and native include order as the Omarchy checkout.
-include = ["tools.toml", "tools.omarchy.toml"]
-
-# Same exclusions as config.omarchy.toml; included files cannot contain settings.
-[settings]
-disable_tools = ["aqua:anomalyco/opencode", "hunk", "dua", "lazydocker"]

@@ -1,32 +1,10 @@
 # Omarchy-specific mise configuration
-# Extends base config.toml with Omarchy packages and this machine's mise selections.
+# Extends base config.toml with Omarchy packages and deployment selections.
 # Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
 
-include = ["tools.omarchy.toml"]
-
-# Preserve machine requests separately from the tools-only installation scope.
-# Node is already mise-managed here; this is not an asdf runtime migration.
-[tools]
-codex = "latest"
-delta = "latest"
-node = "25.2.1"
-tree-sitter = "latest"
-
-# Includes cannot contain settings. Apply the same policy as global.omarchy.toml.
-[settings]
-disable_tools = ["aqua:anomalyco/opencode", "hunk", "dua", "lazydocker"]
-
-[dotfiles."~/.config/mise/config.local.toml"]
-source = "global.omarchy.toml"
+[dotfiles."~/.config/mise/conf.d/20-dotfiles-platform.toml"]
+source = "global/platform.omarchy.toml"
 mode = "symlink"
-depends = ["~/.config/mise/tools.toml", "~/.config/mise/tools.omarchy.toml"]
-
-[dotfiles."~/.config/mise/tools.omarchy.toml"]
-source = "tools.omarchy.toml"
-mode = "symlink"
-
-[settings.upgrade]
-auto_prune = false
 
 # Omarchy's prescribed user override; manage only this block, not the whole file.
 [dotfiles."~/.config/hypr/input.lua/caps-escape"]

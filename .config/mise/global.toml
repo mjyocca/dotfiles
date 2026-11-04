@@ -1,2 +1,0 @@
-# Plain tools-only global layer; project configs can still override it.
-include = ["tools.toml"]

@@ -1,0 +1,7 @@
+# Omarchy user-global provider selections; leave desktop tools Pacman-owned.
+[tools]
+opencode = "latest"
+"aqua:modem-dev/hunk" = "latest"
+
+[settings]
+disable_tools = ["aqua:anomalyco/opencode", "hunk", "dua", "lazydocker"]

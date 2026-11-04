@@ -37,9 +37,9 @@ Run from the repository root; these commands change the machine, not just the re
 |---|---|
 | `make bootstrap` | Runs prerequisites → packages → tools → plugins → config → hooks; no explicit link step |
 | `make packages` | Runs mise bootstrap (packages and selected dotfiles); Omarchy also invokes the AUR layer |
-| `make tools` | Native mise install with the tools-only config for `PROFILE`; excludes ambient config and runtime defaults |
+| `make tools` | Installs effective mise tool requests; requires deployed global tool configuration |
 | `make link` | Runs `mise dotfiles apply`; requires effective deployment declarations |
-| `make sync` | Packages, link, plugins only—not full provisioning |
+| `make sync` | Sequential packages → link → tools → plugins; not full provisioning |
 | `make hooks` | Installs the gitleaks pre-commit hook when gitleaks is available |
 
 Other composable layers and compatibility aliases are defined in `Makefile`.

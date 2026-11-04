@@ -34,7 +34,7 @@ make bootstrap
 - `make pack` — Install system packages and deploy selected dotfiles
 - `make link` — Deploy dotfiles via mise
 - `make plug` — Install plugins
-- `make sync` — Run packages, link, and plugins
+- `make sync` — Run packages, link, tools, and plugins in order
 
 See [mise configuration architecture](docs/architecture/mise.md) for shared,
 platform-specific, and machine-local configuration scope.

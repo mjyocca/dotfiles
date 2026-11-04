@@ -6,7 +6,7 @@ Use for deployment wiring, not package ownership or general mise tutorials.
 
 Declarations live in `.config/mise/`; home-relative sources live under
 `packages/<name>/`. See [mise architecture](../architecture/mise.md) for platform
-composition, global versus checkout scope, and tools-only installation.
+composition and global versus checkout scope.
 
 - Never deploy `packages/aur/`; it contains repository-only installation data.
 - Select the intended platform before deployment. Inspect `mise config ls` and
@@ -34,11 +34,12 @@ authorization; never infer that old files are safe to remove from missing declar
 ## Command Boundaries
 
 - `make packages` runs bootstrap with tools skipped, but can deploy dotfiles.
-- `make tools` isolates dev-tool installation; it is not runtime provisioning.
+- `make tools` installs effective tool requests after global configuration is
+  deployed, including intentional machine-local requests but not asdf version files.
 - `make link` deploys without installing packages. Use `PROFILE` and
   `DOTFILES_ARGS` to limit the operation, e.g.
   `make link PROFILE=omarchy DOTFILES_ARGS='--dry-run ~/.bashrc'`.
-- `make sync` runs packages, link, and plugins, not full provisioning.
+- `make sync` runs packages, link, tools, and plugins sequentially, not full provisioning.
 
 For documentation-only checks, inspect declarations and Make recipes without
 running provisioning or deployment. For deployment work, inspect status and a

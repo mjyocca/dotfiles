@@ -9,39 +9,36 @@ All source files below live in `<repo>/.config/mise/`.
 
 | File | Role |
 |---|---|
-| `tools.toml` | Shared development tools, without runtime requests |
-| `tools.omarchy.toml` | Omarchy-specific tool provider selections |
-| `global.toml` | Tools-only entrypoint including shared tools |
-| `global.omarchy.toml` | Tools-only entrypoint including shared then Omarchy tools |
-| `config.toml` | Shared bootstrap packages and dotfile definitions; includes shared tools |
+| `global/tools.toml` | Shared user-global development tools, without runtime requests |
+| `global/platform.toml` | No platform overrides; shared defaults for macOS and other platforms |
+| `global/platform.omarchy.toml` | Omarchy provider selections and exclusions |
+| `config.toml` | Shared bootstrap packages and dotfile definitions |
 | `config.macos.toml` | macOS packages and dotfile selections |
-| `config.omarchy.toml` | Omarchy packages, deployment overrides, and additional tool requests |
+| `config.omarchy.toml` | Omarchy packages and deployment overrides |
 | `config.local.toml` | Gitignored checkout-local overrides |
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
 
-`global*.toml` are repository naming conventions, not automatically discovered
-mise filenames. Both Omarchy entrypoints maintain matching `disable_tools`
-settings; included files cannot contain settings.
+The `global/` directory holds deployment sources, not another mise discovery
+root. Native `conf.d` discovery composes the deployed files; there is no generated
+configuration or tools-only entrypoint selection in Make.
 
 ## Shared and Platform Composition
 
 ```text
-Repository management                  Tools-only entrypoints
+Repository provisioning                 User-global tool composition
 
-config.toml                            global.toml                 [macOS]
-  └─ include tools.toml                   └─ include tools.toml
-       +
-config.macos.toml       [macOS]         global.omarchy.toml          [Omarchy]
-       OR                                ├─ include tools.toml
-config.omarchy.toml     [Omarchy]         └─ include tools.omarchy.toml
-  └─ include tools.omarchy.toml
-       +
-config.local.toml       [checkout-local, when present]
+config.toml                            global/tools.toml
+  + selected environment                 + selected platform fragment
+    config.macos.toml OR                    global/platform.toml OR
+    config.omarchy.toml                     global/platform.omarchy.toml
+  + checkout-local overrides               ↓ deployed as conf.d symlinks
+    config.local.toml                    same defaults in every directory
 ```
 
-macOS uses shared tools unchanged, so it has no `tools.macos.toml` or
-`global.macos.toml`. Platform group selections choose which shared application
-configs deploy; a shared source does not imply deployment on every platform.
+macOS uses shared tools unchanged. Omarchy selects its platform fragment through
+a deployment override, so the choice persists outside the repository without
+requiring a shell environment variable. Platform group selections separately
+choose which application configs deploy.
 
 Make detects `PROFILE` unless explicitly supplied, and defaults `MISE_ENV` to
 that profile. An existing `MISE_ENV` is preserved: check that both agree.
@@ -49,39 +46,44 @@ Direct mise commands require the intended environment, for example
 `mise -E omarchy config ls`. The repository's Zsh startup defaults to `macos`;
 mise environment names alone do not perform OS or hostname detection.
 
-## Three Loading Contexts
+## Installation and Bootstrap Lifecycle
 
 | Context | Loaded scope |
 |---|---|
-| Repository management (`make link`, package bootstrap) | Normal mise discovery plus the selected platform environment; includes deployment/package rules |
-| `make tools` | Explicit tools-only entrypoint; excludes ambient global/system and parent-checkout configuration |
+| Repository management (`make link`, package bootstrap) | Global tools plus repository provisioning rules and the selected platform environment |
+| `make tools` | Normal effective requests, including machine-local additions and project overrides; requires deployed global fragments and discovery policy |
 | Everyday use outside this repository | System and user-global configuration, plus configuration discovered for the current project |
 
-`make tools` selects `global.<PROFILE>.toml` if present, otherwise `global.toml`.
-Make scopes its global/system config inputs and directory discovery to isolate
-installation. Additional requests in `config.omarchy.toml` are outside this scope.
+Fresh bootstrap runs prerequisites (install/reuse mise), packages and configuration
+deployment, tools, plugins, platform settings, then hooks. Package bootstrap skips
+tool installation so the global fragments and discovery policy deploy first.
+`make sync` sequentially runs packages → link → tools → plugins, even under `make -j`.
+Neither workflow implicitly transfers asdf runtimes to mise. Installation is not
+an explicit upgrade or removal operation.
 
 ## Global Deployment and Precedence
 
-The declared deployment links only the tools layer into user-global configuration:
+The declared deployment links only tool fragments and discovery policy globally:
 
 ```text
-~/.config/mise/                  Source in <repo>/.config/mise/
-  config.toml                   Existing machine config, preserved
-  config.local.toml ──────────► global.toml OR global.omarchy.toml
-  tools.toml ────────────────► tools.toml
-  tools.omarchy.toml ────────► tools.omarchy.toml       [Omarchy]
-  miserc.toml ───────────────► miserc.toml
+~/.config/mise/                        Source in <repo>/.config/mise/
+  conf.d/
+    10-dotfiles-tools.toml ──────────► global/tools.toml
+    20-dotfiles-platform.toml ───────► global/platform[.omarchy].toml
+  config.toml                         Existing machine configuration, preserved
+  config.local.toml                   Optional untracked machine overrides
+  miserc.toml ──────────────────────► miserc.toml
 ```
 
-Included tool files deploy before the entrypoint. Bootstrap and deployment rules
-are not loaded globally. A declaration does not prove a link is deployed: inspect
-the target machine rather than recording deployment status here.
+Bootstrap and deployment rules are not loaded globally. A declaration does not
+prove a link is deployed: inspect the target machine rather than recording
+deployment status here.
 
 Relevant normal precedence, low to high (not every supported mise filename):
 
 ```text
 system configuration
+  → ~/.config/mise/conf.d/*.toml (alphabetical order)
   → ~/.config/mise/config.toml
   → ~/.config/mise/config.local.toml
   → <repo>/.config/mise/config.toml
@@ -92,6 +94,10 @@ system configuration
 This repository's layers apply when discovered from its directory tree. Other
 projects supply their own layers; nested projects can add further configuration.
 Matching tool keys override earlier requests; distinct provider keys may coexist.
+Existing global `config.toml` requests override the tracked fragments. Inspect
+and deliberately reconcile duplicates during adoption; deployment never rewrites
+that file or the machine-local override. Do not treat `mise use -g` as an edit to
+the tracked declarations.
 
 ## Machine Scope and Runtime Ownership
 
@@ -100,9 +106,8 @@ Matching tool keys override earlier requests; distinct provider keys may coexist
 - **Machine:** the preserved `~/.config/mise/config.toml` is machine-local.
 - **Checkout:** `<repo>/.config/mise/config.local.toml` affects this checkout only.
   It is distinct from the user-global file with the same basename.
-- **Current boundary:** `config.omarchy.toml` also contains tool requests that
-  originated on one machine. They apply wherever that environment is selected;
-  they are not hostname-scoped and are not copied into the tools-only global layer.
+- **Boundary:** provisioning files contain no machine-specific tool requests.
+  Put machine-specific requests in global local configuration, not a platform file.
 - **Runtimes:** asdf reads `.tool-versions`; mise's deployed `miserc.toml` disables
   that discovery without disabling explicit TOML tool requests. Managing the asdf
   executable with mise does not transfer runtime ownership.

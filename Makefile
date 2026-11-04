@@ -20,9 +20,6 @@ export PROFILE
 MISE_ENV ?= $(PROFILE)
 export MISE_ENV
 
-# Select a plain tools-only config; native include handles shared/platform merging.
-TOOLS_CONFIG = $(abspath $(if $(wildcard .config/mise/global.$(PROFILE).toml),.config/mise/global.$(PROFILE).toml,.config/mise/global.toml))
-
 # ======================
 # INHERITANCE HELPER
 # ======================
@@ -108,7 +105,11 @@ link:
 plug: plugins
 	@echo "✓ Plugins installed"
 
-sync: pack link plug
+sync:
+	@$(MAKE) packages
+	@$(MAKE) link
+	@$(MAKE) tools
+	@$(MAKE) plugins
 	@echo "✓ System synced"
 
 # ======================
@@ -126,10 +127,14 @@ aur:
 	$(call run_script,omarchy,aur)
 
 tools:
-	@MISE_GLOBAL_CONFIG_FILE="$(TOOLS_CONFIG)" \
-	 MISE_SYSTEM_CONFIG_FILE="$(TOOLS_CONFIG)" \
-	 MISE_CEILING_PATHS="$(CURDIR)" \
-	 bash ./scripts/shared/environment.sh mise -C "$(CURDIR)/.config/mise" install $(TOOLS_ARGS)
+	@config_dir="$${MISE_CONFIG_DIR:-$${XDG_CONFIG_HOME:-$$HOME/.config}/mise}"; \
+	 for file in conf.d/10-dotfiles-tools.toml conf.d/20-dotfiles-platform.toml miserc.toml; do \
+	   if [ ! -e "$$config_dir/$$file" ]; then \
+	     echo "Missing $$config_dir/$$file; inspect and deploy with make link first." >&2; \
+	     exit 1; \
+	   fi; \
+	 done
+	@bash ./scripts/shared/environment.sh mise install $(TOOLS_ARGS)
 
 plugins:
 	$(call run_script,$(PROFILE),plugins)

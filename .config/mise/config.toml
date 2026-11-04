@@ -1,20 +1,15 @@
 # Base mise configuration for all platforms
-# Shared tools, bootstrap packages, and dotfile deployment rules.
+# Shared bootstrap packages and dotfile deployment rules.
 # Platform configurations select packages and dotfile groups via MISE_ENV.
 
-# Native includes share tool declarations without deploying bootstrap rules.
-include = ["tools.toml"]
-
-[dotfiles."~/.config/mise/config.local.toml"]
-source = "global.toml"
+# Deploy tool defaults globally; keep provisioning and machine overrides separate.
+[dotfiles."~/.config/mise/conf.d/10-dotfiles-tools.toml"]
+source = "global/tools.toml"
 mode = "symlink"
-depends = ["~/.config/mise/tools.toml"]
-variants = [{ profile = "omarchy" }, { profile = "macos" }]
 
-[dotfiles."~/.config/mise/tools.toml"]
-source = "tools.toml"
+[dotfiles."~/.config/mise/conf.d/20-dotfiles-platform.toml"]
+source = "global/platform.toml"
 mode = "symlink"
-variants = [{ profile = "omarchy" }, { profile = "macos" }]
 
 [dotfiles."~/.config/mise/miserc.toml"]
 source = "miserc.toml"
@@ -170,7 +165,7 @@ root = "tool-versions"
 manifest = "git"
 
 [dotfile_groups.tool-versions.entries]
-"~/.tool-versions" = { mode = "symlink" }
+"~/.tool-versions" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
 "~/.default-gems" = { mode = "symlink" }
 
 [dotfile_groups.yazi]
