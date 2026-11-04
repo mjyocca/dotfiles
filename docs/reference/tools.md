@@ -17,6 +17,20 @@ declarations determine what this repository actually installs.
 
 ## Terminal and Development
 
+### Multiplexer migration
+
+- Zellij's autolock WASM is installed by `make plugins` (Linux and macOS).
+  Use `make zellij-plugins` for only that dependency; `make tools` does not
+  install plugins. The shared config uses Ctrl-h for focus left and Ctrl-Shift-m
+  for Move mode.
+- TODO: converge the repository Tmux configuration with useful Omarchy defaults
+  before adopting it on this machine. Keep the existing Omarchy config for now;
+  the gitignored `.config/mise/config.local.toml` excludes the `tmux` group.
+  Revisit prefix keys, theme, clipboard/extended-key support, and TPM plugins.
+  Remove the local exclusion only when adoption is intentional.
+
+### Links
+
 - [Ghostty docs](https://ghostty.org/docs) · [source](https://github.com/ghostty-org/ghostty)
 - [OpenCode V2 docs](https://opencode.ai/v2/docs/) — configuration and agent tooling
 - [lazygit](https://github.com/jesseduffield/lazygit) — Git UI

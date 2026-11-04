@@ -80,7 +80,8 @@ keybinds {
     }
 
     shared_except "move" "locked" {
-        bind "Ctrl h" { SwitchToMode "Move"; }
+        // Keep Ctrl-h for leftward focus; Ctrl-m can alias Enter in terminals.
+        bind "Ctrl Shift m" { SwitchToMode "Move"; }
     }
 
     shared_except "tmux" "locked" {

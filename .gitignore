@@ -5,6 +5,9 @@
 .env
 .envrc
 
+# Checkout-specific mise deployment exceptions (never deployed).
+.config/mise/config.local.toml
+
 # Per-machine zsh overrides — not committed
 packages/zsh/.zshrc.local
 

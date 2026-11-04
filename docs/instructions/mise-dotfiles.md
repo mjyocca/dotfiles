@@ -46,6 +46,12 @@ Use for deployment wiring, not package ownership or general mise tutorials.
   mise tool requests. They are checkout-scoped, not deployed global defaults,
   and are not installed by `make tools`. Do not replace the global mise config
   assuming these requests will remain active outside the checkout.
+- Checkout-only exceptions may use gitignored `.config/mise/config.local.toml`.
+  A local group table replaces the whole group: retain `root` and
+  `manifest = "git"`, and use `exclude = ["**"]` to skip a group without
+  duplicating the platform selection list. Confirm the file appears in
+  `mise -E omarchy config ls` and inspect effective deployment status. This
+  stops future deployment; it does not remove previously deployed files.
 
 ## Editing Deployment Configuration
 
