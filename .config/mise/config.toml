@@ -11,6 +11,10 @@ default_mode = "symlink-each"
 root = "asdf"
 manifest = "git"
 
+[dotfile_groups.asdf.entries]
+"~/.asdfrc" = { mode = "symlink" }
+"~/.asdf-direnv.sh" = { mode = "symlink" }
+
 [dotfile_groups.bash]
 root = "bash"
 manifest = "git"
@@ -59,9 +63,15 @@ manifest = "git"
 root = "hunk"
 manifest = "git"
 
+[dotfile_groups.hunk.entries]
+"~/.config/hunk/config.toml" = { mode = "symlink" }
+
 [dotfile_groups.lazygit]
 root = "lazygit"
 manifest = "git"
+
+[dotfile_groups.lazygit.entries]
+"~/.config/lazygit/config.yml" = { mode = "symlink" }
 
 [dotfile_groups.mise]
 root = "mise"
@@ -100,6 +110,9 @@ manifest = "git"
 [dotfile_groups.starship]
 root = "starship"
 manifest = "git"
+
+[dotfile_groups.starship.entries]
+"~/.config/starship.toml" = { mode = "symlink" }
 
 [dotfile_groups.superfile]
 root = "superfile"
