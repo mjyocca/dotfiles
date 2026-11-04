@@ -15,6 +15,12 @@ manifest = "git"
 root = "bash"
 manifest = "git"
 
+# Explicit targets allow a scoped apply without selecting every home-rooted group.
+[dotfile_groups.bash.entries]
+"~/.bashrc" = { mode = "symlink" }
+"~/.bash_profile" = { mode = "symlink" }
+"~/.config/bash/nvim.bash" = { mode = "symlink" }
+
 [dotfile_groups.bat]
 root = "bat"
 manifest = "git"
@@ -68,6 +74,9 @@ manifest = "git"
 [dotfile_groups.nvim-next]
 root = "nvim-next"
 manifest = "git"
+
+[dotfile_groups.nvim-next.entries]
+"~/.config/nvim-next" = { mode = "symlink-each" }
 
 [dotfile_groups.opencode]
 root = "opencode"

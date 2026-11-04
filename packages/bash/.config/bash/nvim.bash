@@ -5,17 +5,16 @@
 # nv — shorthand for nvim
 alias nv='nvim'
 
-# Auto-generate nv-<name> and nvim-<name> aliases for every stowed
+# Auto-generate nv-<name> and nvim-<name> aliases for every deployed
 # ~/.config/nvim-* variant at shell startup.
 #
 # e.g. for ~/.config/nvim-next:
 #   nv-next   → NVIM_APPNAME=nvim-next nvim
 #   nvim-next → NVIM_APPNAME=nvim-next nvim
 #
-# No-op if no nvim-* variants are stowed — safe on any machine.
+# No-op if no nvim-* variants are deployed — safe on any machine.
 
-# Enable nullglob so the loop body doesn't run if no matches
-shopt -s nullglob
+# The directory check also skips an unmatched glob without changing shell options.
 for _nvim_dir in "$HOME"/.config/nvim-*; do
   if [[ -d "$_nvim_dir" ]]; then
     _nvim_name="$(basename "$_nvim_dir")"
@@ -25,4 +24,9 @@ for _nvim_dir in "$HOME"/.config/nvim-*; do
   fi
 done
 unset _nvim_dir _nvim_name _nvim_short
-shopt -u nullglob
+
+# Omarchy keeps its original config at ~/.config/nvim, outside variant discovery.
+if [[ -r /usr/share/omarchy/default/bash/env-bootstrap && -d "$HOME/.config/nvim" ]]; then
+  alias nv-omarchy='NVIM_APPNAME=nvim nvim'
+  alias nvim-omarchy='NVIM_APPNAME=nvim nvim'
+fi

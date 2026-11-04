@@ -18,9 +18,6 @@ adopt = true
 [bootstrap.packages]
 # macOS-only packages (Homebrew)
 
-# Version Managers (except mise - prerequisites install it)
-"brew:asdf" = "latest"
-
 # System infrastructure and general utilities
 "brew:coreutils" = "latest"
 "brew:mas" = "latest"

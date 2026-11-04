@@ -3,6 +3,9 @@
 # See docs/instructions/package-management.md for the decision criteria
 
 [tools]
+# mise manages the asdf executable; asdf still owns its plugins and runtimes.
+"github:asdf-vm/asdf" = "latest"
+
 # AI/Dev tools
 gitleaks = "latest"
 lazydocker = "latest"

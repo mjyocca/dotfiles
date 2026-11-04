@@ -30,6 +30,11 @@ system defaults (notably `/etc/mise/conf.d/` on Omarchy) may also provide tools.
 Language runtimes remain on asdf until a separately scoped migration. Do not
 install duplicate mise runtimes or move runtime ownership incidentally; Terraform
 ownership changes are also a separate migration, not implied by these rules.
+The asdf executable itself is managed by mise via `github:asdf-vm/asdf` in the
+shared dev-tool declaration, not Homebrew or AUR. This does not move asdf's plugins
+or language versions to mise. `scripts/linux/plugins.sh` invokes the shared asdf
+plugin helper as part of the existing `make plugins` flow (also used on macOS).
+The helper installs plugin repositories only, not language versions.
 
 When criteria do not settle a choice, compare similar tracked tools, then inspect
 the installed OS's package and mise defaults or version-matched upstream sources.

@@ -98,8 +98,9 @@ bootstrap_linux:
 pack: packages
 	@echo "✓ System packages installed"
 
+# Optional flags/targets for scoped deployment, e.g. DOTFILES_ARGS='--dry-run ~/.bashrc'.
 link:
-	@bash ./scripts/shared/environment.sh mise dotfiles apply
+	@bash ./scripts/shared/environment.sh mise dotfiles apply $(DOTFILES_ARGS)
 
 plug: plugins
 	@echo "✓ Plugins installed"

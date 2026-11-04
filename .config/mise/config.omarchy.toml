@@ -1,6 +1,28 @@
 # Omarchy-specific mise configuration
-# Extends base config.toml with Omarchy/Arch Linux-only packages
+# Extends base config.toml with Omarchy packages and this machine's mise selections.
 # Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
+
+# Preserve the current machine's working requests without changing providers.
+# Node is already mise-managed here; this is not an asdf runtime migration.
+# These requests apply only in this checkout, not as deployed global defaults.
+# make tools still installs only packages/mise/.config/mise/config.toml.
+[tools]
+codex = "latest"
+delta = "latest"
+gh = "latest"
+node = "25.2.1"
+opencode = "latest"
+tree-sitter = "latest"
+
+[settings.upgrade]
+auto_prune = false
+
+# Keep Omarchy's ~/.config/nvim intact; Bash selects this isolated variant.
+# Group overrides replace the whole table, so retain Git manifest filtering.
+[dotfile_groups.nvim]
+root = "nvim/.config/nvim"
+target = "~/.config/nvim-dotfiles"
+manifest = "git"
 
 [bootstrap]
 dotfile_groups = [

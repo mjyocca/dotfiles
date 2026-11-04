@@ -3,7 +3,6 @@
 # These packages require interactive installation with PKGBUILD review.
 # Repository-only installation input; never include this directory in mise dotfile groups.
 
-asdf-vm # Interim runtime manager; the executable is named asdf.
 heroic-games-launcher
 ngrok
 woeusb-ng

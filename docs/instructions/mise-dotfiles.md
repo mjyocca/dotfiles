@@ -19,9 +19,16 @@ Use for deployment wiring, not package ownership or general mise tutorials.
   or `-E omarchy`.
 - Git, SSH, Ghostty, and Zellij have template overrides; their deployed files are
   rendered copies, not source symlinks. Other group files use `symlink-each`.
+- Omarchy overrides the `nvim` group to deploy into `~/.config/nvim-dotfiles`,
+  leaving its stock `~/.config/nvim` untouched. Bash defaults `NVIM_APPNAME` to
+  `nvim-dotfiles` when deployed; `nv-omarchy`/`nvim-omarchy` explicitly select `nvim`.
 - The deployed `packages/mise/.config/mise/config.toml` declares dev tools only.
   Inspect `mise config ls` and `mise dotfiles status` before deployment;
   machine-local declarations may also affect the effective configuration.
+- The repository's `config.omarchy.toml` also records this machine's existing
+  mise tool requests. They are checkout-scoped, not deployed global defaults,
+  and are not installed by `make tools`. Do not replace the global mise config
+  assuming these requests will remain active outside the checkout.
 
 ## Editing Deployment Configuration
 
@@ -52,6 +59,8 @@ installs only the tracked shared dev tools, excluding asdf runtime defaults.
 `make sync` runs packages, link, and plugins only. It does not run tools, config,
 or hooks. Use the narrow task-appropriate layer rather than treating sync as full
 provisioning. Use authorized `make link` for deployment without installing packages.
+Pass `DOTFILES_ARGS` for flags and/or target paths when only part of the profile
+is authorized, e.g. `make link PROFILE=omarchy DOTFILES_ARGS='--dry-run ~/.bashrc ~/.bash_profile ~/.config/bash/nvim.bash ~/.config/nvim-dotfiles ~/.config/nvim-next'`.
 
 For documentation-only checks, inspect declarations and Make recipes without
 running apply, bootstrap, prune, or unapply. Check status and `apply --dry-run`
