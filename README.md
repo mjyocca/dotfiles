@@ -6,26 +6,32 @@
 /_____/\____/\__/_/   /_/_/\___/____/                     
 ```
 
-## Installing
+Personal dotfiles managed with [mise](https://mise.jdx.dev/dotfiles/) and
+platform-specific bootstrap scripts.
 
-**macOS**
+## Install
+
+### macOS
+
 ```bash
-curl -sO https://raw.githubusercontent.com/mjyocca/dotfiles/main/scripts/macos/installer.sh
+curl -fsSL https://raw.githubusercontent.com/mjyocca/dotfiles/main/scripts/macos/installer.sh -o installer.sh
 bash installer.sh
 ```
 
-**Omarchy (Linux)**
-```bash
-# Prerequisites: git
-sudo pacman -S git
+If prompted to install Xcode Command Line Tools, finish installation and rerun.
 
+### Omarchy
+
+```bash
+sudo pacman -S --needed git make
 git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-make bootstrap  # Auto-detects Omarchy profile
+make bootstrap
 ```
 
-The `make bootstrap` command sets up everything. For incremental updates:
-- `make pack` - Install system packages
-- `make link` - Deploy dotfiles via mise
-- `make plug` - Install plugins
-- `make sync` - All of the above
+`make bootstrap` detects the platform and runs setup. For incremental updates:
+
+- `make pack` — Install system packages and deploy selected dotfiles
+- `make link` — Deploy dotfiles via mise
+- `make plug` — Install plugins
+- `make sync` — Run packages, link, and plugins
