@@ -19,6 +19,18 @@ yazi = "latest"
 [settings.upgrade]
 auto_prune = false
 
+# Omarchy's prescribed user override; manage only this block, not the whole file.
+[dotfiles."~/.config/hypr/input.lua/caps-escape"]
+comment = "--"
+block = '''
+-- Caps Lock is Escape instead of Compose; retain the other keyboard option.
+hl.config({
+  input = {
+    kb_options = "caps:escape,shift:both_capslock_cancel",
+  },
+})
+'''
+
 # Keep Omarchy's ~/.config/nvim intact; Bash selects this isolated variant.
 # Group overrides replace the whole table, so retain Git manifest filtering.
 [dotfile_groups.nvim]

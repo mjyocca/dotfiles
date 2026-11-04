@@ -19,6 +19,11 @@ Use for deployment wiring, not package ownership or general mise tutorials.
   or `-E omarchy`.
 - Git, SSH, Ghostty, and Zellij have template overrides; their deployed files are
   rendered copies, not source symlinks. Other group files use `symlink-each`.
+- Ghostty's template keeps macOS styling independent. Its Linux/Omarchy branch
+  includes the current Omarchy theme without hardcoded palette overrides and
+  preserves the stock font/window settings and Hyprland workaround. Cursor/SSH
+  integration and distinct Enter encodings are shared; Ctrl-s sequences remain
+  commented out for multiplexers. Deploy the cursor shader alongside the config.
 - Git's `~/.gitconfig` template selects the host clipboard command and includes
   optional `~/.gitconfig.local` last, so local scalar settings override shared ones.
   For machine-local edits, use `git config --file ~/.gitconfig.local ...`; this

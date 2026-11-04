@@ -54,6 +54,7 @@ manifest = "git"
 
 [dotfile_groups.ghostty.entries]
 "~/.config/ghostty/config" = { mode = "template" }
+"~/.config/ghostty/shaders/cursor_warp.glsl" = { mode = "symlink" }
 
 [dotfile_groups.gitconfig]
 root = "gitconfig"
@@ -120,7 +121,7 @@ root = "ssh"
 manifest = "git"
 
 [dotfile_groups.ssh.entries]
-"~/.ssh/config" = { mode = "template" }
+"~/.ssh/config" = { mode = "template", permissions = "0600" }
 
 [dotfile_groups.starship]
 root = "starship"

@@ -1,8 +1,15 @@
 # NOTE: If want to auto login to tmux session
 # command = /bin/zsh --login -c 'tmux new-session -A -D'
 shell-integration = detect
+# Keep the cursor stable and forward Ghostty's terminal environment over SSH.
+# Shell integration features must be specified together.
+shell-integration-features = no-cursor,ssh-env
 confirm-close-surface = false
+cursor-style = block
+cursor-style-blink = false
 
+{% if os() == "macos" %}
+# macOS keeps its independent font, window, and theme choices.
 # Font
 font-size = 16
 # font-style-bold = true
@@ -64,6 +71,35 @@ window-padding-y = 8,8
 
 # Quick Terminal
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
+{% else %}
+# Linux / Omarchy: follow the current desktop theme without palette overrides.
+config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"
+
+# Preserve Omarchy's font and window defaults.
+font-family = "JetBrainsMono Nerd Font"
+font-style = Regular
+font-size = 9
+window-theme = ghostty
+window-padding-x = 14
+window-padding-y = 14
+resize-overlay = never
+gtk-toolbar-style = flat
+
+# Preserve Omarchy's scrolling behavior and Hyprland performance workaround.
+mouse-scroll-multiplier = 0.95
+async-backend = epoll
+
+keybind = shift+insert=paste_from_clipboard
+keybind = control+insert=copy_to_clipboard
+keybind = super+control+shift+alt+arrow_down=resize_split:down,100
+keybind = super+control+shift+alt+arrow_up=resize_split:up,100
+keybind = super+control+shift+alt+arrow_left=resize_split:left,100
+keybind = super+control+shift+alt+arrow_right=resize_split:right,100
+{% endif %}
+
+# Preserve distinct Enter encodings for TUIs and terminal multiplexers.
+keybind = shift+enter=csi:13;2u
+keybind = alt+shift+enter=csi:13;4u
 
 # Vim Style Navigation for ghostty splits
 # keybind = cmd+shift+h=goto_split:left
@@ -71,23 +107,24 @@ keybind = global:ctrl+grave_accent=toggle_quick_terminal
 # keybind = cmd+shift+k=goto_split:top
 # keybind = cmd+shift+l=goto_split:right
 
-# NOTE: Testing out tmux style trigger sequence
-# instead of: `ctrl+s>h`, trying: `shift+s`.
-keybind = ctrl+s>h=goto_split:left
-keybind = ctrl+s>j=goto_split:bottom
-keybind = ctrl+s>k=goto_split:top
-keybind = ctrl+s>l=goto_split:right
+# Disabled for now: reserve Ctrl-s for terminal multiplexers.
+# keybind = ctrl+s>h=goto_split:left
+# keybind = ctrl+s>j=goto_split:bottom
+# keybind = ctrl+s>k=goto_split:top
+# keybind = ctrl+s>l=goto_split:right
 
 # Tmux style management for adding,removing,navigating splits
-keybind = ctrl+s>shift+5=new_split:right
-keybind = ctrl+s>shift+'=new_split:down
-keybind = ctrl+s>c=new_tab
-keybind = ctrl+s>n=next_tab
-keybind = ctrl+s>p=previous_tab
-keybind = ctrl+s>shift+7=close_surface
+# keybind = ctrl+s>shift+5=new_split:right
+# keybind = ctrl+s>shift+'=new_split:down
+# keybind = ctrl+s>c=new_tab
+# keybind = ctrl+s>n=next_tab
+# keybind = ctrl+s>p=previous_tab
+# keybind = ctrl+s>shift+7=close_surface
 
 # Reload Config
+{% if os() == "macos" %}
 keybind = cmd+shift+r=reload_config
+{% endif %}
 
 
 custom-shader = ./shaders/cursor_warp.glsl

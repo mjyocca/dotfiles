@@ -14,11 +14,11 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   echo "  --all   Scaffold all available templates without prompting"
   echo ""
   echo "Templates are read from:"
-  echo "  \${XDG_CONFIG_HOME:-\$HOME/.config}/nvim/templates/"
+  echo "  \${XDG_CONFIG_HOME:-\$HOME/.config}/\${NVIM_APPNAME:-nvim}/templates/"
   exit 0
 fi
 
-template_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/templates"
+template_dir="${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/templates"
 
 if [[ ! -d "$template_dir" ]]; then
   echo "init: template directory not found: $template_dir" >&2
