@@ -9,6 +9,7 @@
 # ======================
 # PLATFORM DETECTION
 # ======================
+.DEFAULT_GOAL := bootstrap
 OS := $(shell uname -s)
 DISTRO := $(shell bash ./scripts/shared/detect-os.sh 2>/dev/null || echo unknown)
 
@@ -19,6 +20,18 @@ export PROFILE
 # Select platform mise configuration even before shell dotfiles are deployed.
 MISE_ENV ?= $(PROFILE)
 export MISE_ENV
+
+# Validate before any provisioning recipe, including recursive/parallel Make.
+# A new profile supplies its own config; distro detection alone is not support.
+.PHONY: check-profile
+check-profile:
+	@test -f ".config/mise/config.$(PROFILE).toml" || \
+	 { echo "No provisioning configuration for PROFILE=$(PROFILE)." >&2; exit 1; }
+	@test "$(MISE_ENV)" = "$(PROFILE)" || \
+	 { echo "MISE_ENV=$(MISE_ENV) conflicts with PROFILE=$(PROFILE); select the same single platform." >&2; exit 1; }
+
+bootstrap bootstrap_macos bootstrap_omarchy bootstrap_linux sync fresh-install \
+prerequisites packages link tools plugins config hooks: | check-profile
 
 # ======================
 # INHERITANCE HELPER
@@ -83,12 +96,12 @@ bootstrap_omarchy:
 # Linux bootstrap (generic, for future distros)
 .PHONY: bootstrap_linux
 bootstrap_linux:
-	$(call run_script,linux,prerequisites)
-	$(call run_script,linux,packages)    # mise bootstrap only, no AUR
+	$(call run_script,$(PROFILE),prerequisites)
+	$(call run_script,$(PROFILE),packages)
 	@$(MAKE) tools
-	$(call run_script,linux,plugins)
-	$(call run_script,linux,config)
-	$(call run_script,linux,hooks)
+	$(call run_script,$(PROFILE),plugins)
+	$(call run_script,$(PROFILE),config)
+	$(call run_script,$(PROFILE),hooks)
 
 # ======================
 # INCREMENTAL UPDATE TARGETS

@@ -11,6 +11,8 @@ composition and global versus checkout scope.
 - Never deploy `packages/aur/`; it contains repository-only installation data.
 - Select the intended platform before deployment. Inspect `mise config ls` and
   `mise dotfiles status`, including checkout-local overrides and system defaults.
+- Make requires a platform configuration and matching `PROFILE`/`MISE_ENV`.
+  Direct mise commands bypass that check; select the intended environment explicitly.
 - Preserve Git-filtered manifests and explicit platform group selections. Do not
   turn an empty base selection into an implicit all-platform deployment.
 - Preserve machine-local files, credentials, provider/service configuration, and

@@ -7,7 +7,7 @@ the workflow; read only the applicable platform guide for platform-specific work
 
 | Owner | Repository declaration |
 |---|---|
-| System packages via mise bootstrap | `.config/mise/config.toml` plus `config.macos.toml` or `config.omarchy.toml` in the same directory, under `[bootstrap.packages]` |
+| System packages via mise bootstrap | `.config/mise/config.<platform>.toml`, under `[bootstrap.packages]` |
 | AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
 | mise dev tools | `.config/mise/global/` shared and platform tool fragments |
 | Language runtimes via asdf (interim) | `packages/tool-versions/.tool-versions` |
@@ -40,10 +40,11 @@ may legitimately require a system runtime alongside the selected asdf version.
 
 ## Declaration and Installation Boundaries
 
-- Put shared system dependencies in `.config/mise/config.toml`; platform-only
-  dependencies go in the corresponding platform file. Avoid duplicate declarations.
-  Shared `brew:` entries must specify `os = "macos"` and `pacman:` entries
-  `os = "linux"`: mise's built-in Brew backend also runs on Linux without brew.
+- Keep `.config/mise/config.toml` platform-neutral; each platform file owns its
+  complete system package set. Platforms are independent, not inherited; matching
+  dependencies across platform files may be duplicated. Preserve existing OS
+  filters: mise's built-in Brew backend also runs on Linux without brew, and
+  `os = "linux"` does not distinguish distributions.
 - Shared dev tools belong in `.config/mise/global/tools.toml`; put platform
   differences in that directory's platform fragments. Verify backend/platform
   support and inspect effective provider exclusions. Do not put optional dev tools into platform

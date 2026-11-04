@@ -12,10 +12,11 @@ All source files below live in `<repo>/.config/mise/`.
 | `global/tools.toml` | Shared user-global development tools, without runtime requests |
 | `global/platform.toml` | No platform overrides; shared defaults for macOS and other platforms |
 | `global/platform.omarchy.toml` | Omarchy provider selections and exclusions |
-| `config.toml` | Shared bootstrap packages and dotfile definitions |
-| `config.macos.toml` | macOS packages and dotfile selections |
-| `config.omarchy.toml` | Omarchy packages and deployment overrides |
+| `config.toml` | Platform-neutral dotfile definitions and deployment defaults |
+| `config.macos.toml` | Complete macOS package set, Brew policy, and dotfile selections |
+| `config.omarchy.toml` | Complete Omarchy package set and deployment overrides |
 | `config.local.toml` | Gitignored checkout-local overrides |
+| `config.<environment>.local.toml` | Optional gitignored checkout overrides for one platform |
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
 
 The `global/` directory holds deployment sources, not another mise discovery
@@ -41,10 +42,29 @@ requiring a shell environment variable. Platform group selections separately
 choose which application configs deploy.
 
 Make detects `PROFILE` unless explicitly supplied, and defaults `MISE_ENV` to
-that profile. An existing `MISE_ENV` is preserved: check that both agree.
+that profile. Provisioning targets reject a missing platform file or a conflicting
+`MISE_ENV` before running their recipes. Each profile selects one independent
+environment; Omarchy does not inherit an Arch environment.
 Direct mise commands require the intended environment, for example
 `mise -E omarchy config ls`. The repository's Zsh startup defaults to `macos`;
 mise environment names alone do not perform OS or hostname detection.
+
+### Adding a platform later
+
+Add `config.<profile>.toml` with that platform's complete package set and explicit
+dotfile-group selection. Override shared deployment definitions only where needed.
+Duplication of package intent across platforms is acceptable; no environment map,
+include chain, or custom configuration merger is needed.
+
+Inspect detection and prerequisite support, including how mise itself is installed.
+Detection alone does not establish provisioning support. Generic Linux bootstrap
+and incremental targets both prefer `scripts/<profile>/<layer>.sh`, falling back
+to `scripts/linux/<layer>.sh`; add overrides only for actual platform differences.
+macOS and Omarchy retain their dedicated bootstrap flows.
+
+The default global tool overlay can be reused. Add a platform tool fragment and
+override its deployment source only when providers or exclusions differ. Keep
+these tool sources separate from repository-only bootstrap declarations.
 
 ## Installation and Bootstrap Lifecycle
 
@@ -89,6 +109,7 @@ system configuration
   → <repo>/.config/mise/config.toml
   → <repo>/.config/mise/config.<environment>.toml
   → <repo>/.config/mise/config.local.toml
+  → <repo>/.config/mise/config.<environment>.local.toml (if present)
 ```
 
 This repository's layers apply when discovered from its directory tree. Other

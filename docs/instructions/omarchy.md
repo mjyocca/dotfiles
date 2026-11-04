@@ -7,8 +7,8 @@ load `docs/instructions/bash.md` only for shell changes.
 
 After Omarchy updates, inspect replaced configs, backups, and target collisions
 before authorized redeployment. `make link` is the deployment entrypoint; Make
-selects `PROFILE` (detected by default) as its environment unless `MISE_ENV` is
-already set. See `docs/instructions/mise-dotfiles.md` when working on deployment.
+selects `PROFILE` (detected by default) as its environment and rejects a conflicting
+`MISE_ENV`. See `docs/instructions/mise-dotfiles.md` when working on deployment.
 
 Prefer narrowly managed user overrides over replacing Omarchy-owned files;
 inspect the installed version's loading paths before editing desktop settings.
@@ -21,9 +21,8 @@ adoption; preserve the checkout-local deployment exclusion until then.
 Ownership rules live in `docs/instructions/package-management.md`; this section
 describes actual consumers, not another ownership policy.
 
-- `scripts/linux/packages.sh` invokes `mise bootstrap --skip tools`. Pacman
-  declarations live in `.config/mise/config.toml` and
-  `.config/mise/config.omarchy.toml`.
+- `scripts/linux/packages.sh` invokes `mise bootstrap --skip tools`. All Omarchy
+  Pacman declarations live in `.config/mise/config.omarchy.toml`.
 - `scripts/omarchy/packages.sh` invokes the Linux layer, then `aur.sh`. The AUR
   script reads `packages/aur/packages.txt` and invokes yay with review prompts.
   `scripts/linux/aur-installer.sh` is a standalone interactive alternative using

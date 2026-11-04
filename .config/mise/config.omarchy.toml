@@ -1,5 +1,5 @@
 # Omarchy-specific mise configuration
-# Extends base config.toml with Omarchy packages and deployment selections.
+# Complete Omarchy package set and platform deployment selections.
 # Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
 
 [dotfiles."~/.config/mise/conf.d/20-dotfiles-platform.toml"]
@@ -38,6 +38,52 @@ dotfile_groups = [
 
 # IMPORTANT: Do NOT include mise/mise-bin here
 # The prerequisites layer ensures mise is available before bootstrap runs
+
+# Core Infrastructure
+"pacman:curl" = { version = "latest", os = "linux" }
+"pacman:git" = { version = "latest", os = "linux" }
+"pacman:stow" = { version = "latest", os = "linux" }
+"pacman:unzip" = { version = "latest", os = "linux" }
+"pacman:wget" = { version = "latest", os = "linux" }
+
+# Build Tools
+"pacman:autoconf" = { version = "latest", os = "linux" }
+"pacman:base-devel" = { version = "latest", os = "linux" }
+"pacman:cmake" = { version = "latest", os = "linux" }
+"pacman:gcc" = { version = "latest", os = "linux" }
+"pacman:gmp" = { version = "latest", os = "linux" }
+"pacman:libyaml" = { version = "latest", os = "linux" }
+"pacman:make" = { version = "latest", os = "linux" }
+"pacman:openssl" = { version = "latest", os = "linux" }
+"pacman:readline" = { version = "latest", os = "linux" }
+"pacman:sqlite" = { version = "latest", os = "linux" }
+
+# Containers & Virtualization
+"pacman:docker" = { version = "latest", os = "linux" }
+"pacman:docker-buildx" = { version = "latest", os = "linux" }
+"pacman:docker-compose" = { version = "latest", os = "linux" }
+
+# General Utilities
+"pacman:bat" = { version = "latest", os = "linux" }
+"pacman:btop" = { version = "latest", os = "linux" }
+"pacman:eza" = { version = "latest", os = "linux" }
+"pacman:fd" = { version = "latest", os = "linux" }
+"pacman:fzf" = { version = "latest", os = "linux" }
+"pacman:jq" = { version = "latest", os = "linux" }
+"pacman:lazygit" = { version = "latest", os = "linux" }
+"pacman:neovim" = { version = "latest", os = "linux" }
+"pacman:pv" = { version = "latest", os = "linux" }
+"pacman:ripgrep" = { version = "latest", os = "linux" }
+"pacman:starship" = { version = "latest", os = "linux" }
+"pacman:tmux" = { version = "latest", os = "linux" }
+"pacman:tree" = { version = "latest", os = "linux" }
+"pacman:tree-sitter-cli" = { version = "latest", os = "linux" }
+"pacman:zoxide" = { version = "latest", os = "linux" }
+
+# Additional session-critical tools
+"pacman:direnv" = { version = "latest", os = "linux" }
+"pacman:git-delta" = { version = "latest", os = "linux" }
+"pacman:zellij" = { version = "latest", os = "linux" }
 
 # Containers & Virtualization (Omarchy-specific)
 "pacman:qemu-base" = "latest"

@@ -6,9 +6,9 @@ canonical `docs/instructions/package-management.md` policy.
 
 ## Configuration Sources
 
-- `.config/mise/config.macos.toml` adds platform system packages to the shared
-  `.config/mise/config.toml` bootstrap declarations. Formulas use `brew:`, casks
-  use `brew-cask:` under `[bootstrap.packages]`.
+- `.config/mise/config.macos.toml` owns the complete macOS system package set;
+  `.config/mise/config.toml` holds platform-neutral deployment definitions.
+  Formulas use `brew:`, casks use `brew-cask:` under `[bootstrap.packages]`.
 - Shared dev tools and interim asdf runtime versions have separate declarations
   identified in the package policy; runtime migration to mise is not complete.
 - Fresh setup requires completed Command Line Tools, then installs standalone

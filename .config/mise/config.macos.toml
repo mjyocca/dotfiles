@@ -1,5 +1,5 @@
 # macOS-specific mise configuration
-# Extends base config.toml with macOS-only packages
+# Complete macOS package set and platform deployment selections.
 # Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
 
 [bootstrap]
@@ -16,7 +16,54 @@ dotfile_groups = [
 adopt = true
 
 [bootstrap.packages]
-# macOS-only packages (Homebrew)
+# mise itself is installed by prerequisites before bootstrap runs.
+# Keep OS filters: mise's built-in Brew manager can also run on Linux.
+
+# Core Infrastructure
+"brew:curl" = { version = "latest", os = "macos" }
+"brew:git" = { version = "latest", os = "macos" }
+"brew:stow" = { version = "latest", os = "macos" }
+"brew:unzip" = { version = "latest", os = "macos" }
+"brew:wget" = { version = "latest", os = "macos" }
+
+# Build Tools
+"brew:autoconf" = { version = "latest", os = "macos" }
+"brew:cmake" = { version = "latest", os = "macos" }
+"brew:gcc" = { version = "latest", os = "macos" }
+"brew:gmp" = { version = "latest", os = "macos" }
+"brew:libyaml" = { version = "latest", os = "macos" }
+"brew:make" = { version = "latest", os = "macos" }
+# Ruby 3.3's OpenSSL extension uses the OpenSSL 3 ABI; avoid the moving alias.
+"brew:openssl@3" = { version = "latest", os = "macos" }
+"brew:readline" = { version = "latest", os = "macos" }
+"brew:sqlite" = { version = "latest", os = "macos" }
+
+# Containers & Virtualization
+"brew:docker" = { version = "latest", os = "macos" }
+"brew:docker-compose" = { version = "latest", os = "macos" }
+"brew:docker-buildx" = { version = "latest", os = "macos" }
+
+# General Utilities
+"brew:bat" = { version = "latest", os = "macos" }
+"brew:btop" = { version = "latest", os = "macos" }
+"brew:eza" = { version = "latest", os = "macos" }
+"brew:fd" = { version = "latest", os = "macos" }
+"brew:fzf" = { version = "latest", os = "macos" }
+"brew:jq" = { version = "latest", os = "macos" }
+"brew:lazygit" = { version = "latest", os = "macos" }
+"brew:neovim" = { version = "latest", os = "macos" }
+"brew:pv" = { version = "latest", os = "macos" }
+"brew:ripgrep" = { version = "latest", os = "macos" }
+"brew:starship" = { version = "latest", os = "macos" }
+"brew:tmux" = { version = "latest", os = "macos" }
+"brew:tree" = { version = "latest", os = "macos" }
+"brew:tree-sitter-cli" = { version = "latest", os = "macos" }
+"brew:zoxide" = { version = "latest", os = "macos" }
+
+# Additional session-critical tools
+"brew:direnv" = { version = "latest", os = "macos" }
+"brew:git-delta" = { version = "latest", os = "macos" }
+"brew:zellij" = { version = "latest", os = "macos" }
 
 # System infrastructure and general utilities
 "brew:coreutils" = "latest"
