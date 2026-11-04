@@ -99,7 +99,7 @@ pack: packages
 	@echo "✓ System packages installed"
 
 link:
-	@mise dotfiles apply
+	@bash ./scripts/shared/environment.sh mise dotfiles apply
 
 plug: plugins
 	@echo "✓ Plugins installed"

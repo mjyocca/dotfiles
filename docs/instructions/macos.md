@@ -11,6 +11,11 @@ canonical `docs/instructions/package-management.md` policy.
   use `brew-cask:` under `[bootstrap.packages]`.
 - Shared dev tools and interim asdf runtime versions have separate declarations
   identified in the package policy; runtime migration to mise is not complete.
+- Fresh setup requires completed Command Line Tools, then installs standalone
+  mise (if absent) before Homebrew. Existing mise providers are preserved.
+  `scripts/shared/environment.sh` exposes `~/.local/bin` and Apple Silicon's
+  `/opt/homebrew/bin` and `sbin` to each provisioning process without sourcing
+  interactive startup files. The bootstrap scope is Apple Silicon macOS.
 - `scripts/macos/config.sh` uses `apply-user-defaults`, when available, with
   `.config/macos/defaults.yml` and `.config/macos/defaults.apps.yml`, resolved
   relative to the repository rather than the caller's working directory.
@@ -21,8 +26,8 @@ canonical `docs/instructions/package-management.md` policy.
   step installs or loads them. The SSH key loader's `/var/log/addssh/` logging
   path needs review before any future activation.
 - User configuration uses XDG paths under `~/.config/`; LaunchAgents live under
-  `~/Library/LaunchAgents/`. Discover the Homebrew prefix with `brew --prefix`
-  rather than assuming an Apple Silicon or Intel installation path.
+  `~/Library/LaunchAgents/`. General scripts should discover an installed prefix
+  with `brew --prefix`; provisioning explicitly supports `/opt/homebrew`.
 
 ## Containers and Virtualization
 

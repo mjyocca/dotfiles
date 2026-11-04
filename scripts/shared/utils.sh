@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+source "$(dirname "${BASH_SOURCE[0]}")/environment.sh"
+
 # Colors
 readonly RESET='\033[0m'
 readonly GREEN='\033[0;32m'

@@ -15,30 +15,29 @@ info "Installing prerequisites..."
 if ! xcode-select -p &>/dev/null; then
     info "Installing Xcode Command Line Tools..."
     xcode-select --install
-    info "Please complete Xcode CLT installation in the GUI prompt"
+    fatal "Complete Command Line Tools installation in the GUI, then rerun this command."
 else
     info "Xcode Command Line Tools already installed"
 fi
 
-# Install Homebrew if not present
+# Install/reuse mise first; fresh macOS does not require Homebrew for this step.
+bash "$(dirname "${BASH_SOURCE[0]}")/../install-mise.sh"
+
+# Install Homebrew if not present (Apple Silicon prefix is on provisioning PATH).
 if ! command_exists brew; then
     info "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    
-    # Add Homebrew to PATH for Apple Silicon
-    if [[ -f /opt/homebrew/bin/brew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
+    installer="$(mktemp "${TMPDIR:-/tmp}/homebrew-installer.XXXXXX")"
+    trap 'rm -f "$installer"' EXIT
+    curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$installer"
+    /bin/bash "$installer"
 else
     info "Homebrew already installed"
 fi
 
-# Install git via Homebrew
-if ! command_exists git; then
-    info "Installing git..."
-    brew install git
-fi
-
-bash "$(dirname "${BASH_SOURCE[0]}")/../install-mise.sh"
+# CLT supplies git and make; the packages layer installs tracked replacements via mise.
+command_exists brew || fatal "Homebrew installation did not provide brew; expected /opt/homebrew/bin/brew."
+for dependency in git curl make; do
+    command_exists "$dependency" || fatal "$dependency is required before package bootstrap."
+done
 
 success "Prerequisites installed"

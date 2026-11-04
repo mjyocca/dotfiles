@@ -64,7 +64,7 @@ clone_or_update_repo() {
 		
 		if git rev-parse --git-dir > /dev/null 2>&1; then
 			info "Updating existing repository..."
-			git pull --ff-only || warn "Failed to update repository (continuing anyway)"
+			git pull --ff-only || { error "Repository update failed; bootstrap stopped."; exit 1; }
 		else
 			error "$REPO_PATH exists but is not a git repository"
 			error "Please remove it manually and re-run this script"

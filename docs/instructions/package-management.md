@@ -41,6 +41,8 @@ may legitimately require a system runtime alongside the selected asdf version.
 
 - Put shared system dependencies in `.config/mise/config.toml`; platform-only
   dependencies go in the corresponding platform file. Avoid duplicate declarations.
+  Shared `brew:` entries must specify `os = "macos"` and `pacman:` entries
+  `os = "linux"`: mise's built-in Brew backend also runs on Linux without brew.
 - Shared dev tools belong in `packages/mise/.config/mise/config.toml`; verify the
   backend/platform support before adding one. Do not put optional dev tools into
   platform bootstrap just because they are CLI applications.
@@ -53,6 +55,9 @@ may legitimately require a system runtime alongside the selected asdf version.
   `[tools]` declaration, using `mise --no-config` to exclude asdf/effective defaults.
   Package bootstrap skips its tools phase. Preserve both safeguards; a blanket
   `mise install` or unfiltered bootstrap can install duplicate asdf runtimes.
+- Prerequisites preserve an existing mise provider. On a fresh Mac they install
+  standalone mise before Homebrew; on Omarchy they use pacman when mise is absent.
+  Provisioning adds executable search paths without activating language runtimes.
 
 ## Ownership Changes
 

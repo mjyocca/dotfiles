@@ -37,23 +37,8 @@ install_xcode() {
 	else
 		info "Installing xCode Command Line Tools..."
 		xcode-select --install
-		sudo xcodebuild -license accept
-	fi
-}
-
-install_homebrew() {
-	export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-	if command -v brew >/dev/null 2>&1; then
-		warn "Homebrew already installed"
-	else
-		info "Installing homebrew..."
-		sudo --validate # reset `sudo` timeout to use Homebrew install in noninteractive mode
-		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    # Add Homebrew to PATH for Apple Silicon
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    echo "Homebrew installation completed."
+		error "Complete Command Line Tools installation, then rerun this installer."
+		exit 1
 	fi
 }
 
@@ -66,7 +51,7 @@ clone_or_update_repo() {
 		# Check if it's a git repository
 		if git rev-parse --git-dir > /dev/null 2>&1; then
 			info "Updating existing repository..."
-			git pull --ff-only || warn "Failed to update repository (continuing anyway)"
+			git pull --ff-only || { error "Repository update failed; bootstrap stopped."; exit 1; }
 		else
 			warn "$REPO_PATH exists but is not a git repository"
 			warn "Please remove it manually and re-run this script"
@@ -85,13 +70,10 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	info "bootstrapping..."
 
 	install_xcode
-	install_homebrew
 
-	info "Installing Git..."
-	brew install git
-
+	# Command Line Tools supplies git for cloning; bootstrap installs mise before Homebrew.
 	clone_or_update_repo
 
 	info "Installing dependencies..."
-	make bootstrap_osx
+	make bootstrap PROFILE=macos
 fi

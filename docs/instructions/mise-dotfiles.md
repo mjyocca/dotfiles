@@ -7,7 +7,8 @@ Use for deployment wiring, not package ownership or general mise tutorials.
 - Dotfile directories under `packages/<name>/` mirror paths under `$HOME`.
   Exception: `packages/aur/` is repository-only installation data. Never select
   it as a dotfile group or include it through broad package-directory discovery.
-- `make link` runs `mise dotfiles apply` from the repository root.
+- `make link` runs `mise dotfiles apply` from the repository root through the
+  shared provisioning PATH wrapper (no interactive shell or runtime activation).
 - `.config/mise/config.toml` declares bootstrap packages, `settings.dotfiles.root`
   (`../../packages`), and explicit Git-filtered dotfile groups. Keep package and
   deployment declarations together; neither replaces the other.

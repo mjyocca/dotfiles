@@ -2,6 +2,8 @@
 # Install only repository-declared tools, never effective/asdf defaults.
 set -euo pipefail
 
+source "$(dirname "${BASH_SOURCE[0]}")/environment.sh"
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 config="$repo_root/packages/mise/.config/mise/config.toml"
 
