@@ -15,9 +15,8 @@ does not universally read these files—do not promise script-wide environment s
   initializes tools directly with availability checks; do not duplicate Omarchy
   defaults in the shared hook block or use the variable as proof of OS identity.
 - Cross-platform extras (currently direnv and PNPM) follow the standalone block.
-- When the custom bat config/theme is deployed, clear Omarchy's `BAT_THEME=ansi`
-  in the interactive extras block so bat can use its config. Other theme values
-  and the final machine-local overrides remain respected.
+- Inspect upstream environment overrides when application config appears ignored;
+  preserve intentional machine-local values.
 - `.config/bash/nvim.bash` owns editor aliases and variant shorthands.
 - `~/.bashrc.local` is git-ignored, bootstrapped if missing, and sourced **last**
   for machine-specific settings and credentials.

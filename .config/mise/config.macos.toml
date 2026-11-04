@@ -5,7 +5,7 @@
 [bootstrap]
 dotfile_groups = [
   "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
-  "gitconfig", "herdr", "hunk", "lazygit", "mise", "nvim", "nvim-next",
+  "gitconfig", "herdr", "hunk", "lazygit", "nvim", "nvim-next",
   "opencode", "pnpm", "scripts", "ssh", "starship", "superfile", "tmux",
   "tool-versions", "yazi", "zed", "zellij", "zsh",
 ]

@@ -18,7 +18,7 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
 fi
 
 repo_root="$(git rev-parse --show-toplevel)"
-if ! command_exists gitleaks && ! bash "$repo_root/scripts/shared/mise-tool-path.sh" gitleaks >/dev/null 2>&1; then
+if ! command_exists gitleaks && ! mise -C "$repo_root" which gitleaks --tool gitleaks >/dev/null 2>&1; then
     warn "gitleaks not found, skipping pre-commit hook installation"
     exit 0
 fi

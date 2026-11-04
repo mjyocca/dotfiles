@@ -1,6 +1,24 @@
 # Base mise configuration for all platforms
-# Shared bootstrap packages and dotfile deployment rules.
+# Shared tools, bootstrap packages, and dotfile deployment rules.
 # Platform configurations select packages and dotfile groups via MISE_ENV.
+
+# Native includes share tool declarations without deploying bootstrap rules.
+include = ["tools.toml"]
+
+[dotfiles."~/.config/mise/config.local.toml"]
+source = "global.toml"
+mode = "symlink"
+depends = ["~/.config/mise/tools.toml"]
+variants = [{ profile = "omarchy" }, { profile = "macos" }]
+
+[dotfiles."~/.config/mise/tools.toml"]
+source = "tools.toml"
+mode = "symlink"
+variants = [{ profile = "omarchy" }, { profile = "macos" }]
+
+[dotfiles."~/.config/mise/miserc.toml"]
+source = "miserc.toml"
+mode = "symlink"
 
 [settings.dotfiles]
 root = "../../packages"
@@ -86,10 +104,6 @@ manifest = "git"
 [dotfile_groups.lazygit.entries]
 "~/.config/lazygit/config.yml" = { mode = "symlink" }
 
-[dotfile_groups.mise]
-root = "mise"
-manifest = "git"
-
 [dotfile_groups.nvim]
 root = "nvim"
 manifest = "git"
@@ -104,6 +118,11 @@ manifest = "git"
 [dotfile_groups.opencode]
 root = "opencode"
 manifest = "git"
+exclude = ["*.example"]
+
+# CLI preferences are separate from server settings, providers, and credentials.
+[dotfile_groups.opencode.entries]
+"~/.config/opencode/cli.json" = { mode = "template" }
 
 [dotfile_groups.pnpm]
 root = "pnpm"
@@ -115,6 +134,10 @@ manifest = "git"
 [dotfile_groups.scripts]
 root = "scripts"
 manifest = "git"
+
+[dotfile_groups.scripts.entries]
+"~/.local/bin/dotf" = { mode = "symlink" }
+"~/.local/bin/dotf.d/init" = { mode = "symlink" }
 
 [dotfile_groups.ssh]
 root = "ssh"
@@ -145,6 +168,10 @@ manifest = "git"
 [dotfile_groups.tool-versions]
 root = "tool-versions"
 manifest = "git"
+
+[dotfile_groups.tool-versions.entries]
+"~/.tool-versions" = { mode = "symlink" }
+"~/.default-gems" = { mode = "symlink" }
 
 [dotfile_groups.yazi]
 root = "yazi"

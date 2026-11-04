@@ -11,25 +11,10 @@ declarations determine what this repository actually installs.
   uses the repository's mise entrypoint, not Stow; effective deployment wiring
   must be checked before assuming files are linked.
 - **Colima + Lima** is the preferred Docker/VM stack on macOS. The template in
-  `packages/colima/.config/colima/_templates/default.yaml` selects `vz` and
-  `virtiofs`; existing profiles may differ. Do not assume helper commands exist:
-  inspect `packages/scripts/.local/bin/dotf.d/` for the current `dotf` command set.
+  `packages/colima/` defines new-profile defaults; existing profiles may differ.
+  See [dotf](dotf.md) for the helper command layout.
 
 ## Terminal and Development
-
-### Multiplexer migration
-
-- Zellij's autolock WASM is installed by `make plugins` (Linux and macOS).
-  Use `make zellij-plugins` for only that dependency; `make tools` does not
-  install plugins. The shared config uses Ctrl-h for focus left and Ctrl-Shift-m
-  for Move mode.
-- TODO: converge the repository Tmux configuration with useful Omarchy defaults
-  before adopting it on this machine. Keep the existing Omarchy config for now;
-  the gitignored `.config/mise/config.local.toml` excludes the `tmux` group.
-  Revisit prefix keys, theme, clipboard/extended-key support, and TPM plugins.
-  Remove the local exclusion only when adoption is intentional.
-
-### Links
 
 - [Ghostty docs](https://ghostty.org/docs) · [source](https://github.com/ghostty-org/ghostty)
 - [OpenCode V2 docs](https://opencode.ai/v2/docs/) — configuration and agent tooling
@@ -41,6 +26,15 @@ declarations determine what this repository actually installs.
 - [television docs](https://alexpasmantier.github.io/television/) · [source](https://github.com/alexpasmantier/television)
 - [btop](https://github.com/aristocratos/btop) — resource monitor
 - [glow](https://github.com/charmbracelet/glow) — terminal Markdown
+- [Zellij docs](https://zellij.dev/documentation/) · [Tmux wiki](https://github.com/tmux/tmux/wiki)
+
+## Configuration Managers
+
+- [mise configuration](https://mise.jdx.dev/configuration.html) · [dotfiles](https://mise.jdx.dev/dotfiles.html)
+- [asdf docs](https://asdf-vm.com/guide/introduction.html)
+- [Omarchy manual](https://omarchy.org/manual/)
+
+For this repository's file layout and scope, see [mise architecture](../architecture/mise.md).
 
 ## Containers and Virtual Machines
 

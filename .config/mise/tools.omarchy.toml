@@ -1,0 +1,4 @@
+# Alternative providers; the entrypoint's disable_tools excludes inherited owners.
+[tools]
+opencode = "latest"
+"aqua:modem-dev/hunk" = "latest"

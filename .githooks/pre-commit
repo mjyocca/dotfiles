@@ -10,7 +10,7 @@ source "$repo_root/scripts/shared/environment.sh"
 
 # GUI Git clients and fresh bootstrap shells may not have mise tools on PATH.
 if ! scanner="$(command -v gitleaks)"; then
-  if ! scanner="$(bash "$repo_root/scripts/shared/mise-tool-path.sh" gitleaks 2>/dev/null)"; then
+  if ! scanner="$(mise -C "$repo_root" which gitleaks --tool gitleaks 2>/dev/null)"; then
     echo "⚠️  gitleaks not found. Skipping secret scan."
     echo "   Install tracked tools with: make tools"
     exit 0

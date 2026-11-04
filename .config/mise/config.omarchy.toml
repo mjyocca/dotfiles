@@ -2,19 +2,28 @@
 # Extends base config.toml with Omarchy packages and this machine's mise selections.
 # Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
 
-# Preserve the current machine's working requests without changing providers.
+include = ["tools.omarchy.toml"]
+
+# Preserve machine requests separately from the tools-only installation scope.
 # Node is already mise-managed here; this is not an asdf runtime migration.
-# These requests apply only in this checkout, not as deployed global defaults.
-# make tools still installs only packages/mise/.config/mise/config.toml.
 [tools]
 codex = "latest"
 delta = "latest"
-gh = "latest"
 node = "25.2.1"
-opencode = "latest"
 tree-sitter = "latest"
-superfile = "latest"
-yazi = "latest"
+
+# Includes cannot contain settings. Apply the same policy as global.omarchy.toml.
+[settings]
+disable_tools = ["aqua:anomalyco/opencode", "hunk", "dua", "lazydocker"]
+
+[dotfiles."~/.config/mise/config.local.toml"]
+source = "global.omarchy.toml"
+mode = "symlink"
+depends = ["~/.config/mise/tools.toml", "~/.config/mise/tools.omarchy.toml"]
+
+[dotfiles."~/.config/mise/tools.omarchy.toml"]
+source = "tools.omarchy.toml"
+mode = "symlink"
 
 [settings.upgrade]
 auto_prune = false
@@ -41,7 +50,7 @@ manifest = "git"
 [bootstrap]
 dotfile_groups = [
   "asdf", "bash", "bat", "btop", "ghostty", "gitconfig", "herdr", "hunk",
-  "lazygit", "mise", "nvim", "nvim-next", "opencode", "pnpm", "scripts",
+  "lazygit", "nvim", "nvim-next", "opencode", "pnpm", "scripts",
   "ssh", "starship", "superfile", "tmux", "tool-versions", "yazi", "zed",
   "zellij",
 ]
@@ -58,9 +67,12 @@ dotfile_groups = [
 # General Utilities (Omarchy-specific)
 "pacman:ffmpeg" = "latest"
 "pacman:wl-clipboard" = "latest"
+"pacman:resvg" = "latest" # Optional SVG previews in Yazi
 
 # Platform-managed CLI/TUI tools (Omarchy-specific)
 "pacman:herdr" = "latest"
+"pacman:dua-cli" = "latest"
+"pacman:lazydocker" = "latest"
 
 # GUI Applications (from official repositories, NOT AUR)
 "pacman:1password" = "latest"

@@ -6,7 +6,7 @@
 /_____/\____/\__/_/   /_/_/\___/____/                     
 ```
 
-Personal dotfiles managed with [mise](https://mise.jdx.dev/dotfiles/) and
+Personal dotfiles managed with [mise](https://mise.jdx.dev/dotfiles.html) and
 platform-specific bootstrap scripts.
 
 ## Install
@@ -35,3 +35,6 @@ make bootstrap
 - `make link` — Deploy dotfiles via mise
 - `make plug` — Install plugins
 - `make sync` — Run packages, link, and plugins
+
+See [mise configuration architecture](docs/architecture/mise.md) for shared,
+platform-specific, and machine-local configuration scope.

@@ -12,8 +12,9 @@ for dependency in git mise curl; do
 done
 
 # Installing a mise tool does not put it on the calling shell's PATH.
-# Use only the tracked gh request; never activate effective/asdf runtime defaults.
-gh_binary="$(bash "$(dirname "${BASH_SOURCE[0]}")/../shared/mise-tool-path.sh" gh)"
+# Native lookup does not install tools or activate runtime defaults.
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+gh_binary="$(mise -C "$repo_root" which gh --tool gh)"
 run_gh() {
     "$gh_binary" "$@"
 }

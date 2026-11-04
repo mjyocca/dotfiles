@@ -24,6 +24,9 @@ Paths below are relative to the repository root.
 
 `docs/instructions/` is agent-facing. Other `docs/` directories are human-facing
 references, not default context; consult relevant sections when the task needs them.
+Keep instructions focused on repository constraints and verification, references
+on upstream links, and architecture explanations in `docs/architecture/`. Do not
+duplicate configuration values or record machine migration status in these docs.
 External documentation is reference material, not permission to expand the task.
 
 ## Commands
@@ -34,7 +37,7 @@ Run from the repository root; these commands change the machine, not just the re
 |---|---|
 | `make bootstrap` | Runs prerequisites → packages → tools → plugins → config → hooks; no explicit link step |
 | `make packages` | Runs mise bootstrap (packages and selected dotfiles); Omarchy also invokes the AUR layer |
-| `make tools` | Installs only tracked shared dev tools; excludes asdf runtime defaults |
+| `make tools` | Native mise install with the tools-only config for `PROFILE`; excludes ambient config and runtime defaults |
 | `make link` | Runs `mise dotfiles apply`; requires effective deployment declarations |
 | `make sync` | Packages, link, plugins only—not full provisioning |
 | `make hooks` | Installs the gitleaks pre-commit hook when gitleaks is available |
@@ -44,7 +47,7 @@ Use `scripts/shared/detect-os.sh` to inspect platform detection.
 
 ## Project Conventions
 
-- System bootstrap declarations: `.config/mise/`; shared dev tools: `packages/mise/.config/mise/config.toml`.
+- System bootstrap, dev tools, and mise policy: `.config/mise/`. See `docs/architecture/mise.md` for platform composition and scope; prefer native mise features.
 - AUR lists live in `packages/aur/`; exclude this directory from all dotfile deployment selections.
 - Scripts are organized by domain layer, not package type. Shared helpers live in `scripts/shared/`.
 - Platform scripts live in `scripts/macos/`, `scripts/linux/`, and `scripts/omarchy/`; Make's dispatcher falls back to Linux when a platform layer is missing.

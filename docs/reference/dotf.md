@@ -8,11 +8,11 @@
 packages/scripts/.local/bin/
   dotf            # dispatcher — routes dotf <cmd> [args] to dotf.d/<cmd>
   dotf.d/         # one executable file per subcommand
-    colima-use              # switch colima profile + docker context + socket
-    colima-list             # list profiles, states, contexts
-    colima-migrate-volumes  # export/import volumes between colima profiles
     init                    # scaffold template files into the current project root (fzf picker)
 ```
+
+The `colima-*` subcommands live in `packages/colima-scripts/` and are selected
+only by the macOS deployment profile, not the shared `scripts` group.
 
 ## How It Works
 

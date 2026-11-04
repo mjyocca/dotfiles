@@ -7,7 +7,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 for dependency in git mise; do
     command_exists "$dependency" || fatal "$dependency is required; run the packages/tools layers first."
 done
-asdf_binary="$(bash "$(dirname "${BASH_SOURCE[0]}")/mise-tool-path.sh" asdf github:asdf-vm/asdf)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+asdf_binary="$(mise -C "$repo_root" which asdf --tool github:asdf-vm/asdf)"
 
 info "Installing asdf plugins..."
 installed_asdf_plugins="$("$asdf_binary" plugin list)"

@@ -9,12 +9,11 @@ the workflow; read only the applicable platform guide for platform-specific work
 |---|---|
 | System packages via mise bootstrap | `.config/mise/config.toml` plus `config.macos.toml` or `config.omarchy.toml` in the same directory, under `[bootstrap.packages]` |
 | AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
-| Shared mise dev tools | `packages/mise/.config/mise/config.toml`, under `[tools]`; intended home destination: `~/.config/mise/config.toml` |
+| mise dev tools | `.config/mise/tools.toml` plus platform tool declarations in the same directory |
 | Language runtimes via asdf (interim) | `packages/tool-versions/.tool-versions` |
 
-The repository bootstrap config and deployed dev-tool config have different roles.
-Inspect effective mise configuration and environment selection before installing;
-system defaults (notably `/etc/mise/conf.d/` on Omarchy) may also provide tools.
+See [mise architecture](../architecture/mise.md) for composition and scope.
+Inspect effective configuration, including system defaults, before installing.
 
 ## Choosing an Owner
 
@@ -30,11 +29,8 @@ system defaults (notably `/etc/mise/conf.d/` on Omarchy) may also provide tools.
 Language runtimes remain on asdf until a separately scoped migration. Do not
 install duplicate mise runtimes or move runtime ownership incidentally; Terraform
 ownership changes are also a separate migration, not implied by these rules.
-The asdf executable itself is managed by mise via `github:asdf-vm/asdf` in the
-shared dev-tool declaration, not Homebrew or AUR. This does not move asdf's plugins
-or language versions to mise. `scripts/linux/plugins.sh` invokes the shared asdf
-plugin helper as part of the existing `make plugins` flow (also used on macOS).
-The helper installs plugin repositories only, not language versions.
+mise owns the asdf executable, not its runtimes. `make plugins` installs the
+declared asdf plugins without installing language versions.
 
 When criteria do not settle a choice, compare similar tracked tools, then inspect
 the installed OS's package and mise defaults or version-matched upstream sources.
@@ -48,18 +44,20 @@ may legitimately require a system runtime alongside the selected asdf version.
   dependencies go in the corresponding platform file. Avoid duplicate declarations.
   Shared `brew:` entries must specify `os = "macos"` and `pacman:` entries
   `os = "linux"`: mise's built-in Brew backend also runs on Linux without brew.
-- Shared dev tools belong in `packages/mise/.config/mise/config.toml`; verify the
-  backend/platform support before adding one. Do not put optional dev tools into
-  platform bootstrap just because they are CLI applications.
+- Shared dev tools belong in `.config/mise/tools.toml`; put platform differences
+  in platform tool declarations. Verify backend/platform support and inspect
+  effective provider exclusions. Do not put optional dev tools into platform
+  bootstrap just because they are CLI apps.
 - Track runtime version changes directly in `packages/tool-versions/.tool-versions`.
   Do not assume a global manager command edits the tracked file on this machine.
 - AUR installation reads `packages/aur/packages.txt`, outside mise bootstrap and
   dotfile deployment. Machine lists are tracking-only, not automatic installation
   overlays; read `docs/instructions/omarchy.md` before editing them.
-- `make tools` installs only explicit requests parsed from the tracked shared
-  `[tools]` declaration, using `mise --no-config` to exclude asdf/effective defaults.
-  Package bootstrap skips its tools phase. Preserve both safeguards; a blanket
-  `mise install` or unfiltered bootstrap can install duplicate asdf runtimes.
+- Use `make tools` for isolated dev-tool installation; preview with
+  `TOOLS_ARGS=--dry-run`. Preserve its scope and bootstrap's skipped tools phase:
+  unscoped installation can include ambient tools and runtime requests.
+- Keep mise's `.tool-versions` discovery disabled while asdf owns those files.
+  Explicit mise TOML requests remain separate; do not migrate them incidentally.
 - Prerequisites preserve an existing mise provider. On a fresh Mac they install
   standalone mise before Homebrew; on Omarchy they use pacman when mise is absent.
   Provisioning adds executable search paths without activating language runtimes.

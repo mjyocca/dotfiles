@@ -3,7 +3,7 @@
 # Usage: dotf <command> [args...]
 #
 # Commands are resolved from scripts co-located with this binary
-# under the dotf/ subdirectory.
+# under the dotf.d/ subdirectory.
 
 set -euo pipefail
 

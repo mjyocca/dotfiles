@@ -20,6 +20,9 @@ export PROFILE
 MISE_ENV ?= $(PROFILE)
 export MISE_ENV
 
+# Select a plain tools-only config; native include handles shared/platform merging.
+TOOLS_CONFIG = $(abspath $(if $(wildcard .config/mise/global.$(PROFILE).toml),.config/mise/global.$(PROFILE).toml,.config/mise/global.toml))
+
 # ======================
 # INHERITANCE HELPER
 # ======================
@@ -65,7 +68,7 @@ endif
 bootstrap_macos:
 	$(call run_script,macos,prerequisites)
 	$(call run_script,macos,packages)
-	$(call run_script,macos,tools)
+	@$(MAKE) tools PROFILE=macos
 	$(call run_script,macos,plugins)
 	$(call run_script,macos,config)
 	$(call run_script,macos,hooks)
@@ -75,7 +78,7 @@ bootstrap_macos:
 bootstrap_omarchy:
 	$(call run_script,omarchy,prerequisites)
 	$(call run_script,omarchy,packages)  # Calls linux/packages.sh then omarchy/aur.sh
-	$(call run_script,omarchy,tools)
+	@$(MAKE) tools PROFILE=omarchy
 	$(call run_script,omarchy,plugins)
 	$(call run_script,omarchy,config)
 	$(call run_script,omarchy,hooks)
@@ -85,7 +88,7 @@ bootstrap_omarchy:
 bootstrap_linux:
 	$(call run_script,linux,prerequisites)
 	$(call run_script,linux,packages)    # mise bootstrap only, no AUR
-	$(call run_script,linux,tools)
+	@$(MAKE) tools
 	$(call run_script,linux,plugins)
 	$(call run_script,linux,config)
 	$(call run_script,linux,hooks)
@@ -123,7 +126,10 @@ aur:
 	$(call run_script,omarchy,aur)
 
 tools:
-	$(call run_script,$(PROFILE),tools)
+	@MISE_GLOBAL_CONFIG_FILE="$(TOOLS_CONFIG)" \
+	 MISE_SYSTEM_CONFIG_FILE="$(TOOLS_CONFIG)" \
+	 MISE_CEILING_PATHS="$(CURDIR)" \
+	 bash ./scripts/shared/environment.sh mise -C "$(CURDIR)/.config/mise" install $(TOOLS_ARGS)
 
 plugins:
 	$(call run_script,$(PROFILE),plugins)

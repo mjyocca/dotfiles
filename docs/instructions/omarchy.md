@@ -10,10 +10,11 @@ before authorized redeployment. `make link` is the deployment entrypoint; Make
 selects `PROFILE` (detected by default) as its environment unless `MISE_ENV` is
 already set. See `docs/instructions/mise-dotfiles.md` when working on deployment.
 
-Keyboard overrides belong in `~/.config/hypr/input.lua`, loaded after Omarchy's
-defaults. `config.omarchy.toml` manages a small Lua block there to map Caps Lock
-to Escape rather than Compose, retaining `shift:both_capslock_cancel`. The rest
-of the user file remains untouched; this edit is not declared for macOS.
+Prefer narrowly managed user overrides over replacing Omarchy-owned files;
+inspect the installed version's loading paths before editing desktop settings.
+
+TODO: converge repository Tmux behavior with useful Omarchy defaults before
+adoption; preserve the checkout-local deployment exclusion until then.
 
 ## Installation Inputs
 
