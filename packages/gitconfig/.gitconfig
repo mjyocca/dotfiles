@@ -13,7 +13,7 @@
 [alias]
 	fza = "!git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add"
 {% if os() == "macos" %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
-{% else %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | xclip -selection clipboard"
+{% else %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | wl-copy"
 {% endif %}
 
 [interactive]

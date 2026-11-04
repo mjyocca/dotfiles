@@ -21,6 +21,7 @@ dotfile_groups = [
 
 # General Utilities (Omarchy-specific)
 "pacman:ffmpeg" = "latest"
+"pacman:wl-clipboard" = "latest"
 
 # Platform-managed CLI/TUI tools (Omarchy-specific)
 "pacman:herdr" = "latest"

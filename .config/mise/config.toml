@@ -160,7 +160,8 @@ adopt = true
 "brew:gmp" = { version = "latest", os = "macos" }
 "brew:libyaml" = { version = "latest", os = "macos" }
 "brew:make" = { version = "latest", os = "macos" }
-"brew:openssl" = { version = "latest", os = "macos" }
+# Ruby 3.3's OpenSSL extension uses the OpenSSL 3 ABI; avoid the moving alias.
+"brew:openssl@3" = { version = "latest", os = "macos" }
 "brew:readline" = { version = "latest", os = "macos" }
 "brew:sqlite" = { version = "latest", os = "macos" }
 

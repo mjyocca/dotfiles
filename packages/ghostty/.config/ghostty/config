@@ -1,6 +1,6 @@
 # NOTE: If want to auto login to tmux session
 # command = /bin/zsh --login -c 'tmux new-session -A -D'
-shell-integration = zsh
+shell-integration = detect
 confirm-close-surface = false
 
 # Font

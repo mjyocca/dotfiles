@@ -40,8 +40,8 @@ export XDG_CACHE_HOME="$HOME/.cache"
 # mise platform selection
 # ================================================================
 # Set platform for mise dotfiles configuration. This must be in .zshenv so it's
-# available in all shells (interactive, scripts, cron).
-export MISE_ENV="macos"
+# available in all shells (interactive, scripts, cron). Preserve explicit overrides.
+export MISE_ENV="${MISE_ENV:-macos}"
 
 # ================================================================
 # Standard environment

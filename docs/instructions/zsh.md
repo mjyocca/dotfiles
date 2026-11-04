@@ -7,7 +7,8 @@ relying on a copied snapshot of its contents.
 
 - `.zshenv` runs for non-interactive as well as interactive shells. Keep it fast,
   silent, and limited to required environment/PATH exports. It sets XDG paths,
-  asdf shims, and `MISE_ENV=macos`; do not add prompts, plugin hooks, or aliases.
+  asdf shims, and defaults `MISE_ENV` to `macos` without replacing explicit
+  overrides; do not add prompts, plugin hooks, or aliases.
 - `.zshrc` owns interactive activation, prompts, completions, hooks, aliases, and
   interactive-only PATH entries such as PNPM. Universal script dependencies
   belong in `.zshenv`, not here.

@@ -43,8 +43,10 @@ Learnings from a security audit of this repo. Apply these when adding or modifyi
 ## Gitleaks — secret scanning
 
 `make hooks` links the canonical `.githooks/pre-commit` only when gitleaks is
-available. It resolves Git's hooks directory (including worktrees and
-`core.hooksPath`), preserves matching hooks, and refuses unfamiliar existing hooks.
+available on PATH or through the tracked installed mise tool. The hook uses the
+same lookup without installing tools or activating runtimes. It resolves Git's
+hooks directory (including worktrees and `core.hooksPath`), preserves matching
+hooks, and refuses unfamiliar existing hooks.
 The hook invokes `gitleaks protect --staged --redact --verbose` and skips scanning
 with a warning if the binary is missing. Installation is not proof every commit is
 scanned; inspect the active hook and installed CLI compatibility when auditing

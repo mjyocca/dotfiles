@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 # Pre-commit hook to scan staged changes for secrets using gitleaks
 # Install: make hooks
-# Requires: gitleaks in PATH
+# Requires: gitleaks on PATH or installed through the tracked mise declaration
 
 set -euo pipefail
 
-# Check if gitleaks is available
-if ! command -v gitleaks &> /dev/null; then
-  echo "⚠️  gitleaks not found. Skipping secret scan."
-  echo "   After make link, install with: mise install gitleaks"
-  exit 0
+repo_root="$(git rev-parse --show-toplevel)"
+source "$repo_root/scripts/shared/environment.sh"
+
+# GUI Git clients and fresh bootstrap shells may not have mise tools on PATH.
+if ! scanner="$(command -v gitleaks)"; then
+  if ! scanner="$(bash "$repo_root/scripts/shared/mise-tool-path.sh" gitleaks 2>/dev/null)"; then
+    echo "⚠️  gitleaks not found. Skipping secret scan."
+    echo "   Install tracked tools with: make tools"
+    exit 0
+  fi
 fi
 
 echo "🔍 Scanning staged changes for secrets..."
@@ -18,7 +23,7 @@ echo "🔍 Scanning staged changes for secrets..."
 # --staged: only scan staged files (not entire repo)
 # --redact: hide secret values in output
 # --verbose: show detailed results
-if gitleaks protect --staged --redact --verbose; then
+if "$scanner" protect --staged --redact --verbose; then
   echo "✅ No secrets detected in staged changes"
   exit 0
 else

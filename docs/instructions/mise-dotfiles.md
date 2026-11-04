@@ -32,8 +32,8 @@ configuration. In particular:
 
 - Verify root resolution, group selection, and defaults upstream. Preserve explicit
   platform selections and `manifest = "git"` filtering when changing package setup.
-- `MISE_ENV` selects environment files, not an OS automatically. Zsh currently
-  exports `macos` in `packages/zsh/.zshenv`; confirm the effective value elsewhere.
+- `MISE_ENV` selects environment files, not an OS automatically. Zsh defaults it
+  to `macos` in `packages/zsh/.zshenv`, preserving overrides; confirm it elsewhere.
 - Account for tracked versus ignored/local files before selecting a deployment
   manifest. Do not deploy credentials or add agent metadata to a package tree
   without checking whether it will be copied into `$HOME`.

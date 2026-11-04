@@ -17,13 +17,13 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 0
 fi
 
-if ! command_exists gitleaks; then
+repo_root="$(git rev-parse --show-toplevel)"
+if ! command_exists gitleaks && ! bash "$repo_root/scripts/shared/mise-tool-path.sh" gitleaks >/dev/null 2>&1; then
     warn "gitleaks not found, skipping pre-commit hook installation"
     exit 0
 fi
 
 # Let Git resolve worktrees and core.hooksPath rather than assuming .git/hooks.
-repo_root="$(git rev-parse --show-toplevel)"
 hooks_dir="$(git -C "$repo_root" rev-parse --path-format=absolute --git-path hooks)"
 source_hook="$repo_root/.githooks/pre-commit"
 target_hook="$hooks_dir/pre-commit"
