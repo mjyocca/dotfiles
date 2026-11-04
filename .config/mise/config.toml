@@ -29,9 +29,16 @@ manifest = "git"
 root = "bat"
 manifest = "git"
 
+[dotfile_groups.bat.entries]
+"~/.config/bat/config" = { mode = "symlink" }
+"~/.config/bat/themes/GitHub Dark.tmTheme" = { mode = "symlink" }
+
 [dotfile_groups.btop]
 root = "btop"
 manifest = "git"
+
+[dotfile_groups.btop.entries]
+"~/.config/btop/btop.conf" = { mode = "symlink" }
 
 [dotfile_groups.colima]
 root = "colima"
@@ -54,10 +61,15 @@ manifest = "git"
 
 [dotfile_groups.gitconfig.entries]
 "~/.gitconfig" = { mode = "template" }
+"~/.config/git/.gitignore_global" = { mode = "symlink" }
+"~/.config/git/delta-github-dark.gitconfig" = { mode = "symlink" }
 
 [dotfile_groups.herdr]
 root = "herdr"
 manifest = "git"
+
+[dotfile_groups.herdr.entries]
+"~/.config/herdr/config.toml" = { mode = "symlink" }
 
 [dotfile_groups.hunk]
 root = "hunk"
@@ -96,6 +108,9 @@ manifest = "git"
 root = "pnpm"
 manifest = "git"
 
+[dotfile_groups.pnpm.entries]
+"~/.config/pnpm/config.yaml" = { mode = "symlink" }
+
 [dotfile_groups.scripts]
 root = "scripts"
 manifest = "git"
@@ -118,6 +133,10 @@ manifest = "git"
 root = "superfile"
 manifest = "git"
 
+[dotfile_groups.superfile.entries]
+"~/.config/superfile/config.toml" = { mode = "symlink" }
+"~/.config/superfile/hotkeys.toml" = { mode = "symlink" }
+
 [dotfile_groups.tmux]
 root = "tmux"
 manifest = "git"
@@ -129,6 +148,9 @@ manifest = "git"
 [dotfile_groups.yazi]
 root = "yazi"
 manifest = "git"
+
+[dotfile_groups.yazi.entries]
+"~/.config/yazi/yazi.toml" = { mode = "symlink" }
 
 [dotfile_groups.zed]
 root = "zed"

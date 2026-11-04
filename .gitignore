@@ -11,6 +11,9 @@ packages/zsh/.zshrc.local
 # Per-machine bash overrides — not committed
 packages/bash/.bashrc.local
 
+# Per-machine Git overrides — not committed or deployed by the Git manifest
+packages/gitconfig/.gitconfig.local
+
 # Colima: ignore all runtime envs, keep tracked example config
 packages/colima/.config/**
 !packages/colima/.config/colima/

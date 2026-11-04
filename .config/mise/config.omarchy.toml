@@ -13,6 +13,8 @@ gh = "latest"
 node = "25.2.1"
 opencode = "latest"
 tree-sitter = "latest"
+superfile = "latest"
+yazi = "latest"
 
 [settings.upgrade]
 auto_prune = false

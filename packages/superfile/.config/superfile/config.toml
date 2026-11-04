@@ -131,6 +131,9 @@ enable_file_preview_border = false
 # Values recommended to be in 5–20.
 sidebar_width = 20
 
+#-- Sidebar Section Order
+sidebar_sections = ["home", "pinned", "disks"]
+
 #-- Border
 # Make sure to add strings that are exactly one character wide!
 # Use ' ' for borderless.

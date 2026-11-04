@@ -93,6 +93,13 @@ fi
 # Tools not in Omarchy defaults (cross-platform)
 # ================================================================
 
+# Let the deployed bat config select its custom theme instead of Omarchy's ANSI default.
+if [[ -n "${OMARCHY_PATH:-}" && "${BAT_THEME:-}" == ansi &&
+      -r "$XDG_CONFIG_HOME/bat/config" &&
+      -r "$XDG_CONFIG_HOME/bat/themes/GitHub Dark.tmTheme" ]]; then
+  unset BAT_THEME
+fi
+
 # direnv (see https://github.com/direnv/direnv)
 command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 

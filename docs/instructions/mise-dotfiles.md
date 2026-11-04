@@ -19,6 +19,18 @@ Use for deployment wiring, not package ownership or general mise tutorials.
   or `-E omarchy`.
 - Git, SSH, Ghostty, and Zellij have template overrides; their deployed files are
   rendered copies, not source symlinks. Other group files use `symlink-each`.
+- Git's `~/.gitconfig` template selects the host clipboard command and includes
+  optional `~/.gitconfig.local` last, so local scalar settings override shared ones.
+  For machine-local edits, use `git config --file ~/.gitconfig.local ...`; this
+  creates the local file if needed. Keep it outside mise deployment. Its package
+  counterpart `packages/gitconfig/.gitconfig.local` is gitignored and excluded by
+  the group's Git manifest, not automatically linked or rendered.
+  On Omarchy, preserve existing `~/.config/git/config` and its credential helpers;
+  Git reads it before `~/.gitconfig`. Do not copy credentials or machine-specific
+  helper paths into the template. `git config --global` writes the rendered
+  `~/.gitconfig` once it exists, and reapplying mise can replace those edits.
+  Inspect combined values with `git config --show-origin ...` rather than
+  restricting the query to `--global`.
 - Omarchy overrides the `nvim` group to deploy into `~/.config/nvim-dotfiles`,
   leaving its stock `~/.config/nvim` untouched. Bash defaults `NVIM_APPNAME` to
   `nvim-dotfiles` when deployed; `nv-omarchy`/`nvim-omarchy` explicitly select `nvim`.
