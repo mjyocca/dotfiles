@@ -82,6 +82,7 @@ dotfile_groups = [
 "pacman:typora" = "latest"
 "pacman:udiskie" = "latest"
 "pacman:xournalpp" = "latest"
+"pacman:zed" = "latest"
 
 # Note: AUR packages are NOT installed by mise bootstrap
 # The Omarchy packages layer installs packages/aur/packages.txt via scripts/omarchy/aur.sh
