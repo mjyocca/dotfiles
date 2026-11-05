@@ -24,8 +24,13 @@ canonical `docs/instructions/package-management.md` policy.
   `mise -E macos bootstrap macos defaults apply --dry-run`. Preserve value types
   and undeclared runtime/security state. Removing a declaration does not reset
   the stored preference. App restarts require separate authorization.
-- `.config/macos/launchagents/` contains inactive repository-only plists, not
-  deployment sources. A retained plist is not authorization to install or load it.
+- LaunchAgents are native `[bootstrap.macos.launchd.agents]` declarations in
+  `config.macos.toml`. Inspect status and `apply --dry-run` with
+  `mise -E macos bootstrap macos launchd-agents` before authorized activation.
+  Check existing `com.local.remap_caps_lock` and `addssh` jobs before migration:
+  mise uses `dev.mise.*` labels and does not replace those legacy jobs.
+- `.config/mise/macos/` is reserved for future supporting files; `.gitkeep` is
+  only a repository placeholder, not a deployment source.
 - General scripts should discover the installed Homebrew prefix with `brew --prefix`.
 
 ## Containers and Virtualization

@@ -13,11 +13,12 @@ All source files below live in `<repo>/.config/mise/`.
 | `global/platform.toml` | No platform overrides; shared defaults for macOS and other platforms |
 | `global/platform.omarchy.toml` | Omarchy provider selections and exclusions |
 | `config.toml` | Platform-neutral dotfile definitions and deployment defaults |
-| `config.macos.toml` | Complete macOS package set, Brew policy, user preferences, and dotfile selections |
+| `config.macos.toml` | Complete macOS package set, Brew policy, preferences, LaunchAgents, and dotfile selections |
 | `config.omarchy.toml` | Complete Omarchy package set and deployment overrides |
 | `config.local.toml` | Gitignored checkout-local overrides |
 | `config.<environment>.local.toml` | Optional gitignored checkout overrides for one platform |
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
+| `macos/` | Reserved for future macOS supporting files; retained with `.gitkeep` |
 | `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
 
 The `global/` directory holds deployment sources, not another mise discovery
@@ -89,8 +90,11 @@ these tool sources separate from repository-only bootstrap declarations.
 macOS user preferences are native `[bootstrap.macos.defaults]` declarations in
 `config.macos.toml`. `make config` applies only those preferences; the macOS
 package layer skips defaults and LaunchAgents as well as tools. Direct full
-`mise bootstrap` includes declared preferences and agents. Existing plists in
-`.config/macos/launchagents/` are inactive references, not agent declarations.
+`mise bootstrap` includes declared preferences and agents. LaunchAgents are native
+`[bootstrap.macos.launchd.agents]` declarations, not tracked plists. Explicit
+`mise -E macos bootstrap macos launchd-agents apply` writes and loads them under
+`dev.mise.*` labels. Inspect status and dry-run first, including legacy jobs with
+different labels; removing a declaration does not unload an installed agent.
 
 | Context | Loaded scope |
 |---|---|
@@ -147,6 +151,7 @@ and inspect effective configuration rather than relying on a copied precedence l
 - [Configuration environments](https://mise.jdx.dev/configuration/environments.html)
 - [Dotfiles](https://mise.jdx.dev/dotfiles.html)
 - [macOS preferences](https://mise.jdx.dev/bootstrap/macos-defaults.html)
+- [macOS LaunchAgents](https://mise.jdx.dev/bootstrap/launchd.html)
 - [asdf version selection](https://asdf-vm.com/manage/configuration.html)
 
 For agent safety and verification, see [deployment instructions](../instructions/mise-dotfiles.md)

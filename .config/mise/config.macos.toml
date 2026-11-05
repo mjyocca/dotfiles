@@ -1,5 +1,5 @@
 # macOS-specific mise configuration
-# Complete macOS package set, preferences, and platform deployment selections.
+# Complete macOS package set, preferences, LaunchAgents, and deployment selections.
 # Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
 
 # macOS user overrides
@@ -71,6 +71,26 @@ ApplePressAndHoldEnabled = false
 "Workspace.terminalCursorStyleForced" = false
 "Workspace.terminalCursorBlinkIntervalMilliseconds" = 250
 "Workspace.terminalCursorBlinkUsesCustomInterval" = false
+
+# macOS LaunchAgents
+# -----------------------------------------------------------------------------
+# Explicit agent apply or full mise bootstrap loads these; make config does not.
+
+[bootstrap.macos.launchd.agents.caps-escape]
+program = "/usr/bin/hidutil"
+args = [
+  "property", "--set",
+  '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":30064771129,"HIDKeyboardModifierMappingDst":30064771113}]}',
+]
+run_at_load = true
+
+[bootstrap.macos.launchd.agents.ssh-keychain]
+program = "/usr/bin/ssh-add"
+args = ["--apple-load-keychain"]
+run_at_load = true
+keep_alive = false
+stdout_path = "~/Library/Logs/ssh-keychain.log"
+stderr_path = "~/Library/Logs/ssh-keychain.log"
 
 # macOS packages
 # -----------------------------------------------------------------------------
