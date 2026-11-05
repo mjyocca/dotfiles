@@ -39,6 +39,11 @@ export PAGER="less"
 # ================================================================
 if [[ -r /usr/share/omarchy/default/bash/env-bootstrap ]]; then
   source /usr/share/omarchy/default/bash/env-bootstrap
+  # Keep Omarchy's Neovim untouched; prefer our isolated config when deployed.
+  # Explicit NVIM_APPNAME selections (including variant aliases) take precedence.
+  if [[ -d "$XDG_CONFIG_HOME/nvim-dotfiles" ]]; then
+    export NVIM_APPNAME="${NVIM_APPNAME:-nvim-dotfiles}"
+  fi
   # Non-interactive shells stop here (after env setup)
   [[ $- != *i* ]] && return
   # Source Omarchy defaults (starship, mise, zoxide, fzf, completions, aliases)
@@ -87,6 +92,13 @@ fi
 # ================================================================
 # Tools not in Omarchy defaults (cross-platform)
 # ================================================================
+
+# Let the deployed bat config select its custom theme instead of Omarchy's ANSI default.
+if [[ -n "${OMARCHY_PATH:-}" && "${BAT_THEME:-}" == ansi &&
+      -r "$XDG_CONFIG_HOME/bat/config" &&
+      -r "$XDG_CONFIG_HOME/bat/themes/GitHub Dark.tmTheme" ]]; then
+  unset BAT_THEME
+fi
 
 # direnv (see https://github.com/direnv/direnv)
 command -v direnv &>/dev/null && eval "$(direnv hook bash)"

@@ -1,0 +1,119 @@
+# macOS-specific mise configuration
+# Complete macOS package set and platform deployment selections.
+# Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
+
+[bootstrap]
+dotfile_groups = [
+  "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
+  "gitconfig", "herdr", "hunk", "lazygit", "nvim", "nvim-next",
+  "opencode", "pnpm", "scripts", "ssh", "starship", "superfile", "tmux",
+  "tool-versions", "yazi", "zed", "zellij", "zsh",
+]
+
+[bootstrap.brew]
+# Prevents errors when reinstalling casks (fonts, apps) that already exist
+# Fixed in mise PR #13262 (Sep 2026) - now works correctly in all bootstrap paths
+adopt = true
+
+[bootstrap.packages]
+# mise itself is installed by prerequisites before bootstrap runs.
+# Keep OS filters: mise's built-in Brew manager can also run on Linux.
+
+# Core Infrastructure
+"brew:curl" = { version = "latest", os = "macos" }
+"brew:git" = { version = "latest", os = "macos" }
+"brew:stow" = { version = "latest", os = "macos" }
+"brew:unzip" = { version = "latest", os = "macos" }
+"brew:wget" = { version = "latest", os = "macos" }
+
+# Build Tools
+"brew:autoconf" = { version = "latest", os = "macos" }
+"brew:cmake" = { version = "latest", os = "macos" }
+"brew:gcc" = { version = "latest", os = "macos" }
+"brew:gmp" = { version = "latest", os = "macos" }
+"brew:libyaml" = { version = "latest", os = "macos" }
+"brew:make" = { version = "latest", os = "macos" }
+# Ruby 3.3's OpenSSL extension uses the OpenSSL 3 ABI; avoid the moving alias.
+"brew:openssl@3" = { version = "latest", os = "macos" }
+"brew:readline" = { version = "latest", os = "macos" }
+"brew:sqlite" = { version = "latest", os = "macos" }
+
+# Containers & Virtualization
+"brew:docker" = { version = "latest", os = "macos" }
+"brew:docker-compose" = { version = "latest", os = "macos" }
+"brew:docker-buildx" = { version = "latest", os = "macos" }
+
+# General Utilities
+"brew:bat" = { version = "latest", os = "macos" }
+"brew:btop" = { version = "latest", os = "macos" }
+"brew:eza" = { version = "latest", os = "macos" }
+"brew:fd" = { version = "latest", os = "macos" }
+"brew:fzf" = { version = "latest", os = "macos" }
+"brew:jq" = { version = "latest", os = "macos" }
+"brew:lazygit" = { version = "latest", os = "macos" }
+"brew:neovim" = { version = "latest", os = "macos" }
+"brew:pv" = { version = "latest", os = "macos" }
+"brew:ripgrep" = { version = "latest", os = "macos" }
+"brew:starship" = { version = "latest", os = "macos" }
+"brew:tmux" = { version = "latest", os = "macos" }
+"brew:tree" = { version = "latest", os = "macos" }
+"brew:tree-sitter-cli" = { version = "latest", os = "macos" }
+"brew:zoxide" = { version = "latest", os = "macos" }
+
+# Additional session-critical tools
+"brew:direnv" = { version = "latest", os = "macos" }
+"brew:git-delta" = { version = "latest", os = "macos" }
+"brew:zellij" = { version = "latest", os = "macos" }
+
+# System infrastructure and general utilities
+"brew:coreutils" = "latest"
+"brew:mas" = "latest"
+
+# macOS-specific CLI tools
+"brew:figlet" = "latest"
+"brew:cmatrix" = "latest"
+"brew:sl" = "latest"
+"brew:zsh-autosuggestions" = "latest"
+"brew:zero-sh/tap/apply-user-defaults" = "latest"
+
+# Platform-managed CLI/TUI tools
+"brew:ffmpeg" = "latest"
+"brew:herdr" = "latest"
+
+# System Services
+"brew:lima" = "latest"
+"brew:colima" = "latest"
+"brew:qemu" = "latest"
+"brew:tailscale" = "latest"
+
+# GUI Applications (Casks)
+"brew-cask:zen" = "latest"
+"brew-cask:slack" = "latest"
+"brew-cask:spotify" = "latest"
+"brew-cask:notion" = "latest"
+"brew-cask:1password" = "latest"
+"brew-cask:1password-cli" = "latest"
+"brew-cask:qmk-toolbox" = "latest"
+"brew-cask:monitorcontrol" = "latest"
+"brew-cask:rectangle" = "latest"
+"brew-cask:alt-tab" = "latest"
+"brew-cask:raycast" = "latest"
+"brew-cask:cleanshot" = "latest"
+"brew-cask:screen-studio" = "latest"
+"brew-cask:keycastr" = "latest"
+
+# Development Tools
+"brew-cask:ghostty" = "latest"
+"brew-cask:warp" = "latest"
+"brew-cask:visual-studio-code" = "latest"
+"brew-cask:tower" = "latest"
+"brew-cask:gitbutler" = "latest"
+"brew-cask:orbstack" = "latest"
+
+# Fonts (Nerd Fonts and Symbols)
+"brew-cask:font-fira-code-nerd-font" = "latest"
+"brew-cask:font-symbols-only-nerd-font" = "latest"
+
+# Note: Mac App Store packages (mas) are not yet supported by mise bootstrap
+# They should be installed separately or via a post-install hook
+# mas 'system-color-picker', id: 1545870783

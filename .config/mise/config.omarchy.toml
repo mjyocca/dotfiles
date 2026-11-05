@@ -1,0 +1,135 @@
+# Omarchy-specific mise configuration
+# Complete Omarchy package set and platform deployment selections.
+# Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
+
+[dotfiles."~/.config/mise/conf.d/20-dotfiles-platform.toml"]
+source = "global/platform.omarchy.toml"
+mode = "symlink"
+
+# Omarchy's prescribed user override; manage only this block, not the whole file.
+[dotfiles."~/.config/hypr/input.lua/caps-escape"]
+comment = "--"
+block = '''
+-- Caps Lock is Escape instead of Compose; retain the other keyboard option.
+hl.config({
+  input = {
+    kb_options = "caps:escape,shift:both_capslock_cancel",
+  },
+})
+'''
+
+# Keep Omarchy's ~/.config/nvim intact; Bash selects this isolated variant.
+# Group overrides replace the whole table, so retain Git manifest filtering.
+[dotfile_groups.nvim]
+root = "nvim/.config/nvim"
+target = "~/.config/nvim-dotfiles"
+manifest = "git"
+
+[bootstrap]
+dotfile_groups = [
+  "asdf", "bash", "bat", "btop", "ghostty", "gitconfig", "herdr", "hunk",
+  "lazygit", "nvim", "nvim-next", "opencode", "pnpm", "scripts",
+  "ssh", "starship", "superfile", "tmux", "tool-versions", "yazi", "zed",
+  "zellij",
+]
+
+[bootstrap.packages]
+# Omarchy-only packages (pacman)
+
+# IMPORTANT: Do NOT include mise/mise-bin here
+# The prerequisites layer ensures mise is available before bootstrap runs
+
+# Core Infrastructure
+"pacman:curl" = { version = "latest", os = "linux" }
+"pacman:git" = { version = "latest", os = "linux" }
+"pacman:stow" = { version = "latest", os = "linux" }
+"pacman:unzip" = { version = "latest", os = "linux" }
+"pacman:wget" = { version = "latest", os = "linux" }
+
+# Build Tools
+"pacman:autoconf" = { version = "latest", os = "linux" }
+"pacman:base-devel" = { version = "latest", os = "linux" }
+"pacman:cmake" = { version = "latest", os = "linux" }
+"pacman:gcc" = { version = "latest", os = "linux" }
+"pacman:gmp" = { version = "latest", os = "linux" }
+"pacman:libyaml" = { version = "latest", os = "linux" }
+"pacman:make" = { version = "latest", os = "linux" }
+"pacman:openssl" = { version = "latest", os = "linux" }
+"pacman:readline" = { version = "latest", os = "linux" }
+"pacman:sqlite" = { version = "latest", os = "linux" }
+
+# Containers & Virtualization
+"pacman:docker" = { version = "latest", os = "linux" }
+"pacman:docker-buildx" = { version = "latest", os = "linux" }
+"pacman:docker-compose" = { version = "latest", os = "linux" }
+
+# General Utilities
+"pacman:bat" = { version = "latest", os = "linux" }
+"pacman:btop" = { version = "latest", os = "linux" }
+"pacman:eza" = { version = "latest", os = "linux" }
+"pacman:fd" = { version = "latest", os = "linux" }
+"pacman:fzf" = { version = "latest", os = "linux" }
+"pacman:jq" = { version = "latest", os = "linux" }
+"pacman:lazygit" = { version = "latest", os = "linux" }
+"pacman:neovim" = { version = "latest", os = "linux" }
+"pacman:pv" = { version = "latest", os = "linux" }
+"pacman:ripgrep" = { version = "latest", os = "linux" }
+"pacman:starship" = { version = "latest", os = "linux" }
+"pacman:tmux" = { version = "latest", os = "linux" }
+"pacman:tree" = { version = "latest", os = "linux" }
+"pacman:tree-sitter-cli" = { version = "latest", os = "linux" }
+"pacman:zoxide" = { version = "latest", os = "linux" }
+
+# Additional session-critical tools
+"pacman:direnv" = { version = "latest", os = "linux" }
+"pacman:git-delta" = { version = "latest", os = "linux" }
+"pacman:zellij" = { version = "latest", os = "linux" }
+
+# Containers & Virtualization (Omarchy-specific)
+"pacman:qemu-base" = "latest"
+
+# General Utilities (Omarchy-specific)
+"pacman:ffmpeg" = "latest"
+"pacman:wl-clipboard" = "latest"
+"pacman:resvg" = "latest" # Optional SVG previews in Yazi
+
+# Platform-managed CLI/TUI tools (Omarchy-specific)
+"pacman:herdr" = "latest"
+"pacman:dua-cli" = "latest"
+"pacman:lazydocker" = "latest"
+
+# GUI Applications (from official repositories, NOT AUR)
+"pacman:1password" = "latest"
+"pacman:aether" = "latest"
+"pacman:alacritty" = "latest"
+"pacman:blender" = "latest"
+"pacman:brave-bin" = "latest"
+"pacman:chromium" = "latest"
+"pacman:evince" = "latest"
+"pacman:ghostty" = "latest"
+"pacman:gnome-disk-utility" = "latest"
+"pacman:imv" = "latest"
+"pacman:kdenlive" = "latest"
+"pacman:libreoffice-fresh" = "latest"
+"pacman:localsend" = "latest"
+"pacman:lutris" = "latest"
+"pacman:moonlight-qt" = "latest"
+"pacman:mpv" = "latest"
+"pacman:nautilus" = "latest"
+"pacman:nautilus-python" = "latest"
+"pacman:obs-studio" = "latest"
+"pacman:obsidian" = "latest"
+"pacman:pinta" = "latest"
+"pacman:signal-desktop" = "latest"
+"pacman:spotify" = "latest"
+"pacman:steam" = "latest"
+"pacman:sunshine" = "latest"
+"pacman:system-config-printer" = "latest"
+"pacman:typora" = "latest"
+"pacman:udiskie" = "latest"
+"pacman:xournalpp" = "latest"
+"pacman:zed" = "latest"
+
+# Note: AUR packages are NOT installed by mise bootstrap
+# The Omarchy packages layer installs packages/aur/packages.txt via scripts/omarchy/aur.sh
+# which prompts for PKGBUILD review before installation

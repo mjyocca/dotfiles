@@ -1,0 +1,195 @@
+# Base mise configuration for all platforms
+# Platform-neutral dotfile definitions and deployment defaults.
+# Platform configurations select packages and dotfile groups via MISE_ENV.
+
+# Deploy tool defaults globally; keep provisioning and machine overrides separate.
+[dotfiles."~/.config/mise/conf.d/10-dotfiles-tools.toml"]
+source = "global/tools.toml"
+mode = "symlink"
+
+[dotfiles."~/.config/mise/conf.d/20-dotfiles-platform.toml"]
+source = "global/platform.toml"
+mode = "symlink"
+
+[dotfiles."~/.config/mise/miserc.toml"]
+source = "miserc.toml"
+mode = "symlink"
+
+[settings.dotfiles]
+root = "../../packages"
+default_mode = "symlink-each"
+
+# Deploy only tracked files; keep repository-only packages/aur out of these groups.
+[dotfile_groups.asdf]
+root = "asdf"
+manifest = "git"
+
+[dotfile_groups.asdf.entries]
+"~/.asdfrc" = { mode = "symlink" }
+"~/.asdf-direnv.sh" = { mode = "symlink" }
+
+[dotfile_groups.bash]
+root = "bash"
+manifest = "git"
+
+# Explicit targets allow a scoped apply without selecting every home-rooted group.
+[dotfile_groups.bash.entries]
+"~/.bashrc" = { mode = "symlink" }
+"~/.bash_profile" = { mode = "symlink" }
+"~/.config/bash/nvim.bash" = { mode = "symlink" }
+
+[dotfile_groups.bat]
+root = "bat"
+manifest = "git"
+
+[dotfile_groups.bat.entries]
+"~/.config/bat/config" = { mode = "symlink" }
+"~/.config/bat/themes/GitHub Dark.tmTheme" = { mode = "symlink" }
+
+[dotfile_groups.btop]
+root = "btop"
+manifest = "git"
+
+[dotfile_groups.btop.entries]
+"~/.config/btop/btop.conf" = { mode = "symlink" }
+
+[dotfile_groups.colima]
+root = "colima"
+manifest = "git"
+
+[dotfile_groups.colima-scripts]
+root = "colima-scripts"
+manifest = "git"
+
+[dotfile_groups.ghostty]
+root = "ghostty"
+manifest = "git"
+
+[dotfile_groups.ghostty.entries]
+"~/.config/ghostty/config" = { mode = "template" }
+"~/.config/ghostty/shaders/cursor_warp.glsl" = { mode = "symlink" }
+
+[dotfile_groups.gitconfig]
+root = "gitconfig"
+manifest = "git"
+
+[dotfile_groups.gitconfig.entries]
+"~/.gitconfig" = { mode = "template" }
+"~/.config/git/.gitignore_global" = { mode = "symlink" }
+"~/.config/git/delta-github-dark.gitconfig" = { mode = "symlink" }
+
+[dotfile_groups.herdr]
+root = "herdr"
+manifest = "git"
+
+[dotfile_groups.herdr.entries]
+"~/.config/herdr/config.toml" = { mode = "symlink" }
+
+[dotfile_groups.hunk]
+root = "hunk"
+manifest = "git"
+
+[dotfile_groups.hunk.entries]
+"~/.config/hunk/config.toml" = { mode = "symlink" }
+
+[dotfile_groups.lazygit]
+root = "lazygit"
+manifest = "git"
+
+[dotfile_groups.lazygit.entries]
+"~/.config/lazygit/config.yml" = { mode = "symlink" }
+
+[dotfile_groups.nvim]
+root = "nvim"
+manifest = "git"
+
+[dotfile_groups.nvim-next]
+root = "nvim-next"
+manifest = "git"
+
+[dotfile_groups.nvim-next.entries]
+"~/.config/nvim-next" = { mode = "symlink-each" }
+
+[dotfile_groups.opencode]
+root = "opencode"
+manifest = "git"
+exclude = ["*.example"]
+
+# CLI preferences are separate from server settings, providers, and credentials.
+[dotfile_groups.opencode.entries]
+"~/.config/opencode/cli.json" = { mode = "template" }
+
+[dotfile_groups.pnpm]
+root = "pnpm"
+manifest = "git"
+
+[dotfile_groups.pnpm.entries]
+"~/.config/pnpm/config.yaml" = { mode = "symlink" }
+
+[dotfile_groups.scripts]
+root = "scripts"
+manifest = "git"
+
+[dotfile_groups.scripts.entries]
+"~/.local/bin/dotf" = { mode = "symlink" }
+"~/.local/bin/dotf.d/init" = { mode = "symlink" }
+
+[dotfile_groups.ssh]
+root = "ssh"
+manifest = "git"
+
+[dotfile_groups.ssh.entries]
+"~/.ssh/config" = { mode = "template", permissions = "0600" }
+
+[dotfile_groups.starship]
+root = "starship"
+manifest = "git"
+
+[dotfile_groups.starship.entries]
+"~/.config/starship.toml" = { mode = "symlink" }
+
+[dotfile_groups.superfile]
+root = "superfile"
+manifest = "git"
+
+[dotfile_groups.superfile.entries]
+"~/.config/superfile/config.toml" = { mode = "symlink" }
+"~/.config/superfile/hotkeys.toml" = { mode = "symlink" }
+
+[dotfile_groups.tmux]
+root = "tmux"
+manifest = "git"
+
+[dotfile_groups.tool-versions]
+root = "tool-versions"
+manifest = "git"
+
+[dotfile_groups.tool-versions.entries]
+"~/.tool-versions" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
+"~/.default-gems" = { mode = "symlink" }
+
+[dotfile_groups.yazi]
+root = "yazi"
+manifest = "git"
+
+[dotfile_groups.yazi.entries]
+"~/.config/yazi/yazi.toml" = { mode = "symlink" }
+
+[dotfile_groups.zed]
+root = "zed"
+manifest = "git"
+
+[dotfile_groups.zellij]
+root = "zellij"
+manifest = "git"
+
+[dotfile_groups.zellij.entries]
+"~/.config/zellij/config.kdl" = { mode = "template" }
+
+[dotfile_groups.zsh]
+root = "zsh"
+manifest = "git"
+
+[bootstrap]
+# Select a platform environment before deploying; no implicit all-platform apply.
+dotfile_groups = []

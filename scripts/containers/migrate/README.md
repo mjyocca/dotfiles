@@ -25,9 +25,14 @@ dotf colima-use <profile>
 
 1. Starts the colima VM if it is not already running
 2. Switches the active docker context (`docker context use colima[-<profile>]`)
-3. Relinks `/var/run/docker.sock` → `~/.colima/<profile>/docker.sock`
+3. Relinks `/var/run/docker.sock` to the selected profile's socket
 
 **Requires `sudo`** for the socket relink step.
+
+The switching helper uses `$XDG_CONFIG_HOME/colima/<profile>/docker.sock` when
+`XDG_CONFIG_HOME` is set, otherwise `~/.colima/<profile>/docker.sock`. Verify that
+this matches the actual Docker context endpoint before switching; the listing
+helper currently inspects only `~/.colima`.
 
 ```bash
 dotf colima-use default   # context: colima
@@ -58,9 +63,6 @@ deleted on exit.
 | `--all` | Migrates all volumes without prompting. Default when fzf is absent. |
 
 ```bash
-# Migrate all volumes from default → arm profile (auto-mode)
-dotf colima-migrate-volumes default arm
-
 # Interactively choose which volumes to move
 dotf colima-migrate-volumes default arm --select
 
@@ -102,86 +104,26 @@ The archive `<volume_name>.tar.gz` must already exist in the current directory.
 
 ---
 
-## Manual context switching (no scripts)
-
-```bash
-docker context ls                  # list contexts, active one has *
-docker context use colima          # switch to default colima profile
-docker context use colima-arm      # switch to arm colima profile
-docker context show                # print active context name
-```
-
-Re-link the socket manually after switching:
-
-```bash
-sudo ln -sf ~/.colima/<profile>/docker.sock /var/run/docker.sock
-
-# e.g.
-sudo ln -sf ~/.colima/default/docker.sock /var/run/docker.sock
-sudo ln -sf ~/.colima/arm/docker.sock     /var/run/docker.sock
-```
-
-Verify which socket is active:
-
-```bash
-ls -la /var/run/docker.sock
-```
-
----
-
-## Using external volumes in docker-compose
-
-When a volume was created outside of Compose (e.g. migrated manually), declare
-it as `external` so Compose won't attempt to create or delete it:
-
-```yaml
-services:
-  myapp:
-    image: myapp
-    volumes:
-      - my_volume:/app/data
-
-volumes:
-  my_volume:
-    external: true
-```
-
-If the on-disk name differs from the Compose name:
-
-```yaml
-volumes:
-  my_volume:
-    external: true
-    name: the_actual_volume_name_on_docker
-```
-
----
-
 ## Troubleshooting
 
-**`Cannot connect to the Docker daemon` after switching**
-
-The socket is likely still pointing to the previous engine. Run:
-
-```bash
-dotf colima-use <profile>
-```
-
-or relink manually:
+If Docker cannot connect after switching, inspect the active context and socket
+before changing links. Other Docker runtimes may manage `/var/run/docker.sock`.
 
 ```bash
-sudo ln -sf ~/.colima/<profile>/docker.sock /var/run/docker.sock
-```
-
-**Check socket target**
-
-```bash
+docker context show
+docker context inspect colima
 ls -la /var/run/docker.sock
 ```
 
-**Pass `--context` directly (bypass socket entirely)**
+Pass `--context` explicitly to avoid depending on the shared socket link:
 
 ```bash
 docker --context colima volume ls
 docker --context colima-arm ps
 ```
+
+## Upstream Guidance
+
+- [Colima](https://github.com/abiosoft/colima) — profile configuration and lifecycle
+- [Docker contexts](https://docs.docker.com/engine/manage-resources/contexts/) — endpoints and context selection
+- [Compose external volumes](https://docs.docker.com/reference/compose-file/volumes/#external) — reusing migrated volumes

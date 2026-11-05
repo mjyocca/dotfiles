@@ -5,235 +5,205 @@
 #  \ \ \_/\ \/\ \L\.\_\ \ \\`\ /\  __/\ \ \/  \ \ \ \_\ \_/\  __/ 
 #   \ \_\\ \_\ \__/.\_\\ \_\ \_\ \____\\ \_\   \ \_\/\____\ \____\
 #    \/_/ \/_/\/__/\/_/ \/_/\/_/\/____/ \/_/    \/_/\/____/\/____/
-                                                               
-                                                                
 
-# Determine current platform, package manager, and distro.
-# Purpose: Detect the operating system and run appropriate target(s)
-#
+# ======================
+# PLATFORM DETECTION
+# ======================
+.DEFAULT_GOAL := bootstrap
 OS := $(shell uname -s)
+DISTRO := $(shell bash ./scripts/shared/detect-os.sh 2>/dev/null || echo unknown)
 
-# Profile detection - can be overridden via PROFILE=xxx on command line
-PROFILE ?= $(shell bash ./scripts/detect-os.sh --print 2>/dev/null || echo unknown)
+# Profile can be overridden via PROFILE=xxx on command line
+PROFILE ?= $(DISTRO)
 export PROFILE
 
-ifeq ($(OS), Darwin)
-	PLATFORM := "OSX"
-	PKG_MANAGER := brew
-	INSTALL_CMD := $(PKG_MANAGER) install
-	UPDATE_CMD := $(PKG_MANAGER) update
-else ifeq ($(OS), Linux)
-	PLATFORM := "Linux"
-	# Extract ID from /etc/os-release, fallback to ID_LIKE for derivatives
-	_DISTRO_ID := $(shell awk -F= '/^ID=/{print $$2}' /etc/os-release 2>/dev/null | tr -d '"')
-	_DISTRO_LIKE := $(shell awk -F= '/^ID_LIKE=/{print $$2}' /etc/os-release 2>/dev/null | tr -d '"')
-	
-	# Map distro to package manager
-	# Omarchy: ID=omarchy, ID_LIKE=arch → pacman
-	# Arch: ID=arch → pacman
-	# Ubuntu/Debian → apt-get
-	# Fedora → dnf
-	# CentOS → yum
-	ifeq ($(_DISTRO_ID),ubuntu)
-		PKG_MANAGER := apt-get
-	else ifeq ($(_DISTRO_ID),debian)
-		PKG_MANAGER := apt-get
-	else ifeq ($(_DISTRO_ID),fedora)
-		PKG_MANAGER := dnf
-	else ifeq ($(_DISTRO_ID),centos)
-		PKG_MANAGER := yum
-	else ifeq ($(_DISTRO_ID),arch)
-		PKG_MANAGER := pacman
-	else ifeq ($(_DISTRO_ID),omarchy)
-		# Omarchy is arch-based
-		PKG_MANAGER := pacman
-	else ifneq ($(filter arch,$(_DISTRO_LIKE)),)
-		# Fallback: if ID_LIKE contains "arch", use pacman
-		PKG_MANAGER := pacman
-	else
-		$(error Unsupported Linux distribution: $(_DISTRO_ID) (ID_LIKE: $(_DISTRO_LIKE)))
-	endif
+# Select platform mise configuration even before shell dotfiles are deployed.
+MISE_ENV ?= $(PROFILE)
+export MISE_ENV
 
-	DISTRO := $(_DISTRO_ID)
-	INSTALL_CMD := sudo $(PKG_MANAGER) install -y
-	UPDATE_CMD := sudo $(PKG_MANAGER) update
-	ifeq ($(PKG_MANAGER),pacman)
-		INSTALL_CMD := sudo pacman -S --needed
-		UPDATE_CMD := sudo pacman -Syu
-	endif
+# Validate before any provisioning recipe, including recursive/parallel Make.
+# A new profile supplies its own config; distro detection alone is not support.
+.PHONY: check-profile
+check-profile:
+	@test -f ".config/mise/config.$(PROFILE).toml" || \
+	 { echo "No provisioning configuration for PROFILE=$(PROFILE)." >&2; exit 1; }
+	@test "$(MISE_ENV)" = "$(PROFILE)" || \
+	 { echo "MISE_ENV=$(MISE_ENV) conflicts with PROFILE=$(PROFILE); select the same single platform." >&2; exit 1; }
+
+bootstrap bootstrap_macos bootstrap_omarchy bootstrap_linux sync fresh-install \
+prerequisites packages link tools plugins config hooks: | check-profile
+
+# ======================
+# INHERITANCE HELPER
+# ======================
+# Run script with inheritance: check platform folder first, fall back to linux/
+# Usage: $(call run_script,platform,layer)
+define run_script
+  @if [ -f ./scripts/$(1)/$(2).sh ]; then \
+    bash ./scripts/$(1)/$(2).sh; \
+  elif [ -f ./scripts/linux/$(2).sh ]; then \
+    bash ./scripts/linux/$(2).sh; \
+  else \
+    echo "Error: Script $(2).sh not found for $(1)" >&2; exit 1; \
+  fi
+endef
+
+# ======================
+# ENTRY POINTS
+# ======================
+.PHONY: bootstrap sync pack link plug fresh-install
+
+# Platform-aware bootstrap dispatcher
+bootstrap:
+ifeq ($(PROFILE),macos)
+	@echo "Bootstrapping macOS..."
+	@$(MAKE) bootstrap_macos
+else ifeq ($(PROFILE),omarchy)
+	@echo "Bootstrapping Omarchy..."
+	@$(MAKE) bootstrap_omarchy
+else ifeq ($(OS),Linux)
+	@echo "Bootstrapping Linux ($(PROFILE))..."
+	@$(MAKE) bootstrap_linux
+else
+	@echo "Error: Unsupported platform: $(OS)" >&2
+	@exit 1
 endif
 
 # ======================
-## SHARED REUSABLE TARGETS
+# PLATFORM-SPECIFIC BOOTSTRAP FLOWS
 # ======================
-# NOTE: Group of targets to continually execute after bootstrap/setup.
 
-# Target: ghostty-shader
-# Purpose: Import a Ghostty GLSL shader from a remote git repository.
-#          Clones (or pulls) the repo into a local cache, presents an fzf
-#          multi-select picker of all .glsl files, copies selected shaders
-#          into packages/ghostty with an attribution header, and optionally
-#          appends custom-shader entries to the ghostty config.
-# Usage: make ghostty-shader REPO=<git-url>
-#   e.g. make ghostty-shader REPO=https://github.com/sahaj-b/ghostty-cursor-shaders
+# macOS bootstrap
+.PHONY: bootstrap_macos
+bootstrap_macos:
+	$(call run_script,macos,prerequisites)
+	$(call run_script,macos,packages)
+	@$(MAKE) tools PROFILE=macos
+	$(call run_script,macos,plugins)
+	$(call run_script,macos,config)
+	$(call run_script,macos,hooks)
+
+# Omarchy bootstrap (inherits from linux where applicable)
+.PHONY: bootstrap_omarchy
+bootstrap_omarchy:
+	$(call run_script,omarchy,prerequisites)
+	$(call run_script,omarchy,packages)  # Calls linux/packages.sh then omarchy/aur.sh
+	@$(MAKE) tools PROFILE=omarchy
+	$(call run_script,omarchy,plugins)
+	$(call run_script,omarchy,config)
+	$(call run_script,omarchy,hooks)
+
+# Linux bootstrap (generic, for future distros)
+.PHONY: bootstrap_linux
+bootstrap_linux:
+	$(call run_script,$(PROFILE),prerequisites)
+	$(call run_script,$(PROFILE),packages)
+	@$(MAKE) tools
+	$(call run_script,$(PROFILE),plugins)
+	$(call run_script,$(PROFILE),config)
+	$(call run_script,$(PROFILE),hooks)
+
+# ======================
+# INCREMENTAL UPDATE TARGETS
+# ======================
+.PHONY: pack link plug sync
+
+pack: packages
+	@echo "✓ System packages installed"
+
+# Optional flags/targets for scoped deployment, e.g. DOTFILES_ARGS='--dry-run ~/.bashrc'.
+link:
+	@bash ./scripts/shared/environment.sh mise dotfiles apply $(DOTFILES_ARGS)
+
+plug: plugins
+	@echo "✓ Plugins installed"
+
+sync:
+	@$(MAKE) packages
+	@$(MAKE) link
+	@$(MAKE) tools
+	@$(MAKE) plugins
+	@echo "✓ System synced"
+
+# ======================
+# COMPOSABLE LAYER TARGETS
+# ======================
+.PHONY: prerequisites packages tools plugins config hooks aur
+
+prerequisites:
+	$(call run_script,$(PROFILE),prerequisites)
+
+packages:
+	$(call run_script,$(PROFILE),packages)
+
+aur:
+	$(call run_script,omarchy,aur)
+
+tools:
+	@config_dir="$${MISE_CONFIG_DIR:-$${XDG_CONFIG_HOME:-$$HOME/.config}/mise}"; \
+	 for file in conf.d/10-dotfiles-tools.toml conf.d/20-dotfiles-platform.toml miserc.toml; do \
+	   if [ ! -e "$$config_dir/$$file" ]; then \
+	     echo "Missing $$config_dir/$$file; inspect and deploy with make link first." >&2; \
+	     exit 1; \
+	   fi; \
+	 done
+	@bash ./scripts/shared/environment.sh mise install $(TOOLS_ARGS)
+
+plugins:
+	$(call run_script,$(PROFILE),plugins)
+
+config:
+	$(call run_script,$(PROFILE),config)
+
+hooks:
+	$(call run_script,$(PROFILE),hooks)
+
+# ======================
+# FRESH INSTALL
+# ======================
+.PHONY: fresh-install
+
+fresh-install:
+ifeq ($(PROFILE),macos)
+	@bash ./scripts/macos/installer.sh
+else ifeq ($(PROFILE),omarchy)
+	@bash ./scripts/omarchy/installer.sh
+else
+	@bash ./scripts/linux/installer.sh
+endif
+
+# ======================
+# UTILITIES
+# ======================
+.PHONY: apply_settings ghostty-shader zellij-plugins install_mise
+
+# Backward compatibility: install_mise (now part of prerequisites)
+install_mise:
+	@bash ./scripts/install-mise.sh
+
+# Apply OS-specific settings
+apply_settings: config
+
+# Zellij plugins (kept for backward compatibility)
+zellij-plugins:
+	@bash ./scripts/shared/install-zellij-plugin.sh
+
+# Ghostty shader installer
 ghostty-shader:
 ifndef REPO
 	$(error REPO is required. Usage: make ghostty-shader REPO=<git-url>)
 endif
 	@bash ./scripts/ghostty-shader.sh "$(REPO)"
 
-# Target: zellij-plugins
-# Purpose: Download zellij wasm plugins from their release pages.
-#          Runs during bootstrap; can also be called manually.
-.PHONY: zellij-plugins
-zellij-plugins:
-	@mkdir -p $(HOME)/.config/zellij/plugins
-	@curl -fSL -o $(HOME)/.config/zellij/plugins/zellij-autolock.wasm \
-		https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm
-	@echo "✓ zellij-autolock v0.2.2 installed"
-
-# Target: dotfiles
-# Purpose: GNU Stow packages for current OS profile into $HOME.
-#          Profile detection happens automatically (macOS → macos, Omarchy → omarchy).
-#          Override with: make dotfiles PROFILE=omarchy
-#          Packages in .stow-ignore.local are subtracted from the profile.
-# Usage: Run `make dotfiles`.
-dotfiles:
-	@echo "Stowing Dotfile Packages..."
-	@echo "Profile: $(PROFILE)"
-	@bash ./scripts/stow.sh
-
-# Target: stow
-# Purpose: Stow one or more specific packages by name, with optional stow flags.
-# Usage: make stow PKG=<name>                    — single package
-#        make stow PKG="nvim zsh tmux"           — multiple packages
-#        make stow PKG=zsh FLAGS=--adopt         — adopt existing files first
-#        make stow PKG=nvim FLAGS=--simulate     — dry-run
-#        make stow PKG=zsh FLAGS="--adopt --no-folding"
-stow:
-	@bash ./scripts/stow.sh $(FLAGS) $(PKG)
-
-# Target: apply_settings
-# Purpose: Apply operating system/GUI application settings that can configured through CLI/declarative means.
-# Usage: Run `make apply_settings`.
-apply_settings:
-ifeq ($(PLATFORM), "OSX")
-	$(MAKE) apply_defaults_osx 
-else
-	## TODO: Implement OS-specific settings application for Linux profiles
-	## For Omarchy: most user settings are in ~/.config/ and managed via stow.
-	## Consider adding: gsettings, dconf, or profile-specific setting scripts.
-	@echo "Linux settings application not yet implemented for profile: $(PROFILE)"
-	@echo "Most settings are managed via stow in ~/.config/"
-	@echo "See: profiles/$(PROFILE) and AGENTS.md for Omarchy conventions."
-endif
-
 # ======================
-## BOOTSTRAP / SETUP TARGET ENTRYPOINT
+# LEGACY TARGETS (kept for compatibility)
 # ======================
-#
-# NOTE: Meant to run when provisioning a new machine. But should gracefully check if software is installed in each step either manually or through package managers.
-bootstrap:
-ifeq ($(PLATFORM), "OSX")
-	@echo "Bootstrapping..."
-	@echo "Detected $(PLATFORM)."
-	$(MAKE) bootstrap_osx
-else ifeq ($(PLATFORM), "Linux")
-	@echo "Bootstrapping..."
-	@echo "Detected $(PLATFORM)."
-	$(MAKE) bootstrap_linux
-endif
+.PHONY: bootstrap_osx bootstrap_linux_legacy mise_bootstrap mise_install
 
-# ===========================
-# ===========================
-## OS SPECIFC TARGETS BELOW
-# ===========================
-# ===========================
+bootstrap_osx: bootstrap_macos
 
-# ======================
-## MacOS/OSX Specific Targets
-# ======================
+bootstrap_linux_legacy: bootstrap_linux
 
-# Target: apply_defaults_osx
-# Purpose: Leverages apply-user-defaults binary to apply MacOS/Application settings declared at ./scripts/macos/defaults.yml & ./scripts/macos/defaults.apps.yml
-apply_defaults_osx:
-	@echo "Applying OSX default settings ..."
-	apply-user-defaults ./scripts/macos/defaults.yml
-	@echo "Applying OSX Application default settings ..."
-	apply-user-defaults ./scripts/macos/defaults.apps.yml
+mise_bootstrap: packages
 
-# Target: install_mise
-# Purpose: Install mise if not already present (idempotent)
-install_mise:
-ifeq ($(PROFILE),omarchy)
-	@command -v mise >/dev/null || { echo "mise is missing; run make install_linux_tools to install mise-bin." >&2; exit 1; }
-else
-	@bash ./scripts/install-mise.sh
-endif
-
-# Target: bootstrap_osx
-# Purpose: Executes series of scripts/binaries to automate the installation and provisioning of software
-bootstrap_osx: pre_install_osx install_osx_tools install_mise mise_install zellij-plugins
-
-pre_install_osx:
-	@echo "Initializing macOS-specific tools..."
-	@bash ./scripts/macos/core-utils.sh
-	@bash ./scripts/macos/config.sh
-
-install_osx_tools:
-	@echo "Installing macOS-specific tools..."
-	@brew bundle --file="~/Brewfile"
-	@bash ./scripts/plugins.sh
-
-brew_bundle:
-	@brew bundle --file="~/Brewfile"
-# ======================
-## LINUX SPECIFIC TARGETs
-# ======================
-# 
-# Omarchy installs curated lists; other Linux profiles retain their existing setup.
-
-# Recursive makes enforce provisioning order even with make -j.
-.PHONY: bootstrap_linux update_linux_packages install_linux_tools install_mise mise_install install_git_hooks
-bootstrap_linux:
-	$(MAKE) update_linux_packages
-	$(MAKE) install_linux_tools
-	$(MAKE) install_mise
-	$(MAKE) mise_install
-	$(MAKE) install_git_hooks
-	$(MAKE) zellij-plugins
-	@echo "Packages installed. Run make dotfiles to activate the repository configuration."
-
-update_linux_packages:
-	@echo "Updating Linux-specific packages ..."
-	@echo "updating pkg manager: $(PKG_MANAGER) for distro: $(DISTRO)"
-	$(UPDATE_CMD)
-
-install_linux_tools:
-	@echo "Installing Linux-specific tools..."
-	@echo "Profile: $(PROFILE) | DISTRO: $(DISTRO)"
-ifeq ($(PROFILE),omarchy)
-	@bash ./scripts/omarchy/install-packages.sh
-else
-	$(INSTALL_CMD) git
-	$(INSTALL_CMD) curl
-	$(INSTALL_CMD) vim
-	$(INSTALL_CMD) stow
-	$(INSTALL_CMD) gitleaks
-endif
-
-install_git_hooks:
-	@echo "Installing git hooks..."
-	@bash ./scripts/install-git-hooks.sh
-
-# ===========================
-# MISE TARGETS (Dev Tools)
-# ===========================
-
-mise_install:
-	@echo "Installing mise-managed dev tools..."
-	@bash ./scripts/install-mise-tools.sh
-
-mise_update:
-	@echo "Updating mise-managed dev tools..."
-	@mise update
+mise_install: tools

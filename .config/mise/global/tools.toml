@@ -1,0 +1,16 @@
+# Shared user-global development tools. Language runtimes remain with asdf.
+[tools]
+"github:asdf-vm/asdf" = "latest"
+gitleaks = "latest"
+lazydocker = "latest"
+hunk = "latest"
+"aqua:anomalyco/opencode" = "latest"
+gh = "latest"
+kubectl = "latest"
+yq = "latest"
+glow = "latest"
+lsd = "latest"
+dua = "latest"
+superfile = "latest"
+television = "latest"
+yazi = "latest"

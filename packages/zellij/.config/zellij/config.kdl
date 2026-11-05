@@ -1,6 +1,7 @@
 theme "ansi"
-default_shell "zsh"
-// pane_frames false
+{% if os() == "macos" %}default_shell "zsh"
+{% else %}default_shell "bash"
+{% endif %}// pane_frames false
 // Restore pre-0.45.0 rendering: full-border frames + stacked panes expanded in place
 pane_frame_style "full"
 stacked_pane_list false
@@ -79,7 +80,8 @@ keybinds {
     }
 
     shared_except "move" "locked" {
-        bind "Ctrl h" { SwitchToMode "Move"; }
+        // Keep Ctrl-h for leftward focus; Ctrl-m can alias Enter in terminals.
+        bind "Ctrl Shift m" { SwitchToMode "Move"; }
     }
 
     shared_except "tmux" "locked" {

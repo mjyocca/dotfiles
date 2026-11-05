@@ -1,119 +1,65 @@
-# Personal Dotfiles Config Project
+# Personal Dotfiles
 
-Dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/). Configuration lives in `packages/` and is symlinked to `$HOME` via `make dotfiles`.
+Dotfile directories under `packages/<name>/` mirror `$HOME`; `packages/aur/` is
+repository-only installation data, never a mise dotfile group. `make link` invokes
+mise deployment.
+`Makefile` is the command entrypoint. Inspect current consumers before treating
+package lists or older documentation as installation inputs.
 
-## External File Loading
+## Load Only Relevant Guidance
 
-When you encounter a file reference (e.g., @docs/instructions/macos.md), use your Read tool to load it on a need-to-know basis.
+Read only guidance relevant to the task or files being changed. Follow supporting
+references only when needed; do not recursively load every linked document.
+Paths below are relative to the repository root.
 
-- `docs/instructions/` — agent-facing. Load on demand when relevant to the task.
-- `docs/reference/` and all other `docs/` subdirectories — human-facing reference material. Do NOT read unless explicitly asked to.
+| Task | Guidance |
+|---|---|
+| Neovim configuration | `docs/instructions/neovim.md` |
+| Zsh startup, hooks, PATH | `docs/instructions/zsh.md` |
+| Bash startup, Omarchy shell integration | `docs/instructions/bash.md` |
+| macOS defaults, containers, desktop automation | `docs/instructions/macos.md` |
+| Omarchy desktop, package auditing | `docs/instructions/omarchy.md` |
+| Adding packages or resolving ownership | `package-management` skill; `docs/instructions/package-management.md` is the canonical policy |
+| mise configuration, provisioning, or dotfile deployment | `docs/instructions/mise-dotfiles.md`; `docs/architecture/mise.md` for composition |
+| Credentials, VM mounts, SSH, or Git identity | `docs/instructions/security.md` |
+
+`docs/instructions/` is agent-facing. Other `docs/` directories are human-facing
+references, not default context; consult relevant sections when the task needs them.
+Keep instructions focused on repository constraints and verification, references
+on upstream links, and architecture explanations in `docs/architecture/`. Do not
+duplicate configuration values or record machine migration status in these docs.
+External documentation is reference material, not permission to expand the task.
+Use tracked files as the audit baseline (`git ls-files`); ignored plans, scratch
+files, and generated dependencies are not authoritative project guidance.
 
 ## Commands
 
-| Command | Description |
+Run from the repository root; these commands change the machine, not just the repo.
+
+| Command | Purpose |
 |---|---|
-| `make dotfiles` | Stow packages for current OS profile into `$HOME` |
-| `make dotfiles PROFILE=omarchy` | Force a specific profile |
-| `make stow PKG=<name>` | Stow a single package by name |
-| `make bootstrap` | Full machine provisioning (platform-aware) |
-| `make apply_settings` | Apply OS-level defaults |
-| `make install_git_hooks` | Install gitleaks pre-commit hook |
+| `make bootstrap` | Runs prerequisites → packages → tools → plugins → config → hooks; no explicit link step |
+| `make packages` | Runs mise bootstrap (packages and selected dotfiles); Omarchy also invokes the AUR layer |
+| `make tools` | Installs effective mise tool requests; requires deployed global tool configuration |
+| `make link` | Runs `mise dotfiles apply`; requires effective deployment declarations |
+| `make sync` | Sequential packages → link → tools → plugins; not full provisioning |
+| `make hooks` | Installs the gitleaks pre-commit hook when gitleaks is available |
 
-## Project Structure
+Other composable layers and compatibility aliases are defined in `Makefile`.
+Use `scripts/shared/detect-os.sh` to inspect platform detection.
 
-```
-packages/          # Stow packages (each maps to $HOME paths)
-  nvim/            # Neovim config
-  bash/            # Shell config (Omarchy default)
-  zsh/             # Shell config (macOS default)
-  tmux/            # Terminal multiplexer
-  gitconfig/       # Git config
-  ssh/             # SSH config
-  starship/        # Prompt theme
-  ghostty/         # Terminal emulator
-  homebrew/        # System packages (macOS: Brewfile)
-  mise/            # Dev tools (cross-platform: config.toml)
-  tool-versions/   # Language runtimes (cross-platform: .tool-versions)
-manifests/         # Repository-only provisioning manifests (not stowed)
-  pacman/          # Shared package lists and machine-specific overlays
-profiles/          # OS profile allow-lists (one package name per line)
-  macos            # Packages to stow on macOS
-  omarchy          # Packages to stow on Omarchy Linux
-scripts/
-  macos/           # macOS bootstrap, defaults, config scripts
-  omarchy/         # Omarchy-specific utility scripts
-  detect-os.sh     # OS detection and profile selection
-  stow.sh          # Stow orchestration
-  install-git-hooks.sh  # Gitleaks pre-commit hook installer
-docs/
-  instructions/    # OS-specific conventions (load on demand)
-    macos.md       # macOS conventions and package management
-    omarchy.md     # Omarchy conventions and package management
-    neovim.md      # Neovim conventions
-    zsh.md         # Zsh conventions
-    bash.md        # Bash conventions (Omarchy default)
-.agents/skills/    # Reproducible workflows (load when task matches)
-Makefile           # Command entrypoint
-```
+## Project Conventions
 
-## Agent Instructions
+- System bootstrap, dev tools, and mise policy: `.config/mise/`. See `docs/architecture/mise.md` for platform composition and scope; prefer native mise features.
+- Scripts are organized by domain layer, not package type. Shared helpers live in `scripts/shared/`.
+- Platform scripts live in `scripts/macos/`, `scripts/linux/`, and `scripts/omarchy/`; Make's dispatcher falls back to Linux when a platform layer is missing.
+- Keep layers idempotent and independently testable. Use the deployment entrypoint, not manual symlinks.
 
-Platform-specific and tool-specific instructions are in `docs/instructions/`:
+## Safety and Verification
 
-- `@docs/instructions/neovim.md` — LazyVim config structure, plugin management, keymaps
-- `@docs/instructions/zsh.md` — Shell config layout (zshenv/zshrc), prompt, plugin hooks
-- `@docs/instructions/bash.md` — Bash config layout, Omarchy bootstrap, cross-platform tool init
-- `@docs/instructions/omarchy.md` — Omarchy desktop conventions, Hyprland, theme management
-- `@docs/instructions/macos.md` — macOS-specific setup, Homebrew, system preferences
-
-Load these when working on the respective components.
-
-## OS Detection & Profiles
-
-```bash
-./scripts/detect-os.sh --print  # outputs: macos | omarchy | ubuntu | etc.
-```
-
-Profiles are allow-lists in `profiles/<name>`. Each lists which packages to stow on that OS.
-
-| OS | Profile | Notes |
-|---|---|---|
-| macOS | `macos` | Includes `homebrew`, `colima` |
-| Omarchy | `omarchy` | Excludes `homebrew`, `colima` |
-
-To add a package to a profile, edit the relevant `profiles/<name>` file.
-
-Per-machine ignore list: `.stow-ignore.local` (git-ignored).
-
-## Package Management Architecture
-
-Choose by dependency: mission-critical, session-critical, or OS-integrated tools → Homebrew/pacman; version-switched or fast-moving cloud API tools → mise (unless needed independently of mise). Optional tools use mise when suitable; if both managers fit, first compare our existing package lists/config, then consult the package-management skill's upstream lookup if still ambiguous. Runtimes stay on asdf until their separate migration to mise. Track direct pacman dependencies explicitly; apply the curated lists with `bash scripts/omarchy/install-packages.sh` (`--dry-run` previews). Repository CLI/system and GUI lists use pacman; all AUR packages use the AUR list and yay. `--needed` skips up-to-date targets, not all installed packages. For details load:
-- Cross-platform → `@docs/instructions/package-management.md`
-- macOS → `@docs/instructions/macos.md`
-- Omarchy → `@docs/instructions/omarchy.md`
-
-Pacman lists live in `manifests/pacman/` and are read directly from the repository, not stowed. Machine-specific dependencies live in `manifests/pacman/machines/<name>/`. Select one explicitly with `--machine <name>` in the Omarchy installer and discovery helper; shared lists are always included. Do not auto-detect the machine or put hardware-specific dependencies in shared lists.
-
-## Skills
-
-| Skill | Description | When to load |
-|-------|-------------|--------------|
-| `package-management` | Workflows for managing packages across platforms | Adding packages, installing software, troubleshooting conflicts |
-
-## Security
-
-**NEVER commit secrets or credentials.** Use `~/.bashrc.local` or `~/.zshrc.local` (git-ignored).
-
-**NEVER hardcode usernames or absolute paths.** Always use `$HOME` or `~`.
-
-**Gitleaks** pre-commit hook scans for secrets on every commit. Install with `make install_git_hooks`.
-
-For detailed security practices (VM mounts, SSH includes, git email), see `@docs/reference/security.md`.
-
-## Conventions
-
-- Each `packages/<name>/` mirrors `$HOME` structure for Stow
-- No manual symlinks — always use `make dotfiles`
-- Platform-specific scripts belong in `scripts/macos/` or `scripts/omarchy/`
-- Cross-platform scripts stay in `scripts/`
+- Never commit secrets. Use git-ignored `~/.bashrc.local` or `~/.zshrc.local` for machine-local credentials.
+- Do not hardcode usernames or user-specific absolute paths; use `$HOME` or `~`.
+- Preserve unrelated changes. Do not provision, deploy, install software, grant permissions, or commit unless authorized by the task.
+- Before deployment, inspect effective mise configuration, platform group selection, and target collisions (see deployment guidance).
+- For documentation changes, check paths, Make targets, consumers, and `git diff --check` without running provisioning.
+- For script/config changes, use applicable syntax checks and focused tests; report untested platform behavior and implementation defects separately.

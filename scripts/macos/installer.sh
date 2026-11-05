@@ -5,7 +5,7 @@ set -o errexit
 REPO_URL=https://github.com/mjyocca/dotfiles.git
 REPO_PATH="$HOME/dotfiles"
 
-## NOTE: Sourced from ./scripts/utils.sh to make install/execution easier
+# Logging is inline so this installer can run before the repository is cloned.
 # Color codes
 RESET='\033[0m'      # No Color / Reset
 GREEN='\033[0;32m'   # Green for Success
@@ -29,7 +29,6 @@ error() {
 success() {
 	printf "${GREEN}[SUCCESS] %s${RESET}\n" "$1"
 }
-## NOTE: Sourced from ./scripts/utils.sh to make install/execution easier
 
 install_xcode() {
 	if xcode-select -p >/dev/null; then
@@ -37,23 +36,30 @@ install_xcode() {
 	else
 		info "Installing xCode Command Line Tools..."
 		xcode-select --install
-		sudo xcodebuild -license accept
+		error "Complete Command Line Tools installation, then rerun this installer."
+		exit 1
 	fi
 }
 
-install_homebrew() {
-	export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-	if command -v brew >/dev/null 2>&1; then
-		warn "Homebrew already installed"
+# Idempotent repository handling
+clone_or_update_repo() {
+	if [[ -d "$REPO_PATH" ]]; then
+		info "Repository already exists at $REPO_PATH"
+		cd "$REPO_PATH"
+		
+		# Check if it's a git repository
+		if git rev-parse --git-dir > /dev/null 2>&1; then
+			info "Updating existing repository..."
+			git pull --ff-only || { error "Repository update failed; bootstrap stopped."; exit 1; }
+		else
+			warn "$REPO_PATH exists but is not a git repository"
+			warn "Please remove it manually and re-run this script"
+			exit 1
+		fi
 	else
-		info "Installing homebrew..."
-		sudo --validate # reset `sudo` timeout to use Homebrew install in noninteractive mode
-		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    # Add Homebrew to PATH for Apple Silicon
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    echo "Homebrew installation completed."
+		info "Cloning repo $REPO_URL into $REPO_PATH"
+		git clone "$REPO_URL" "$REPO_PATH"
+		cd "$REPO_PATH"
 	fi
 }
 
@@ -63,17 +69,10 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	info "bootstrapping..."
 
 	install_xcode
-	install_homebrew
 
-	info "Installing Git..."
-	brew install git
-
-	info "Cloning repo $REPO_URL into $REPO_PATH"
-	git clone "$REPO_URL" "$REPO_PATH"
-
-	info "Change path to $REPO_PATH"
-	cd "$REPO_PATH" >/dev/null
+	# Command Line Tools supplies git for cloning; bootstrap installs mise before Homebrew.
+	clone_or_update_repo
 
 	info "Installing dependencies..."
-	make bootstrap_osx
+	make bootstrap PROFILE=macos
 fi

@@ -30,11 +30,18 @@ esac
 # ================================================================
 # Force XDG paths on macOS so tools default to ~/.config, ~/.local/share, etc.
 # rather than ~/Library/Application Support. Keeps config locations consistent
-# with Linux and makes stow packages portable across both platforms.
+# with Linux and makes dotfile packages portable across both platforms.
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
+
+# ================================================================
+# mise platform selection
+# ================================================================
+# Set platform for mise dotfiles configuration. This must be in .zshenv so it's
+# available in all shells (interactive, scripts, cron). Preserve explicit overrides.
+export MISE_ENV="${MISE_ENV:-macos}"
 
 # ================================================================
 # Standard environment

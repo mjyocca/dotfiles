@@ -1,4 +1,6 @@
-# Global .gitconfig
+# Global .gitconfig, rendered by mise for the host clipboard command.
+# Git also reads ~/.config/git/config first; preserve existing machine settings there.
+# New machine-local overrides belong in ~/.gitconfig.local (included last).
 [core]
   pager = hunk pager
 	excludesfile = ~/.config/git/.gitignore_global
@@ -11,8 +13,42 @@
 	email = 19916665+mjyocca@users.noreply.github.com
 
 [alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
 	fza = "!git ls-files -m -o --exclude-standard | fzf --print0 -m | xargs -0 -t -o git add"
-	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
+{% if os() == "macos" %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
+{% else %}	cpb = "!git rev-parse --abbrev-ref HEAD | tr -d '\n' | wl-copy"
+{% endif %}
+
+# Portable defaults retained from Omarchy.
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[diff]
+	algorithm = histogram
+	colorMoved = plain
+	mnemonicPrefix = true
+
+[commit]
+	verbose = true
+
+[column]
+	ui = auto
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -version:refname
+
+[rerere]
+	enabled = true
+	autoupdate = true
 
 [interactive]
   diffFilter = delta --color-only
@@ -29,9 +65,11 @@
 [include]
   path = ~/.config/git/delta-github-dark.gitconfig
 
-# Per parent directory settings
-; [includeIf "gitdir:~/Projects/Development/work/"]
-;   path = .gitconfig-work
-;
-; [includeIf "gitdir:~/Projects/Development/personal/"]
-;   path = .gitconfig-personal
+# Machine-local overrides (optional, never committed); keep this include last.
+# Git safely ignores this path when the file does not exist.
+[include]
+  path = ~/.gitconfig.local
+
+# For per-directory overrides, put a rule like this in ~/.gitconfig.local:
+# [includeIf "gitdir:~/Projects/work/"]
+#   path = ~/.gitconfig-work
