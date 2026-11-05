@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // This workspace's AGENTS.md is discovered automatically.
+  // References expose supporting projects without registering their skills.
+  "references": {
+    // "global-skills": {
+    //   "path": "~/skills",
+    //   "description": "Source and deployment configuration for personal skills. Inspect when maintaining that project; do not install or register skills unless requested.",
+    // },
+  },
+}

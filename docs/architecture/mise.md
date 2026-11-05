@@ -17,12 +17,30 @@ All source files below live in `<repo>/.config/mise/`.
 | `config.omarchy.toml` | Complete Omarchy package set and deployment overrides |
 | `config.local.toml` | Gitignored checkout-local overrides |
 | `config.<environment>.local.toml` | Optional gitignored checkout overrides for one platform |
+| `conf.d/workspace.toml.example` | Sanitized optional private-repository declaration |
+| `conf.d/workspace.toml` | Gitignored checkout provisioning, seeded only when missing |
+| `workspace/opencode.jsonc.example` | Sanitized workspace-local OpenCode scaffold |
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
 | `macos/` | Reserved for future macOS supporting files; retained with `.gitkeep` |
 | `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
 
 The `global/` directory holds deployment sources, not another mise discovery
 root. Native `conf.d` discovery composes the deployed files.
+
+Deployment also seeds the checkout's ignored `opencode.jsonc` from
+`workspace/opencode.jsonc.example`, and `conf.d/workspace.toml` from its adjacent example.
+Both are create-only copies: existing files, symlinks, and local edits are left
+alone. The OpenCode example relies on automatic `AGENTS.md` discovery and offers
+an optional local project reference, not a skill source.
+
+To opt into private checkout provisioning, first create the scaffolds with
+`make link`, then edit the ignored workspace fragment locally. With the intended
+platform selected, preview repository provisioning using
+`mise -E <profile> bootstrap repos apply --dry-run` before applying it. Repository
+cloning runs before dotfile creation, so a declaration added to the new fragment
+takes effect on a later provisioning run. It does not execute the cloned
+project's configuration or deploy its skills. Keep remote identities out of
+tracked examples and leave `config.local.toml` for existing local overrides.
 
 Omarchy deployment declarations stay in `config.omarchy.toml`, grouped by hooks
 and user overrides. Their contents live in `omarchy/hooks/`, `omarchy/themed/`,

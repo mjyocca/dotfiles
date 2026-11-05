@@ -1,0 +1,6 @@
+# Optional private checkout. Uncomment and replace the URL locally.
+# Never commit the populated workspace.toml file.
+# Cloning does not apply the checkout's own mise configuration.
+#
+# [bootstrap.repos]
+# "~/skills" = { url = "git@github.com:OWNER/PRIVATE-REPOSITORY.git" }

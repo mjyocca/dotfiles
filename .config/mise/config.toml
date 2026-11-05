@@ -2,6 +2,25 @@
 # Platform-neutral dotfile definitions and deployment defaults.
 # Platform configurations select packages and dotfile groups via MISE_ENV.
 
+# Seed checkout-local configuration without overwriting private edits.
+[dotfiles.workspace-config]
+source = "conf.d/workspace.toml.example"
+mode = "copy"
+create_if_missing = true
+permissions = "0600"
+variants = [
+  { default = true, target = "{{ config_root }}/.config/mise/conf.d/workspace.toml" },
+]
+
+[dotfiles.workspace-opencode]
+source = "workspace/opencode.jsonc.example"
+mode = "copy"
+create_if_missing = true
+permissions = "0600"
+variants = [
+  { default = true, target = "{{ config_root }}/opencode.jsonc" },
+]
+
 # Deploy tool defaults globally; keep provisioning and machine overrides separate.
 [dotfiles."~/.config/mise/conf.d/10-dotfiles-tools.toml"]
 source = "global/tools.toml"
