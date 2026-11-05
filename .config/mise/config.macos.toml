@@ -6,7 +6,7 @@
 dotfile_groups = [
   "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
   "gitconfig", "herdr", "hunk", "lazygit", "nvim", "nvim-next",
-  "opencode", "pnpm", "scripts", "ssh", "starship", "superfile", "tmux",
+  "opencode", "pnpm", "rex", "scripts", "ssh", "starship", "superfile", "tmux",
   "tool-versions", "yazi", "zed", "zellij", "zsh",
 ]
 

@@ -17,6 +17,7 @@ a site deployment, not a content change; an absent date is not evidence of stale
 ## Terminal and Development
 
 - [Ghostty docs](https://ghostty.org/docs) · [source](https://github.com/ghostty-org/ghostty)
+- [Rex docs](https://www.superlogical.com/rex/docs) · [repository configuration](rex.md)
 - [OpenCode V2 docs](https://opencode.ai/v2/docs/) — configuration and agent tooling
 - [lazygit](https://github.com/jesseduffield/lazygit) — Git UI
 - [lazydocker](https://github.com/jesseduffield/lazydocker) — container UI

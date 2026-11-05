@@ -17,6 +17,7 @@ Paths below are relative to the repository root.
 | Neovim configuration | `docs/instructions/neovim.md` |
 | Zsh startup, hooks, PATH | `docs/instructions/zsh.md` |
 | Bash startup, Omarchy shell integration | `docs/instructions/bash.md` |
+| Rex configuration or automation | `docs/instructions/rex.md`; load the installed `rex` skill for operations |
 | macOS defaults, containers, desktop automation | `docs/instructions/macos.md` |
 | Omarchy desktop, package auditing | `docs/instructions/omarchy.md` |
 | Adding packages or resolving ownership | `package-management` skill; `docs/instructions/package-management.md` is the canonical policy |

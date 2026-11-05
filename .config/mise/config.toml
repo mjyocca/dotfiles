@@ -126,6 +126,13 @@ manifest = "git"
 [dotfile_groups.pnpm.entries]
 "~/.config/pnpm/config.yaml" = { mode = "symlink" }
 
+[dotfile_groups.rex]
+root = "rex"
+manifest = "git"
+
+[dotfile_groups.rex.entries]
+"~/.config/rex/init.lua" = { mode = "symlink" }
+
 [dotfile_groups.scripts]
 root = "scripts"
 manifest = "git"
