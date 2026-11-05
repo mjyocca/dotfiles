@@ -15,13 +15,17 @@ canonical `docs/instructions/package-management.md` policy.
   mise (if absent) before Homebrew. Existing mise providers are preserved.
   Provisioning uses `scripts/shared/environment.sh`, not interactive startup
   files. The bootstrap scope is Apple Silicon macOS.
-- `scripts/macos/config.sh` uses `apply-user-defaults`, when available, with
-  `.config/macos/defaults.yml` and `.config/macos/defaults.apps.yml`, resolved
-  relative to the repository rather than the caller's working directory.
-  `make config` (also `make apply_settings`) applies them; it is not a read-only
-  validation command and may skip defaults if the utility or input files are absent.
-- `.config/macos/` is repository-only configuration, not a mise dotfile deployment
-  source. A retained plist is not authorization to install or load it.
+- User preferences live under `[bootstrap.macos.defaults]` in
+  `.config/mise/config.macos.toml`. Quote dotted domains and preference keys.
+  `make config` (also `make apply_settings`) applies only native mise defaults;
+  `make packages` skips preferences and LaunchAgents. Direct full `mise bootstrap`
+  includes both, so scope inspection and application explicitly.
+- Inspect with `mise -E macos bootstrap macos defaults status`; preview with
+  `mise -E macos bootstrap macos defaults apply --dry-run`. Preserve value types
+  and undeclared runtime/security state. Removing a declaration does not reset
+  the stored preference. App restarts require separate authorization.
+- `.config/macos/launchagents/` contains inactive repository-only plists, not
+  deployment sources. A retained plist is not authorization to install or load it.
 - General scripts should discover the installed Homebrew prefix with `brew --prefix`.
 
 ## Containers and Virtualization

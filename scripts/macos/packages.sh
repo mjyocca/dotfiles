@@ -16,6 +16,7 @@ if ! command_exists mise; then
 fi
 
 # Deploy global tool configuration before the separate tools/plugins steps.
-mise bootstrap --skip tools
+# Preferences belong to make config; LaunchAgents require a separate apply.
+mise bootstrap --skip tools,macos-defaults,macos-launchd-agents
 
 success "System packages installed"

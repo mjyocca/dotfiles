@@ -6,6 +6,10 @@ The macOS mise selection deploys `packages/rex/.config/rex/init.lua` to
 Bindings live in [init.lua](../../packages/rex/.config/rex/init.lua), not this
 reference. Rex defaults remain available; app-local shortcuts take precedence.
 
+Selected macOS UI preferences are tracked in
+[macOS mise configuration](../../.config/mise/config.macos.toml), applied by `make config`,
+not `make link` or `rex config reload`. Session and host state remain local.
+
 Repository workflow and verification: [Rex guidance](../instructions/rex.md).
 For version differences, prefer installed `rex --help`, `rex api describe METHOD`,
 and the connected client's action list over website examples. Check `REX_CONFIG`
@@ -14,6 +18,7 @@ and `XDG_CONFIG_HOME` when troubleshooting config discovery; reloads are explici
 ## Customize
 
 - [Configuration file](https://www.superlogical.com/rex/docs/customize/config.md) — discovery, modules, reloads
+- [Mac settings](https://www.superlogical.com/rex/docs/reference/mac-settings.md) — sidebar, appearance, terminal preferences
 - [Keyboard shortcuts](https://www.superlogical.com/rex/docs/customize/keyboard-shortcuts.md) — binding syntax and precedence
 - [Key sequences](https://www.superlogical.com/rex/docs/customize/key-sequences.md) — tmux-style prefixes
 - [Key modes](https://www.superlogical.com/rex/docs/customize/key-modes.md) — persistent/one-shot tables and exclusive modes

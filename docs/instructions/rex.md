@@ -6,6 +6,11 @@ Paths below are relative to the repository root.
 
 - Keep shared bindings in `packages/rex/.config/rex/init.lua`; retain Rex defaults
   and the contextual close action. Keep machine-specific hosts and credentials local.
+- macOS app preferences belong in `.config/mise/config.macos.toml` under
+  `[bootstrap.macos.defaults."com.superlogical.rex"]`, not a full plist symlink.
+  Track selected UI keys only; exclude session state, hosts, permissions, and
+  update metadata. Inspect installed keys and validate with
+  `mise -E macos bootstrap macos defaults apply --dry-run`.
 - Keep `init.lua` declarative: session operations belong in action callbacks;
   event listeners belong in separate `rex do` scripts. Running a draft action with
   `rex do` performs real operations, not validation.

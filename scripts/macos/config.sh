@@ -12,29 +12,11 @@ fi
 info "Applying macOS configuration..."
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-config_dir="$repo_root/.config/macos"
-
-# Apply macOS defaults via apply-user-defaults
-if command_exists apply-user-defaults; then
-    info "Applying system defaults..."
-
-    applied=false
-    for defaults_file in "$config_dir/defaults.yml" "$config_dir/defaults.apps.yml"; do
-        if [[ -f "$defaults_file" ]]; then
-            apply-user-defaults "$defaults_file"
-            applied=true
-        else
-            warn "Defaults file not found: $defaults_file"
-        fi
-    done
-
-    if [[ "$applied" == true ]]; then
-        success "macOS defaults applied"
-    else
-        warn "No macOS defaults files found, skipping defaults"
-    fi
-else
-    warn "apply-user-defaults not found, skipping macOS defaults"
+if ! command_exists mise; then
+    fatal "mise is not installed. Run prerequisites first."
 fi
+
+# Scope to preferences only; do not install packages or load LaunchAgents.
+mise -C "$repo_root" -E macos bootstrap macos defaults apply "$@"
 
 info "macOS configuration step complete"

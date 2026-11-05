@@ -13,7 +13,7 @@ All source files below live in `<repo>/.config/mise/`.
 | `global/platform.toml` | No platform overrides; shared defaults for macOS and other platforms |
 | `global/platform.omarchy.toml` | Omarchy provider selections and exclusions |
 | `config.toml` | Platform-neutral dotfile definitions and deployment defaults |
-| `config.macos.toml` | Complete macOS package set, Brew policy, and dotfile selections |
+| `config.macos.toml` | Complete macOS package set, Brew policy, user preferences, and dotfile selections |
 | `config.omarchy.toml` | Complete Omarchy package set and deployment overrides |
 | `config.local.toml` | Gitignored checkout-local overrides |
 | `config.<environment>.local.toml` | Optional gitignored checkout overrides for one platform |
@@ -86,6 +86,12 @@ these tool sources separate from repository-only bootstrap declarations.
 
 ## Installation and Bootstrap Lifecycle
 
+macOS user preferences are native `[bootstrap.macos.defaults]` declarations in
+`config.macos.toml`. `make config` applies only those preferences; the macOS
+package layer skips defaults and LaunchAgents as well as tools. Direct full
+`mise bootstrap` includes declared preferences and agents. Existing plists in
+`.config/macos/launchagents/` are inactive references, not agent declarations.
+
 | Context | Loaded scope |
 |---|---|
 | Repository management (`make link`, package bootstrap) | Global tools plus repository provisioning rules and the selected platform environment |
@@ -140,6 +146,7 @@ and inspect effective configuration rather than relying on a copied precedence l
 - [Configuration and discovery](https://mise.jdx.dev/configuration.html)
 - [Configuration environments](https://mise.jdx.dev/configuration/environments.html)
 - [Dotfiles](https://mise.jdx.dev/dotfiles.html)
+- [macOS preferences](https://mise.jdx.dev/bootstrap/macos-defaults.html)
 - [asdf version selection](https://asdf-vm.com/manage/configuration.html)
 
 For agent safety and verification, see [deployment instructions](../instructions/mise-dotfiles.md)

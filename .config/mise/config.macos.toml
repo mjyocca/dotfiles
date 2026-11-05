@@ -1,11 +1,17 @@
 # macOS-specific mise configuration
-# Complete macOS package set and platform deployment selections.
+# Complete macOS package set, preferences, and platform deployment selections.
 # Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
+
+# macOS user overrides
+# -----------------------------------------------------------------------------
 
 # Merge shared native key sequences without replacing Herdr's macOS shortcuts.
 [dotfiles."~/.config/herdr-app/keys.json/tmux-prefix"]
 source = "../../packages/herdr-app/.config/herdr-app/keys.json"
 merge = true
+
+# Dotfile deployment selections
+# -----------------------------------------------------------------------------
 
 [bootstrap]
 dotfile_groups = [
@@ -14,6 +20,60 @@ dotfile_groups = [
   "opencode", "pnpm", "rex", "scripts", "ssh", "starship", "superfile", "tmux",
   "tool-versions", "yazi", "zed", "zellij", "zsh",
 ]
+
+# macOS user preferences
+# -----------------------------------------------------------------------------
+# Applied by make config; leave runtime, host, and security state local.
+
+[bootstrap.macos.defaults."com.apple.dock"]
+autohide = true
+"show-process-indicators" = true
+
+[bootstrap.macos.defaults.NSGlobalDomain]
+_HIHideMenuBar = true
+
+[bootstrap.macos.defaults."com.apple.finder"]
+CreateDesktop = false
+AppleShowAllFiles = true
+
+[bootstrap.macos.defaults."com.microsoft.VSCode"]
+ApplePressAndHoldEnabled = false
+
+# Rex: selected UI preferences, not the full app preferences plist.
+[bootstrap.macos.defaults."com.superlogical.rex"]
+# Sidebar and tabs
+"Workspace.tabStyle" = "vertical"
+"Workspace.sidebarPosition" = "left"
+"Workspace.sidebarCollapsed" = false
+"Workspace.sidebarWidth" = 279.0
+"Workspace.sidebarShowsActivity" = false
+"Workspace.tabIconTintMode" = "off"
+
+# Appearance and built-in themes
+"Workspace.interfaceStyle" = "blendTheme"
+"Workspace.usesPaneGlass" = true
+"Workspace.appIcon" = "dark"
+"Workspace.lightThemeID" = "merino-light"
+"Workspace.darkThemeID" = "merino-dark"
+"Workspace.darkUsesExtendedThemePalette" = true
+
+# Panes and focus indicators
+"Workspace.paneDensity" = "comfortable"
+"Workspace.showsActivePaneBorder" = true
+"Workspace.activePaneBorderColor" = "red"
+"Workspace.activePaneBorderOpacity" = 0.5197035845588235
+"Workspace.inactivePaneFadeMode" = "both"
+"Workspace.usesStandardInactiveWindowPaneStyles" = true
+
+# Terminal typography and cursor
+"Workspace.terminalFontPointSize" = 14.0
+"Workspace.terminalCursorStyle" = "block"
+"Workspace.terminalCursorStyleForced" = false
+"Workspace.terminalCursorBlinkIntervalMilliseconds" = 250
+"Workspace.terminalCursorBlinkUsesCustomInterval" = false
+
+# macOS packages
+# -----------------------------------------------------------------------------
 
 [bootstrap.brew]
 # Prevents errors when reinstalling casks (fonts, apps) that already exist
@@ -79,7 +139,6 @@ adopt = true
 "brew:cmatrix" = "latest"
 "brew:sl" = "latest"
 "brew:zsh-autosuggestions" = "latest"
-"brew:zero-sh/tap/apply-user-defaults" = "latest"
 
 # Platform-managed CLI/TUI tools
 "brew:ffmpeg" = "latest"
