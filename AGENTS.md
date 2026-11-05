@@ -23,6 +23,8 @@ Paths below are relative to the repository root.
 | Adding packages or resolving ownership | `package-management` skill; `docs/instructions/package-management.md` is the canonical policy |
 | mise configuration, provisioning, or dotfile deployment | `docs/instructions/mise-dotfiles.md`; `docs/architecture/mise.md` for composition |
 | Credentials, VM mounts, SSH, or Git identity | `docs/instructions/security.md` |
+| Editing or auditing AGENTS.md, docs, or skills | `maintain-agent-docs` skill; `docs/instructions/documentation.md` is the canonical policy |
+| Refreshing upstream references by topic or date | `sync-doc-references` skill |
 
 `docs/instructions/` is agent-facing. Other `docs/` directories are human-facing
 references, not default context; consult relevant sections when the task needs them.

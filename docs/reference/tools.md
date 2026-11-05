@@ -10,8 +10,7 @@ a site deployment, not a content change; an absent date is not evidence of stale
 
 ## Agent Guidance
 
-- OpenCode V2 [instructions](https://opencode.ai/v2/docs/instructions/) — scope and loading
-- OpenCode V2 [skills](https://opencode.ai/v2/docs/skills/) — discovery and on-demand workflows
+- [Agent guidance](agent-guidance.md) — official OpenCode V2, OpenAI, and Anthropic sources with review dates
 - [agent-desktop](https://github.com/vercel-labs/agent-desktop) — platform-specific automation guidance
 
 ## Terminal and Development
