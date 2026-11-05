@@ -4,6 +4,12 @@ rex.bind("ctrl+s>j", "pane.focus", { direction = "down" })
 rex.bind("ctrl+s>k", "pane.focus", { direction = "up" })
 rex.bind("ctrl+s>l", "pane.focus", { direction = "right" })
 
+-- Shift moves the pane instead of changing focus.
+rex.bind("ctrl+s>shift+h", "pane.move", { direction = "left" })
+rex.bind("ctrl+s>shift+j", "pane.move", { direction = "down" })
+rex.bind("ctrl+s>shift+k", "pane.move", { direction = "up" })
+rex.bind("ctrl+s>shift+l", "pane.move", { direction = "right" })
+
 -- % and " on a US keyboard layout; Rex matches unshifted key names.
 rex.bind("ctrl+s>shift+5", "pane.split", { direction = "right" })
 rex.bind("ctrl+s>shift+'", "pane.split", { direction = "down" })
