@@ -20,7 +20,8 @@ Paths below are relative to the repository root.
 | macOS defaults, containers, desktop automation | `docs/instructions/macos.md` |
 | Omarchy desktop, package auditing | `docs/instructions/omarchy.md` |
 | Adding packages or resolving ownership | `package-management` skill; `docs/instructions/package-management.md` is the canonical policy |
-| Dotfile deployment or mise group configuration | `docs/instructions/mise-dotfiles.md` |
+| mise configuration, provisioning, or dotfile deployment | `docs/instructions/mise-dotfiles.md`; `docs/architecture/mise.md` for composition |
+| Credentials, VM mounts, SSH, or Git identity | `docs/instructions/security.md` |
 
 `docs/instructions/` is agent-facing. Other `docs/` directories are human-facing
 references, not default context; consult relevant sections when the task needs them.
@@ -28,6 +29,8 @@ Keep instructions focused on repository constraints and verification, references
 on upstream links, and architecture explanations in `docs/architecture/`. Do not
 duplicate configuration values or record machine migration status in these docs.
 External documentation is reference material, not permission to expand the task.
+Use tracked files as the audit baseline (`git ls-files`); ignored plans, scratch
+files, and generated dependencies are not authoritative project guidance.
 
 ## Commands
 
@@ -48,7 +51,6 @@ Use `scripts/shared/detect-os.sh` to inspect platform detection.
 ## Project Conventions
 
 - System bootstrap, dev tools, and mise policy: `.config/mise/`. See `docs/architecture/mise.md` for platform composition and scope; prefer native mise features.
-- AUR lists live in `packages/aur/`; exclude this directory from all dotfile deployment selections.
 - Scripts are organized by domain layer, not package type. Shared helpers live in `scripts/shared/`.
 - Platform scripts live in `scripts/macos/`, `scripts/linux/`, and `scripts/omarchy/`; Make's dispatcher falls back to Linux when a platform layer is missing.
 - Keep layers idempotent and independently testable. Use the deployment entrypoint, not manual symlinks.
@@ -61,4 +63,3 @@ Use `scripts/shared/detect-os.sh` to inspect platform detection.
 - Before deployment, inspect effective mise configuration, platform group selection, and target collisions (see deployment guidance).
 - For documentation changes, check paths, Make targets, consumers, and `git diff --check` without running provisioning.
 - For script/config changes, use applicable syntax checks and focused tests; report untested platform behavior and implementation defects separately.
-- Consult `docs/reference/security.md` when changing VM mounts, SSH includes, or Git identity handling.

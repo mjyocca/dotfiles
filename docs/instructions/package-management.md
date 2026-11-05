@@ -10,7 +10,7 @@ the workflow; read only the applicable platform guide for platform-specific work
 | System packages via mise bootstrap | `.config/mise/config.<platform>.toml`, under `[bootstrap.packages]` |
 | AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
 | mise dev tools | `.config/mise/global/` shared and platform tool fragments |
-| Language runtimes via asdf (interim) | `packages/tool-versions/.tool-versions` |
+| Language runtimes via asdf | `packages/tool-versions/.tool-versions` |
 
 See [mise architecture](../architecture/mise.md) for composition and scope.
 Inspect effective configuration, including system defaults, before installing.
@@ -47,8 +47,8 @@ may legitimately require a system runtime alongside the selected asdf version.
   `os = "linux"` does not distinguish distributions.
 - Shared dev tools belong in `.config/mise/global/tools.toml`; put platform
   differences in that directory's platform fragments. Verify backend/platform
-  support and inspect effective provider exclusions. Do not put optional dev tools into platform
-  bootstrap just because they are CLI apps.
+  support and effective provider exclusions; CLI apps do not automatically belong
+  in system bootstrap.
 - Track runtime version changes directly in `packages/tool-versions/.tool-versions`.
   Do not assume a global manager command edits the tracked file on this machine.
 - AUR installation reads `packages/aur/packages.txt`, outside mise bootstrap and
@@ -59,9 +59,9 @@ may legitimately require a system runtime alongside the selected asdf version.
   Preserve bootstrap's skipped tools phase so deployment precedes installation.
 - Keep mise's `.tool-versions` discovery disabled while asdf owns those files.
   Explicit mise TOML requests remain separate; do not migrate them incidentally.
-- Prerequisites preserve an existing mise provider. On a fresh Mac they install
-  standalone mise before Homebrew; on Omarchy they use pacman when mise is absent.
-  Provisioning adds executable search paths without activating language runtimes.
+- Preserve existing mise providers and keep provisioning independent of interactive
+  shell startup and runtime activation. Inspect platform prerequisites before changing
+  installation order.
 
 ## Ownership Changes
 
@@ -73,5 +73,5 @@ or `asdf current` as applicable. Do not infer successful installation from a tex
 
 ## Upstream References
 
-- [mise](https://mise.jdx.dev/) — registry, backends, effective configuration
-- [asdf](https://asdf-vm.com/) — runtime installation and version selection
+- [mise configuration](https://mise.jdx.dev/configuration.html) — effective requests and discovery
+- [asdf configuration](https://asdf-vm.com/manage/configuration.html) — runtime version selection

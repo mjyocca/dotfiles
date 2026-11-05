@@ -1,6 +1,7 @@
-# mise Dotfile Deployment
+# mise Configuration and Deployment
 
-Use for deployment wiring, not package ownership or general mise tutorials.
+Use for provisioning boundaries and deployment safety. Package ownership lives
+in [package policy](package-management.md); do not duplicate upstream tutorials.
 
 ## Sources and Scope
 
@@ -23,6 +24,8 @@ composition and global versus checkout scope.
 - Preserve checkout-local exclusions. Confirm group replacement semantics before
   editing an override; deselection does not remove previously deployed files.
 - Deploy mise's discovery guard before asdf-owned `.tool-versions` files.
+- Keep provisioning rules repository-scoped and tool defaults global. Prefer
+  native mise features over custom configuration merging.
 
 ## Editing Deployment Configuration
 
@@ -33,15 +36,13 @@ Inspect source manifests, target collisions, existing edits, and backups before
 an authorized scoped apply. Prune/unapply require separate explicit scope and
 authorization; never infer that old files are safe to remove from missing declarations.
 
-## Command Boundaries
+## Verification
 
-- `make packages` runs bootstrap with tools skipped, but can deploy dotfiles.
-- `make tools` installs effective tool requests after global configuration is
-  deployed, including intentional machine-local requests but not asdf version files.
-- `make link` deploys without installing packages. Use `PROFILE` and
-  `DOTFILES_ARGS` to limit the operation, e.g.
-  `make link PROFILE=omarchy DOTFILES_ARGS='--dry-run ~/.bashrc'`.
-- `make sync` runs packages, link, tools, and plugins sequentially, not full provisioning.
+Use `PROFILE` and `DOTFILES_ARGS` to scope deployment, for example
+`make link PROFILE=omarchy DOTFILES_ARGS='--dry-run ~/.bashrc'`. Direct mise
+inspection also needs the intended environment, e.g. `mise -E omarchy config ls`.
+Inspect the Make recipes before invoking a target: `make packages` can deploy
+dotfiles, and `make tools` installs effective requests, not only tracked defaults.
 
 For documentation-only checks, inspect declarations and Make recipes without
 running provisioning or deployment. For deployment work, inspect status and a

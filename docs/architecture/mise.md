@@ -20,8 +20,7 @@ All source files below live in `<repo>/.config/mise/`.
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
 
 The `global/` directory holds deployment sources, not another mise discovery
-root. Native `conf.d` discovery composes the deployed files; there is no generated
-configuration or tools-only entrypoint selection in Make.
+root. Native `conf.d` discovery composes the deployed files.
 
 ## Shared and Platform Composition
 
@@ -81,7 +80,7 @@ tool installation so the global fragments and discovery policy deploy first.
 Neither workflow implicitly transfers asdf runtimes to mise. Installation is not
 an explicit upgrade or removal operation.
 
-## Global Deployment and Precedence
+## Global Deployment and Overrides
 
 The declared deployment links only tool fragments and discovery policy globally:
 
@@ -99,26 +98,10 @@ Bootstrap and deployment rules are not loaded globally. A declaration does not
 prove a link is deployed: inspect the target machine rather than recording
 deployment status here.
 
-Relevant normal precedence, low to high (not every supported mise filename):
-
-```text
-system configuration
-  → ~/.config/mise/conf.d/*.toml (alphabetical order)
-  → ~/.config/mise/config.toml
-  → ~/.config/mise/config.local.toml
-  → <repo>/.config/mise/config.toml
-  → <repo>/.config/mise/config.<environment>.toml
-  → <repo>/.config/mise/config.local.toml
-  → <repo>/.config/mise/config.<environment>.local.toml (if present)
-```
-
-This repository's layers apply when discovered from its directory tree. Other
-projects supply their own layers; nested projects can add further configuration.
-Matching tool keys override earlier requests; distinct provider keys may coexist.
-Existing global `config.toml` requests override the tracked fragments. Inspect
-and deliberately reconcile duplicates during adoption; deployment never rewrites
-that file or the machine-local override. Do not treat `mise use -g` as an edit to
-the tracked declarations.
+The existing global `config.toml` overrides the tracked fragments; deployment
+never rewrites it or machine-local overrides. Do not treat `mise use -g` as an edit
+to tracked declarations. Consult upstream [configuration discovery and precedence](https://mise.jdx.dev/configuration.html#configuration-hierarchy)
+and inspect effective configuration rather than relying on a copied precedence list.
 
 ## Machine Scope and Runtime Ownership
 

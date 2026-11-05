@@ -4,15 +4,15 @@ Human-facing discovery links, not a package inventory or installation policy.
 Consult upstream for features, compatibility, licensing, and commands; tracked
 declarations determine what this repository actually installs.
 
-## Local Preferences
+When freshness matters, check upstream content's **Last updated** date or source
+history and compare it with the installed version. HTTP `Last-Modified` may reflect
+a site deployment, not a content change; an absent date is not evidence of staleness.
 
-- **Ghostty** is the preferred terminal; configuration lives in `packages/ghostty/`.
-- **superfile** is in use, with configuration in `packages/superfile/`. Deployment
-  uses the repository's mise entrypoint, not Stow; effective deployment wiring
-  must be checked before assuming files are linked.
-- **Colima + Lima** is the preferred Docker/VM stack on macOS. The template in
-  `packages/colima/` defines new-profile defaults; existing profiles may differ.
-  See [dotf](dotf.md) for the helper command layout.
+## Agent Guidance
+
+- OpenCode V2 [instructions](https://opencode.ai/v2/docs/instructions/) — scope and loading
+- OpenCode V2 [skills](https://opencode.ai/v2/docs/skills/) — discovery and on-demand workflows
+- [agent-desktop](https://github.com/vercel-labs/agent-desktop) — platform-specific automation guidance
 
 ## Terminal and Development
 
@@ -21,7 +21,7 @@ declarations determine what this repository actually installs.
 - [lazygit](https://github.com/jesseduffield/lazygit) — Git UI
 - [lazydocker](https://github.com/jesseduffield/lazydocker) — container UI
 - [gh-dash](https://github.com/dlvhdr/gh-dash) — GitHub dashboard
-- [yazi docs](https://yazi-rs.github.io/docs/installation) · [source](https://github.com/sxyazi/yazi)
+- [yazi docs](https://yazi-rs.github.io/docs/installation/) · [source](https://github.com/sxyazi/yazi)
 - [superfile docs](https://superfile.dev/) · [source](https://github.com/yorukot/superfile)
 - [television docs](https://alexpasmantier.github.io/television/) · [source](https://github.com/alexpasmantier/television)
 - [btop](https://github.com/aristocratos/btop) — resource monitor
@@ -31,7 +31,7 @@ declarations determine what this repository actually installs.
 ## Configuration Managers
 
 - [mise configuration](https://mise.jdx.dev/configuration.html) · [dotfiles](https://mise.jdx.dev/dotfiles.html)
-- [asdf docs](https://asdf-vm.com/guide/introduction.html)
+- [asdf configuration](https://asdf-vm.com/manage/configuration.html)
 - [Omarchy manual](https://omarchy.org/manual/)
 
 For this repository's file layout and scope, see [mise architecture](../architecture/mise.md).
@@ -45,6 +45,8 @@ For this repository's file layout and scope, see [mise architecture](../architec
 - [containerd](https://containerd.io/docs/)
 - [QEMU docs](https://www.qemu.org/docs/master/) · [wiki](https://wiki.qemu.org/)
 - [UTM docs](https://docs.getutm.app/) · [source](https://github.com/utmapp/UTM)
+
+See [dotf](dotf.md) for repository helper commands.
 
 ## Infrastructure
 
