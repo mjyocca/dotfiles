@@ -6,17 +6,29 @@
 source = "global/platform.omarchy.toml"
 mode = "symlink"
 
+# Omarchy hooks
+# -----------------------------------------------------------------------------
+
+# Herdr desktop: render the palette, then publish on theme changes.
+[dotfiles."~/.config/omarchy/hooks/theme-set.d/herdr-app"]
+source = "omarchy/hooks/herdr-app-theme.sh"
+mode = "symlink"
+
+[dotfiles."~/.config/omarchy/themed/herdr-app.json.tpl"]
+source = "omarchy/themed/herdr-app.json.tpl"
+mode = "symlink"
+
+# Omarchy user overrides
+# -----------------------------------------------------------------------------
+
 # Omarchy's prescribed user override; manage only this block, not the whole file.
 [dotfiles."~/.config/hypr/input.lua/caps-escape"]
+source = "omarchy/user-overrides/caps-escape.lua"
+template = "tera"
 comment = "--"
-block = '''
--- Caps Lock is Escape instead of Compose; retain the other keyboard option.
-hl.config({
-  input = {
-    kb_options = "caps:escape,shift:both_capslock_cancel",
-  },
-})
-'''
+
+# Dotfile deployment overrides
+# -----------------------------------------------------------------------------
 
 # Keep Omarchy's ~/.config/nvim intact; Bash selects this isolated variant.
 # Group overrides replace the whole table, so retain Git manifest filtering.
@@ -108,6 +120,7 @@ dotfile_groups = [
 "pacman:evince" = "latest"
 "pacman:ghostty" = "latest"
 "pacman:gnome-disk-utility" = "latest"
+"pacman:herdr-app" = "latest" # Omarchy repository; pulls in herdr-core
 "pacman:imv" = "latest"
 "pacman:kdenlive" = "latest"
 "pacman:libreoffice-fresh" = "latest"

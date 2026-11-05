@@ -104,6 +104,7 @@ adopt = true
 
 # Development Tools
 "brew-cask:ghostty" = "latest"
+"brew-cask:herdr-app" = "latest"
 "brew-cask:warp" = "latest"
 "brew-cask:visual-studio-code" = "latest"
 "brew-cask:tower" = "latest"

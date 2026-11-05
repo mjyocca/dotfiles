@@ -18,9 +18,28 @@ All source files below live in `<repo>/.config/mise/`.
 | `config.local.toml` | Gitignored checkout-local overrides |
 | `config.<environment>.local.toml` | Optional gitignored checkout overrides for one platform |
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
+| `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
 
 The `global/` directory holds deployment sources, not another mise discovery
 root. Native `conf.d` discovery composes the deployed files.
+
+Omarchy deployment declarations stay in `config.omarchy.toml`, grouped by hooks
+and user overrides. Their contents live in `omarchy/hooks/`, `omarchy/themed/`,
+and `omarchy/user-overrides/`. User-override snippets are rendered into managed
+blocks, preserving the rest of the target file.
+
+### Herdr desktop theme integration
+
+The Omarchy platform deploys a user template under `~/.config/omarchy/themed/`
+and a `theme-set.d` publishing hook. Omarchy renders the template from the active
+palette during a theme switch; the hook validates and atomically publishes the
+rendered JSON as Herdr's `themes/omarchy.json`. Herdr derives interface colors
+from that palette and reloads it live. Generated palettes are not tracked.
+
+Select Omarchy once in Herdr's theme picker (or run
+`herdr-app do app.theme --name omarchy` with Herdr open). Theme switches never
+rewrite preferences or reselect the theme. This bridge can be retired when the
+installed Omarchy provides its native Herdr desktop integration.
 
 ## Shared and Platform Composition
 
