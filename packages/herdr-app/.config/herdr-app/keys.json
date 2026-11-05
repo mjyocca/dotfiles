@@ -1,0 +1,28 @@
+{
+  "terminal": {
+    "ctrl-s h": "pane.go:left",
+    "ctrl-s j": "pane.go:down",
+    "ctrl-s k": "pane.go:up",
+    "ctrl-s l": "pane.go:right",
+    "ctrl-s shift-h": "pane.swap:left",
+    "ctrl-s shift-j": "pane.swap:down",
+    "ctrl-s shift-k": "pane.swap:up",
+    "ctrl-s shift-l": "pane.swap:right",
+    "ctrl-s left": "pane.go:left",
+    "ctrl-s down": "pane.go:down",
+    "ctrl-s up": "pane.go:up",
+    "ctrl-s right": "pane.go:right",
+    "ctrl-s %": "pane.split:right",
+    "ctrl-s shift-%": "pane.split:right",
+    "ctrl-s \"": "pane.split:down",
+    "ctrl-s shift-\"": "pane.split:down",
+    "ctrl-s c": "tab.new",
+    "ctrl-s &": "pane.close",
+    "ctrl-s shift-&": "pane.close",
+    "ctrl-s x": "pane.close",
+    "ctrl-s n": "tab.next",
+    "ctrl-s p": "tab.prev",
+    "ctrl-s z": "pane.zoom",
+    "ctrl-s ctrl-s": "send:\u0013"
+  }
+}

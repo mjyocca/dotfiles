@@ -2,6 +2,11 @@
 # Complete macOS package set and platform deployment selections.
 # Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
 
+# Merge shared native key sequences without replacing Herdr's macOS shortcuts.
+[dotfiles."~/.config/herdr-app/keys.json/tmux-prefix"]
+source = "../../packages/herdr-app/.config/herdr-app/keys.json"
+merge = true
+
 [bootstrap]
 dotfile_groups = [
   "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",

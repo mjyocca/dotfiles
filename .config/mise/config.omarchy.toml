@@ -21,6 +21,11 @@ mode = "symlink"
 # Omarchy user overrides
 # -----------------------------------------------------------------------------
 
+# Merge shared native key sequences without replacing Herdr's Linux shortcuts.
+[dotfiles."~/.config/herdr-app/keys.json/tmux-prefix"]
+source = "../../packages/herdr-app/.config/herdr-app/keys.json"
+merge = true
+
 # Omarchy's prescribed user override; manage only this block, not the whole file.
 [dotfiles."~/.config/hypr/input.lua/caps-escape"]
 source = "omarchy/user-overrides/caps-escape.lua"
