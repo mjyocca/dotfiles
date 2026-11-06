@@ -11,32 +11,31 @@ source "$repo_root/scripts/shared/environment.sh"
 # GUI Git clients and fresh bootstrap shells may not have mise tools on PATH.
 if ! scanner="$(command -v gitleaks)"; then
   if ! scanner="$(mise -C "$repo_root" which gitleaks --tool gitleaks 2>/dev/null)"; then
-    echo "⚠️  gitleaks not found. Skipping secret scan."
+    echo "❌ gitleaks not found. Commit blocked: secret scan could not run." >&2
     echo "   Install tracked tools with: make tools"
-    exit 0
+    exit 1
   fi
 fi
 
 echo "🔍 Scanning staged changes for secrets..."
 
-# Run gitleaks on staged changes only
-# --staged: only scan staged files (not entire repo)
-# --redact: hide secret values in output
-# --verbose: show detailed results
-if "$scanner" protect --staged --redact --verbose; then
+# Use the repository's policy even when a shell has GITLEAKS_CONFIG set.
+# A dedicated findings exit code distinguishes leaks from scanner errors.
+if "$scanner" git --pre-commit --staged --redact --verbose \
+  --config "$repo_root/.gitleaks.toml" --exit-code 10; then
   echo "✅ No secrets detected in staged changes"
   exit 0
 else
-  echo ""
-  echo "❌ Secrets detected in staged changes!"
-  echo ""
-  echo "To fix:"
-  echo "  1. Remove the secrets from your code"
-  echo "  2. Use environment variables or a secrets manager"
-  echo "  3. Add false positives to .gitleaks.toml (see docs)"
-  echo ""
-  echo "To bypass (NOT recommended):"
-  echo "  git commit --no-verify"
-  echo ""
-  exit 1
+  scan_status=$?
 fi
+
+echo ""
+if [[ "$scan_status" -eq 10 ]]; then
+  echo "❌ Secrets detected in staged changes. Commit blocked."
+  echo "Remove credentials and use environment variables or a secrets manager."
+  echo "Rotate exposed credentials; review false positives before adding narrow exceptions."
+else
+  echo "❌ Secret scan failed (exit $scan_status). Commit blocked." >&2
+  echo "Fix the scanner or configuration error above and retry." >&2
+fi
+exit 1

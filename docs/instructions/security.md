@@ -30,7 +30,7 @@ credentials or configuration in mounted host files.
 
 - Run Gitleaks before an authorized push. Check `.gitleaks.toml`, the installed
   CLI's help, and [upstream guidance](https://github.com/gitleaks/gitleaks).
-- Hook installation does not prove scanning is enforced: the current hook skips
-  scanning if Gitleaks is unavailable. Verify the active hook and scan outcome.
+- Hook installation does not prove scanning is enforced. Verify the active hook
+  and scan outcome; missing scanners and scan errors must block the commit.
 - Preserve unfamiliar hooks and never write through an existing hook symlink.
 - Redact scan output before sharing it. Do not bypass a failed scan to commit.
