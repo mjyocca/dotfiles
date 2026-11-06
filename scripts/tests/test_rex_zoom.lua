@@ -359,6 +359,8 @@ assert(bindings["ctrl+s>shift+7"].action == "client.close")
 assert(bindings["ctrl+p>s"].action == "new_fullscreen_pane")
 assert(bindings["ctrl+p>ctrl+p"].action == "pane.send_key")
 assert(bindings["ctrl+p>ctrl+p"].args.key == "ctrl+p")
+assert(bindings["ctrl+s>r"].action == "client.config.reload")
+assert(bindings["cmd+shift+r"].action == "client.config.reload")
 
 local count = 0
 for name, test in pairs(tests) do

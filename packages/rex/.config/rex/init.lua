@@ -49,6 +49,8 @@ rex.bind("ctrl+s>p", "client.tab.previous")
 -- Sessions: Rex has Cmd+K. Reload Config is also available in Cmd+Shift+P's palette.
 rex.bind("ctrl+s>s", "session.switch")
 rex.bind("ctrl+s>r", "client.config.reload")
+-- Ghostty-style reload shortcut, alongside the prefix sequence above.
+rex.bind("cmd+shift+r", "client.config.reload")
 
 -- Forward intercepted prefixes to terminal applications (history, nested tmux).
 rex.bind("ctrl+s>ctrl+s", "pane.send_key", { key = "ctrl+s" })
