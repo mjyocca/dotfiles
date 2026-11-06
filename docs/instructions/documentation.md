@@ -1,7 +1,9 @@
 # Documentation and Skill Policy
 
-Use for shared guidance changes. `maintain-agent-docs` owns the editing workflow;
-`sync-doc-references` owns date-based upstream review.
+Use for shared guidance changes. This file owns repository-specific placement
+and verification policy; applicable authoring skills supplement it, not replace
+it. `sync-doc-references` owns date-based upstream review here. Do not install
+missing skills as part of a documentation edit.
 
 ## Content Ownership
 
@@ -9,13 +11,19 @@ Use for shared guidance changes. `maintain-agent-docs` owns the editing workflow
 |---|---|
 | Essential repository-wide constraints and task routing | `AGENTS.md` |
 | Topic-specific repository rules and safe verification | `docs/instructions/` |
-| Reusable task procedures | `.agents/skills/<id>/SKILL.md` |
+| Workspace-specific reusable task procedures | `.agents/skills/<id>/SKILL.md` |
 | Categorized official links, relevance, and source-review dates | `docs/reference/` |
 | Repository-specific structure and rationale | `docs/architecture/` |
 | Machine state, migration progress, and one-off troubleshooting | Session output, not shared guidance |
 
 ## Admission and Editing
 
+- Before editing, inventory relevant tracked guidance with `git ls-files` and
+  inspect the working diff. Include task-authorized new files explicitly; ignored
+  plans, scratch files, and generated dependencies are not policy inputs.
+- Keep portable authoring workflows in the shared skills project, not a local
+  same-ID copy. Keep this workspace's rules here; do not require a global skill
+  to be installed for the policy to remain usable.
 - Add only durable guidance that changes a future agent's decision. Name the
   repository constraint, affected scope, or verification requirement; omit generic
   advice the agent already knows. Amend existing canonical guidance before adding.

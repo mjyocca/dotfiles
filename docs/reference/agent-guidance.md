@@ -23,10 +23,13 @@ vendor manuals. Consult only the topic and vendor relevant to the current change
 
 These dates cover the relevant source content and its application to
 [documentation policy](../instructions/documentation.md), the
-[maintenance skill](../../.agents/skills/maintain-agent-docs/SKILL.md), the
 [reference-sync skill](../../.agents/skills/sync-doc-references/SKILL.md), and
 [AGENTS.md routing](../../AGENTS.md). They do not attest to installed versions,
 every upstream feature, or other workspace documentation.
+
+The global `writing-agent-guidance` skill owns its bundled authoring sources and
+review dates independently. This index remains scoped to dotfiles policy and
+reference refreshes; do not recreate a project-local skill with the same ID.
 
 Use `sync-doc-references` for scoped date-based review; `unknown` means unreviewed.
 Replace dates after reconciliation rather than append a review history.
