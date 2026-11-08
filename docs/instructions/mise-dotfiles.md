@@ -13,7 +13,11 @@ composition and global versus checkout scope.
 - Select the intended platform before deployment. Inspect `mise config ls` and
   `mise dotfiles status`, including checkout-local overrides and system defaults.
 - Make requires a platform configuration and matching `PROFILE`/`MISE_ENV`.
-  Direct mise commands bypass that check; select the intended environment explicitly.
+  Direct mise commands bypass that check. After deployment, the checkout's ignored
+  `.miserc.local.toml` supplies a default only when `-E` and `MISE_ENV` are absent;
+  confirm loaded config before applying. Initial deployment needs explicit selection.
+- Keep the workspace environment seed create-only and checkout-scoped. Do not put
+  its `env` selection in the shared `miserc.toml`, which also deploys globally.
 - Preserve Git-filtered manifests and explicit platform group selections. Do not
   turn an empty base selection into an implicit all-platform deployment.
 - Preserve machine-local files, credentials, provider/service configuration, and
@@ -40,7 +44,8 @@ authorization; never infer that old files are safe to remove from missing declar
 
 Use `PROFILE` and `DOTFILES_ARGS` to scope deployment, for example
 `make link PROFILE=omarchy DOTFILES_ARGS='--dry-run ~/.bashrc'`. Direct mise
-inspection also needs the intended environment, e.g. `mise -E omarchy config ls`.
+inspection also needs the intended environment, e.g. `mise -E omarchy config ls`,
+or a verified workspace default with no conflicting `MISE_ENV`.
 Inspect the Make recipes before invoking a target: `make packages` installs system
 packages only (including Omarchy AUR), `make link` deploys dotfiles, and `make tools`
 installs effective requests, not only tracked defaults. Bootstrap and sync deploy

@@ -1,0 +1,2 @@
+# Default for this checkout only; -E and MISE_ENV still take precedence.
+env = ["macos"]

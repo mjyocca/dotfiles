@@ -6,6 +6,7 @@
 .envrc
 
 # Checkout-specific mise deployment exceptions (never deployed).
+.miserc.local.toml
 .config/mise/config.local.toml
 .config/mise/config.*.local.toml
 

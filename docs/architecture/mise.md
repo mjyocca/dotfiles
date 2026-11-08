@@ -20,6 +20,7 @@ All source files below live in `<repo>/.config/mise/`.
 | `conf.d/workspace.toml.example` | Sanitized optional private-repository declaration |
 | `conf.d/workspace.toml` | Gitignored checkout provisioning, seeded only when missing |
 | `workspace/opencode.jsonc.example` | Sanitized workspace-local OpenCode scaffold |
+| `workspace/miserc.<platform>.toml` | Create-only source for the checkout's ignored `.miserc.local.toml` environment default |
 | `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
 | `macos/` | Reserved for future macOS supporting files; retained with `.gitkeep` |
 | `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
@@ -29,9 +30,10 @@ root. Native `conf.d` discovery composes the deployed files.
 
 Deployment also seeds the checkout's ignored `opencode.jsonc` from
 `workspace/opencode.jsonc.example`, and `conf.d/workspace.toml` from its adjacent example.
-Both are create-only copies: existing files, symlinks, and local edits are left
-alone. The OpenCode example relies on automatic `AGENTS.md` discovery and offers
-an optional local project reference, not a skill source.
+These and the platform-selected `.miserc.local.toml` seed are create-only copies:
+existing files, symlinks, and local edits are left alone. The OpenCode example
+relies on automatic `AGENTS.md` discovery and offers an optional local project
+reference, not a skill source.
 
 To opt into private checkout provisioning, first create the scaffolds with
 `make link`, then edit the ignored workspace fragment locally. With the intended
@@ -82,14 +84,33 @@ Make detects `PROFILE` unless explicitly supplied, and defaults `MISE_ENV` to
 that profile. Provisioning targets reject a missing platform file or a conflicting
 `MISE_ENV` before running their recipes. Each profile selects one independent
 environment; Omarchy does not inherit an Arch environment.
-Direct mise commands require the intended environment, for example
-`mise -E omarchy config ls`. The repository's Zsh startup defaults to `macos`;
-mise environment names alone do not perform OS or hostname detection.
+Each platform's deployment seeds `<repo>/.miserc.local.toml` with its environment.
+mise reads this early file before discovering ordinary config, so direct commands
+inside the checkout and its subdirectories inherit the platform when `-E` and
+`MISE_ENV` are absent. This works in Bash, Zsh, and non-interactive invocations
+without shell initialization. It selects mise's environment, not a parent-shell
+export, and does not select a platform in unrelated projects.
+
+Explicit `-E` and then `MISE_ENV` take precedence over the workspace default.
+Existing shell exports remain unchanged, including Zsh's `macos` default. Initial
+deployment still needs Make's profile selection or explicit `-E`. The seed is
+create-only: edit the ignored file locally to change an existing checkout's
+default, rather than expecting another deployment to overwrite it. Environment
+names alone do not perform OS or hostname detection.
+
+Global tools and machine-local configuration still compose normally. Keep the
+workspace selection out of `.config/mise/miserc.toml`: that discovery guard also
+deploys globally and must not impose this checkout's platform on other projects.
+Do not assume workspace and global `miserc` environment defaults are combined on
+every mise version. If a global environment profile must apply here too, include
+it alongside the platform in the ignored workspace `env` list and verify
+`mise config ls`. This is separate from always-loaded global config and fragments.
 
 ### Adding a platform later
 
 Add `config.<profile>.toml` with that platform's complete package set and explicit
 dotfile-group selection. Override shared deployment definitions only where needed.
+Include a create-only workspace environment seed, following the existing platforms.
 Duplication of package intent across platforms is acceptable; no environment map,
 include chain, or custom configuration merger is needed.
 

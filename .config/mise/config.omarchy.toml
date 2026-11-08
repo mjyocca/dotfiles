@@ -2,6 +2,16 @@
 # Complete Omarchy package set and platform deployment selections.
 # Selected via MISE_ENV=omarchy (exported by Make on detected Omarchy).
 
+# Seed a checkout-only default; never select the platform globally.
+[dotfiles.workspace-mise-env]
+source = "workspace/miserc.omarchy.toml"
+mode = "copy"
+create_if_missing = true
+permissions = "0600"
+variants = [
+  { default = true, target = "{{ config_root }}/.miserc.local.toml" },
+]
+
 [dotfiles."~/.config/mise/conf.d/20-dotfiles-platform.toml"]
 source = "global/platform.omarchy.toml"
 mode = "symlink"

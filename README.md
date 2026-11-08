@@ -100,6 +100,14 @@ Make defaults `MISE_ENV` to that profile and rejects conflicting selections or a
 missing platform configuration. Detecting another Linux distro does not imply
 that provisioning is supported.
 
+Deployment seeds an ignored `.miserc.local.toml` in this checkout with the selected
+platform as mise's default. After deployment, direct commands such as
+`mise config ls`, `mise dot apply --dry-run`, and
+`mise bootstrap --only packages --dry-run` work here without `-E`, in Bash or Zsh.
+An explicit `-E` or `MISE_ENV` still wins. Existing workspace defaults, shell exports,
+and global configuration are left alone; outside the checkout, nothing changes.
+Before the first deployment, select the platform through Make or explicit `-E`.
+
 Platform entrypoints live at `scripts/<platform>/<stage>.sh`. They source shared
 implementations, or explicitly inherit Linux entrypoints, and can extend or
 replace functions before running a stage. Make does not hide inheritance behind
