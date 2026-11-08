@@ -17,9 +17,10 @@ canonical `docs/instructions/package-management.md` policy.
   files. The bootstrap scope is Apple Silicon macOS.
 - User preferences live under `[bootstrap.macos.defaults]` in
   `.config/mise/config.macos.toml`. Quote dotted domains and preference keys.
-  `make config` (also `make apply_settings`) applies only native mise defaults;
-  `make packages` skips preferences and LaunchAgents. Direct full `mise bootstrap`
-  includes both, so scope inspection and application explicitly.
+  `make config` applies only native mise defaults. `make packages` installs packages
+  only, without deployment, preferences, or LaunchAgents. Direct full
+  `mise bootstrap` includes both preferences and agents, so scope inspection and
+  application explicitly.
 - Inspect with `mise -E macos bootstrap macos defaults status`; preview with
   `mise -E macos bootstrap macos defaults apply --dry-run`. Preserve value types
   and undeclared runtime/security state. Removing a declaration does not reset

@@ -18,9 +18,10 @@ Ownership rules live in `docs/instructions/package-management.md`; this section
 describes actual consumers, not another ownership policy.
 
 - Pacman declarations live in `.config/mise/config.omarchy.toml`.
-- `scripts/omarchy/packages.sh` runs the Linux package layer, then `aur.sh`, which
-  reads `packages/aur/packages.txt`. The standalone `scripts/linux/aur-installer.sh`
-  uses the same list. Inspect these consumers before changing installation inputs.
+- `scripts/omarchy/packages.sh` sources the Linux package interface and extends
+  shared package installation with `install_aur_packages` from `aur.sh`, which
+  reads `packages/aur/packages.txt`. This is the sole AUR installer; inspect these
+  consumers before changing installation inputs.
 - Machine lists beneath `packages/aur/machines/` are tracking-only, not automatic
   installation overlays. Keep hardware-specific dependencies out of shared declarations.
 - Plain Arch or Manjaro detection does not establish Omarchy support. Inspect

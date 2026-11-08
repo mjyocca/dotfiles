@@ -1,22 +1,14 @@
 #!/usr/bin/env bash
-# Packages layer: Install system packages via mise bootstrap
-# macOS implementation
+# macOS package interface.
 set -euo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../shared/utils.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared/packages.sh"
 
-if ! is_macos; then
-    fatal "This script is for macOS only"
+install_packages() {
+    is_macos || fatal 'This script is for macOS only'
+    install_system_packages "$@"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    install_packages "$@"
 fi
-
-info "Installing system packages via mise bootstrap..."
-
-if ! command_exists mise; then
-    fatal "mise is not installed. Run prerequisites first."
-fi
-
-# Deploy global tool configuration before the separate tools/plugins steps.
-# Preferences belong to make config; LaunchAgents require a separate apply.
-mise bootstrap --skip tools,macos-defaults,macos-launchd-agents
-
-success "System packages installed"

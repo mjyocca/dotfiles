@@ -1,209 +1,112 @@
-#                    __              ____         ___             
-#  /'\_/`\          /\ \            /\  _`\   __ /\_ \            
-# /\      \     __  \ \ \/'\      __\ \ \L\_\/\_\\//\ \      __   
-# \ \ \__\ \  /'__`\ \ \ , <    /'__`\ \  _\/\/\ \ \ \ \   /'__`\ 
-#  \ \ \_/\ \/\ \L\.\_\ \ \\`\ /\  __/\ \ \/  \ \ \ \_\ \_/\  __/ 
-#   \ \_\\ \_\ \__/.\_\\ \_\ \_\ \____\\ \_\   \ \_\/\____\ \____\
-#    \/_/ \/_/\/__/\/_/ \/_/\/_/\/____/ \/_/    \/_/\/____/\/____/
+# Make owns lifecycle ordering; platform scripts compose shared implementations.
+.DEFAULT_GOAL := help
 
-# ======================
-# PLATFORM DETECTION
-# ======================
-.DEFAULT_GOAL := bootstrap
-OS := $(shell uname -s)
-DISTRO := $(shell bash ./scripts/shared/detect-os.sh 2>/dev/null || echo unknown)
-
-# Profile can be overridden via PROFILE=xxx on command line
-PROFILE ?= $(DISTRO)
-export PROFILE
-
-# Select platform mise configuration even before shell dotfiles are deployed.
+DETECTED_PROFILE := $(shell bash ./scripts/shared/detect-os.sh)
+PROFILE ?= $(DETECTED_PROFILE)
 MISE_ENV ?= $(PROFILE)
-export MISE_ENV
+export PROFILE MISE_ENV
 
-# Validate before any provisioning recipe, including recursive/parallel Make.
-# A new profile supplies its own config; distro detection alone is not support.
-.PHONY: check-profile
+.PHONY: help check-profile bootstrap sync prerequisites packages repos link tools \
+        plugins config hooks aur ghostty-shader
+
+help:
+	@printf '%s\n' \
+	  'Usage: make <target> [PROFILE=<platform>]' \
+	  '' \
+	  'Lifecycle (changes this machine):' \
+	  '  bootstrap      prerequisites → packages → repos → link → tools → plugins → config → hooks' \
+	  '  sync           packages → repos → link → tools → plugins' \
+	  '' \
+	  'Individual stages:' \
+	  '  prerequisites  Install/reuse mise and platform prerequisites' \
+	  '  packages       Install system packages (includes interactive AUR on Omarchy)' \
+	  '  repos          Provision optional configured workspace checkouts' \
+	  '  link           Deploy dotfiles; scope with DOTFILES_ARGS="--dry-run <target>"' \
+	  '  tools          Install effective mise tool requests; accepts TOOLS_ARGS' \
+	  '  plugins        Install tracked plugin integrations, not language runtimes' \
+	  '  config         Apply platform preferences, where implemented' \
+	  '  hooks          Install the repository Gitleaks pre-commit hook' \
+	  '' \
+	  'Utilities:' \
+	  '  aur            Install Omarchy AUR packages with interactive review' \
+	  '  ghostty-shader Import shaders; requires REPO=<git-url>' \
+	  '' \
+	  'Supported profiles: macos (Apple Silicon), omarchy. Other distros need configuration and scripts.' \
+	  "Selected profile: $$PROFILE (MISE_ENV=$$MISE_ENV)"
+
+# Detection is not support: require a matching provisioning configuration.
 check-profile:
-	@test -f ".config/mise/config.$(PROFILE).toml" || \
-	 { echo "No provisioning configuration for PROFILE=$(PROFILE)." >&2; exit 1; }
-	@test "$(MISE_ENV)" = "$(PROFILE)" || \
-	 { echo "MISE_ENV=$(MISE_ENV) conflicts with PROFILE=$(PROFILE); select the same single platform." >&2; exit 1; }
+	@case "$$PROFILE" in ''|*[!a-z0-9_-]*) \
+	  echo "Invalid PROFILE=$$PROFILE" >&2; exit 1;; esac
+	@test -f ".config/mise/config.$$PROFILE.toml" || \
+	  { echo "No provisioning configuration for PROFILE=$$PROFILE." >&2; exit 1; }
+	@test "$$MISE_ENV" = "$$PROFILE" || \
+	  { echo "MISE_ENV=$$MISE_ENV conflicts with PROFILE=$$PROFILE; select the same single platform." >&2; exit 1; }
 
-bootstrap bootstrap_macos bootstrap_omarchy bootstrap_linux sync fresh-install \
-prerequisites packages link tools plugins config hooks: | check-profile
+bootstrap sync prerequisites packages repos link tools plugins config hooks aur: | check-profile
 
-# ======================
-# INHERITANCE HELPER
-# ======================
-# Run script with inheritance: check platform folder first, fall back to linux/
-# Usage: $(call run_script,platform,layer)
-define run_script
-  @if [ -f ./scripts/$(1)/$(2).sh ]; then \
-    bash ./scripts/$(1)/$(2).sh; \
-  elif [ -f ./scripts/linux/$(2).sh ]; then \
-    bash ./scripts/linux/$(2).sh; \
-  else \
-    echo "Error: Script $(2).sh not found for $(1)" >&2; exit 1; \
-  fi
+# Platform entrypoints are explicit; inheritance lives in their source statements.
+define run_platform_script
+	@script="./scripts/$$PROFILE/$(1).sh"; \
+	 if [ ! -f "$$script" ]; then \
+	   echo "Missing platform stage: $$script" >&2; exit 1; \
+	 fi; \
+	 bash "$$script"
 endef
 
-# ======================
-# ENTRY POINTS
-# ======================
-.PHONY: bootstrap sync pack link plug fresh-install
-
-# Platform-aware bootstrap dispatcher
+# Recursive recipes intentionally serialize stages, including under make -j.
 bootstrap:
-ifeq ($(PROFILE),macos)
-	@echo "Bootstrapping macOS..."
-	@$(MAKE) bootstrap_macos
-else ifeq ($(PROFILE),omarchy)
-	@echo "Bootstrapping Omarchy..."
-	@$(MAKE) bootstrap_omarchy
-else ifeq ($(OS),Linux)
-	@echo "Bootstrapping Linux ($(PROFILE))..."
-	@$(MAKE) bootstrap_linux
-else
-	@echo "Error: Unsupported platform: $(OS)" >&2
-	@exit 1
-endif
-
-# ======================
-# PLATFORM-SPECIFIC BOOTSTRAP FLOWS
-# ======================
-
-# macOS bootstrap
-.PHONY: bootstrap_macos
-bootstrap_macos:
-	$(call run_script,macos,prerequisites)
-	$(call run_script,macos,packages)
-	@$(MAKE) tools PROFILE=macos
-	$(call run_script,macos,plugins)
-	$(call run_script,macos,config)
-	$(call run_script,macos,hooks)
-
-# Omarchy bootstrap (inherits from linux where applicable)
-.PHONY: bootstrap_omarchy
-bootstrap_omarchy:
-	$(call run_script,omarchy,prerequisites)
-	$(call run_script,omarchy,packages)  # Calls linux/packages.sh then omarchy/aur.sh
-	@$(MAKE) tools PROFILE=omarchy
-	$(call run_script,omarchy,plugins)
-	$(call run_script,omarchy,config)
-	$(call run_script,omarchy,hooks)
-
-# Linux bootstrap (generic, for future distros)
-.PHONY: bootstrap_linux
-bootstrap_linux:
-	$(call run_script,$(PROFILE),prerequisites)
-	$(call run_script,$(PROFILE),packages)
-	@$(MAKE) tools
-	$(call run_script,$(PROFILE),plugins)
-	$(call run_script,$(PROFILE),config)
-	$(call run_script,$(PROFILE),hooks)
-
-# ======================
-# INCREMENTAL UPDATE TARGETS
-# ======================
-.PHONY: pack link plug sync
-
-pack: packages
-	@echo "✓ System packages installed"
-
-# Optional flags/targets for scoped deployment, e.g. DOTFILES_ARGS='--dry-run ~/.bashrc'.
-link:
-	@bash ./scripts/shared/environment.sh mise dotfiles apply $(DOTFILES_ARGS)
-
-plug: plugins
-	@echo "✓ Plugins installed"
+	@$(MAKE) --no-print-directory prerequisites
+	@$(MAKE) --no-print-directory packages
+	@$(MAKE) --no-print-directory repos
+	@$(MAKE) --no-print-directory link
+	@$(MAKE) --no-print-directory tools
+	@$(MAKE) --no-print-directory plugins
+	@$(MAKE) --no-print-directory config
+	@$(MAKE) --no-print-directory hooks
 
 sync:
-	@$(MAKE) packages
-	@$(MAKE) link
-	@$(MAKE) tools
-	@$(MAKE) plugins
-	@echo "✓ System synced"
-
-# ======================
-# COMPOSABLE LAYER TARGETS
-# ======================
-.PHONY: prerequisites packages tools plugins config hooks aur
+	@$(MAKE) --no-print-directory packages
+	@$(MAKE) --no-print-directory repos
+	@$(MAKE) --no-print-directory link
+	@$(MAKE) --no-print-directory tools
+	@$(MAKE) --no-print-directory plugins
 
 prerequisites:
-	$(call run_script,$(PROFILE),prerequisites)
+	$(call run_platform_script,prerequisites)
 
 packages:
-	$(call run_script,$(PROFILE),packages)
+	$(call run_platform_script,packages)
 
-aur:
-	$(call run_script,omarchy,aur)
+repos:
+	@bash ./scripts/shared/repos.sh
+
+link:
+	@bash ./scripts/shared/link.sh $(DOTFILES_ARGS)
 
 tools:
-	@config_dir="$${MISE_CONFIG_DIR:-$${XDG_CONFIG_HOME:-$$HOME/.config}/mise}"; \
-	 for file in conf.d/10-dotfiles-tools.toml conf.d/20-dotfiles-platform.toml miserc.toml; do \
-	   if [ ! -e "$$config_dir/$$file" ]; then \
-	     echo "Missing $$config_dir/$$file; inspect and deploy with make link first." >&2; \
-	     exit 1; \
-	   fi; \
-	 done
-	@bash ./scripts/shared/environment.sh mise install $(TOOLS_ARGS)
+	@bash ./scripts/shared/tools.sh $(TOOLS_ARGS)
 
 plugins:
-	$(call run_script,$(PROFILE),plugins)
+	$(call run_platform_script,plugins)
 
+# Preferences are optional; dotfile deployment belongs exclusively to link.
 config:
-	$(call run_script,$(PROFILE),config)
+	@if [ -f "./scripts/$$PROFILE/config.sh" ]; then \
+	  bash "./scripts/$$PROFILE/config.sh"; \
+	 else \
+	  echo "No additional platform preferences for $$PROFILE."; \
+	 fi
 
 hooks:
-	$(call run_script,$(PROFILE),hooks)
+	$(call run_platform_script,hooks)
 
-# ======================
-# FRESH INSTALL
-# ======================
-.PHONY: fresh-install
+aur:
+	@test "$$PROFILE" = omarchy || \
+	  { echo 'The aur target requires PROFILE=omarchy.' >&2; exit 1; }
+	$(call run_platform_script,aur)
 
-fresh-install:
-ifeq ($(PROFILE),macos)
-	@bash ./scripts/macos/installer.sh
-else ifeq ($(PROFILE),omarchy)
-	@bash ./scripts/omarchy/installer.sh
-else
-	@bash ./scripts/linux/installer.sh
-endif
-
-# ======================
-# UTILITIES
-# ======================
-.PHONY: apply_settings ghostty-shader zellij-plugins install_mise
-
-# Backward compatibility: install_mise (now part of prerequisites)
-install_mise:
-	@bash ./scripts/install-mise.sh
-
-# Apply OS-specific settings
-apply_settings: config
-
-# Zellij plugins (kept for backward compatibility)
-zellij-plugins:
-	@bash ./scripts/shared/install-zellij-plugin.sh
-
-# Ghostty shader installer
 ghostty-shader:
-ifndef REPO
-	$(error REPO is required. Usage: make ghostty-shader REPO=<git-url>)
-endif
+	@test -n "$(REPO)" || \
+	  { echo 'Usage: make ghostty-shader REPO=<git-url>' >&2; exit 1; }
 	@bash ./scripts/ghostty-shader.sh "$(REPO)"
-
-# ======================
-# LEGACY TARGETS (kept for compatibility)
-# ======================
-.PHONY: bootstrap_osx bootstrap_linux_legacy mise_bootstrap mise_install
-
-bootstrap_osx: bootstrap_macos
-
-bootstrap_linux_legacy: bootstrap_linux
-
-mise_bootstrap: packages
-
-mise_install: tools

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared by the plugin layer and the Zellij-only compatibility target.
+# Install the pinned Zellij plugin; used by the shared plugin layer.
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"

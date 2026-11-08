@@ -5,18 +5,14 @@ set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../shared/utils.sh"
 
-if ! is_macos; then
-    fatal "This script is for macOS only"
+configure_platform() {
+    is_macos || fatal 'This script is for macOS only'
+    command_exists mise || fatal 'mise is not installed. Run make prerequisites first.'
+    info 'Applying macOS preferences...'
+    # Preferences only: no package installation or LaunchAgent activation.
+    mise -C "$DOTFILES_ROOT" -E macos bootstrap macos defaults apply "$@"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    configure_platform "$@"
 fi
-
-info "Applying macOS configuration..."
-
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-if ! command_exists mise; then
-    fatal "mise is not installed. Run prerequisites first."
-fi
-
-# Scope to preferences only; do not install packages or load LaunchAgents.
-mise -C "$repo_root" -E macos bootstrap macos defaults apply "$@"
-
-info "macOS configuration step complete"

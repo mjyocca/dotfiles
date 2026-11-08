@@ -41,21 +41,25 @@ Run from the repository root; these commands change the machine, not just the re
 
 | Command | Purpose |
 |---|---|
-| `make bootstrap` | Runs prerequisites → packages → tools → plugins → config → hooks; no explicit link step |
-| `make packages` | Runs mise bootstrap (packages and selected dotfiles); Omarchy also invokes the AUR layer |
+| `make` | Shows help; does not provision |
+| `make bootstrap` | Runs prerequisites → packages → repos → link → tools → plugins → config → hooks |
+| `make packages` | Installs system packages only; Omarchy also invokes the interactive AUR layer |
+| `make repos` | Applies optional configured workspace checkouts |
 | `make tools` | Installs effective mise tool requests; requires deployed global tool configuration |
 | `make link` | Runs `mise dotfiles apply`; requires effective deployment declarations |
-| `make sync` | Sequential packages → link → tools → plugins; not full provisioning |
+| `make sync` | Sequential packages → repos → link → tools → plugins; not full provisioning |
 | `make hooks` | Installs the gitleaks pre-commit hook when gitleaks is available |
 
-Other composable layers and compatibility aliases are defined in `Makefile`.
+Other composable layers and utilities are defined in `Makefile`; there are no
+legacy installation aliases or standalone platform installers.
 Use `scripts/shared/detect-os.sh` to inspect platform detection.
 
 ## Project Conventions
 
 - System bootstrap, dev tools, and mise policy: `.config/mise/`. See `docs/architecture/mise.md` for platform composition and scope; prefer native mise features.
 - Scripts are organized by domain layer, not package type. Shared helpers live in `scripts/shared/`.
-- Platform scripts live in `scripts/macos/`, `scripts/linux/`, and `scripts/omarchy/`; Make's dispatcher falls back to Linux when a platform layer is missing.
+- Platform entrypoints live in `scripts/<profile>/<stage>.sh`; they explicitly source shared implementations or Linux entrypoints. Make does not fall back to another platform. `config.sh` is optional.
+- Sourcing a platform entrypoint must not provision anything. Guard execution with `BASH_SOURCE`; expose stage functions so a distro can extend or replace behavior before invoking it.
 - Keep layers idempotent and independently testable. Use the deployment entrypoint, not manual symlinks.
 
 ## Safety and Verification

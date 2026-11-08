@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Plugins layer: Install editor/shell plugins
-# macOS implementation
+# macOS plugin interface.
 set -euo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../shared/utils.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared/plugins.sh"
 
-# macOS uses the same plugin logic as Linux
-bash "$(dirname "${BASH_SOURCE[0]}")/../linux/plugins.sh"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    install_plugins "$@"
+fi

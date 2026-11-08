@@ -1,47 +1,39 @@
 #!/usr/bin/env bash
-# Prerequisites layer: Install base tools needed to run everything else
-# Linux base implementation
+# Linux prerequisite interface; distributions can override install_prerequisites.
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../shared/utils.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../shared/detect-os.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared/install-mise.sh"
 
-if ! is_linux; then
-    fatal "This script is for Linux only"
-fi
+install_prerequisites() {
+    is_linux || fatal 'This script is for Linux only'
+    info 'Installing prerequisites...'
 
-info "Installing prerequisites..."
-
-distro="$(get_os)"
-
-case "$distro" in
-    ubuntu)
-        if command_exists apt-get; then
+    case "$(get_os)" in
+        ubuntu)
+            command_exists apt-get || fatal 'apt-get not found'
             sudo apt-get update
             sudo apt-get install -y git curl make build-essential
-        else
-            fatal "apt-get not found"
-        fi
-        ;;
-    fedora)
-        if command_exists dnf; then
+            ;;
+        fedora)
+            command_exists dnf || fatal 'dnf not found'
             sudo dnf install -y git curl make gcc gcc-c++
-        else
-            fatal "dnf not found"
-        fi
-        ;;
-    arch|omarchy)
-        if command_exists pacman; then
+            ;;
+        arch|omarchy)
+            command_exists pacman || fatal 'pacman not found'
             sudo pacman -S --needed --noconfirm git curl make base-devel
-        else
-            fatal "pacman not found"
-        fi
-        ;;
-    *)
-        fatal "Unsupported distribution: $distro"
-        ;;
-esac
+            ;;
+        *)
+            fatal "No Linux prerequisites implemented for $(get_os)"
+            ;;
+    esac
 
-bash "$(dirname "${BASH_SOURCE[0]}")/../install-mise.sh"
+    # A new distribution also needs an appropriate mise provider here or upstream.
+    install_mise
+    success 'Prerequisites installed'
+}
 
-success "Prerequisites installed"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    install_prerequisites "$@"
+fi

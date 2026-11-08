@@ -1,21 +1,14 @@
 #!/usr/bin/env bash
-# Packages layer: Install system packages via mise bootstrap
-# Linux base implementation
+# Linux package interface; distributions may source and override install_packages.
 set -euo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../shared/utils.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared/packages.sh"
 
-if ! is_linux; then
-    fatal "This script is for Linux only"
+install_packages() {
+    is_linux || fatal 'This script is for Linux only'
+    install_system_packages "$@"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    install_packages "$@"
 fi
-
-info "Installing system packages via mise bootstrap..."
-
-if ! command_exists mise; then
-    fatal "mise is not installed. Run prerequisites first."
-fi
-
-# Deploy global tool configuration before the separate tools/plugins steps.
-mise bootstrap --skip tools
-
-success "System packages installed"

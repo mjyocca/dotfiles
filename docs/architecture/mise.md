@@ -93,11 +93,39 @@ dotfile-group selection. Override shared deployment definitions only where neede
 Duplication of package intent across platforms is acceptable; no environment map,
 include chain, or custom configuration merger is needed.
 
+Add `scripts/<profile>/prerequisites.sh`, `packages.sh`, `plugins.sh`, and `hooks.sh`.
+Make invokes those entrypoints directly, with no implicit platform fallback. Each
+entrypoint sources reusable functions from `scripts/shared/`, or explicitly sources
+the corresponding `scripts/linux/` entrypoint. Override functions or compose shared
+operations to add platform-specific behavior. `config.sh` is optional for additional
+platform preferences; dotfiles always deploy in the separate `link` stage.
+
+Sourcing an entrypoint defines functions but does not execute its stage. Keep the
+call behind a `[[ "${BASH_SOURCE[0]}" == "$0" ]]` guard. Shared utility initialization
+is guarded too, so composing multiple sources does not redefine readonly values.
+For example, Omarchy's package interface sources the Linux interface, then replaces
+`install_packages` with a function calling `install_system_packages` followed by
+`install_aur_packages`. Its plugin and hook interfaces reuse Linux functions unchanged.
+
+A new Linux distro's unchanged plugin entrypoint can be just:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/../linux/plugins.sh"
+
+# Define install_plugins here only when this distro needs different behavior.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    install_plugins "$@"
+fi
+```
+
 Inspect detection and prerequisite support, including how mise itself is installed.
-Detection alone does not establish provisioning support. Generic Linux bootstrap
-and incremental targets both prefer `scripts/<profile>/<layer>.sh`, falling back
-to `scripts/linux/<layer>.sh`; add overrides only for actual platform differences.
-macOS and Omarchy retain their dedicated bootstrap flows.
+Detection alone does not establish provisioning support. The Linux prerequisite
+implementation has apt/dnf/pacman branches, but only macOS and Omarchy have complete
+tracked provisioning configurations. A new distro needs an appropriate mise provider
+as well as its package declarations; the shared installer currently installs missing
+mise on macOS or pacman-based Linux, preserving an existing provider everywhere.
 
 The default global tool overlay can be reused. Add a platform tool fragment and
 override its deployment source only when providers or exclusions differ. Keep
@@ -107,25 +135,34 @@ these tool sources separate from repository-only bootstrap declarations.
 
 macOS user preferences are native `[bootstrap.macos.defaults]` declarations in
 `config.macos.toml`. `make config` applies only those preferences; the macOS
-package layer skips defaults and LaunchAgents as well as tools. Direct full
-`mise bootstrap` includes declared preferences and agents. LaunchAgents are native
-`[bootstrap.macos.launchd.agents]` declarations, not tracked plists. Explicit
+package layer runs only packages, without deployment, preferences, agents, or tools.
+Direct full `mise bootstrap` includes declared preferences and agents. LaunchAgents
+are native `[bootstrap.macos.launchd.agents]` declarations, not tracked plists. Explicit
 `mise -E macos bootstrap macos launchd-agents apply` writes and loads them under
 `dev.mise.*` labels. Inspect status and dry-run first, including legacy jobs with
 different labels; removing a declaration does not unload an installed agent.
 
 | Context | Loaded scope |
 |---|---|
-| Repository management (`make link`, package bootstrap) | Global tools plus repository provisioning rules and the selected platform environment |
+| Repository management (`make packages`, `make repos`, `make link`) | Global tools plus repository provisioning rules and the selected platform environment, with each command applying only its stage |
 | `make tools` | Normal effective requests, including machine-local additions and project overrides; requires deployed global fragments and discovery policy |
 | Everyday use outside this repository | System and user-global configuration, plus configuration discovered for the current project |
 
-Fresh bootstrap runs prerequisites (install/reuse mise), packages and configuration
-deployment, tools, plugins, platform settings, then hooks. Package bootstrap skips
-tool installation so the global fragments and discovery policy deploy first.
-`make sync` sequentially runs packages → link → tools → plugins, even under `make -j`.
-Neither workflow implicitly transfers asdf runtimes to mise. Installation is not
-an explicit upgrade or removal operation.
+The single installation path is clone → `make bootstrap`; no standalone platform
+installers clone or update the checkout. Bare `make` shows help without provisioning.
+
+Fresh bootstrap runs prerequisites (install/reuse mise) → packages → repos → link →
+tools → plugins → config → hooks. Packages use `mise bootstrap --only packages`;
+Omarchy extends that stage with interactive AUR installation. Repository provisioning
+uses `mise bootstrap repos apply`, and deployment uses `mise dotfiles apply`.
+The global tool fragments and discovery policy deploy before tool installation.
+
+`make sync` sequentially runs packages → repos → link → tools → plugins, even under
+`make -j`. Both workflows stop on the first failed stage. Neither transfers asdf
+runtimes to mise, pulls this checkout, requests upgrades/removals, or activates
+macOS LaunchAgents. Repository application can enforce a configured ref; it does
+not request the separate repository update operation. Run layers from the checkout;
+scripts pin mise operations to the repository root rather than interactive shell state.
 
 ## Global Deployment and Overrides
 

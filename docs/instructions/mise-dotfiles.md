@@ -41,8 +41,10 @@ authorization; never infer that old files are safe to remove from missing declar
 Use `PROFILE` and `DOTFILES_ARGS` to scope deployment, for example
 `make link PROFILE=omarchy DOTFILES_ARGS='--dry-run ~/.bashrc'`. Direct mise
 inspection also needs the intended environment, e.g. `mise -E omarchy config ls`.
-Inspect the Make recipes before invoking a target: `make packages` can deploy
-dotfiles, and `make tools` installs effective requests, not only tracked defaults.
+Inspect the Make recipes before invoking a target: `make packages` installs system
+packages only (including Omarchy AUR), `make link` deploys dotfiles, and `make tools`
+installs effective requests, not only tracked defaults. Bootstrap and sync deploy
+global configuration before installing tools.
 
 For documentation-only checks, inspect declarations and Make recipes without
 running provisioning or deployment. For deployment work, inspect status and a

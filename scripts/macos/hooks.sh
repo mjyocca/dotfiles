@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Hooks layer: Install git hooks and automation
-# macOS implementation (same as Linux base)
+# macOS Git hook interface.
 set -euo pipefail
 
-bash "$(dirname "${BASH_SOURCE[0]}")/../linux/hooks.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared/hooks.sh"
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    install_hooks "$@"
+fi

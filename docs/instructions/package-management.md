@@ -56,7 +56,8 @@ may legitimately require a system runtime alongside the selected asdf version.
   overlays; read `docs/instructions/omarchy.md` before editing them.
 - `make tools` uses normal mise discovery, including intentional machine-local
   requests; preview with `TOOLS_ARGS=--dry-run`. Deploy the global fragments first.
-  Preserve bootstrap's skipped tools phase so deployment precedes installation.
+  Keep package installation, deployment, and tools as separate stages, with
+  deployment before tools. The package stage uses native packages-only scoping.
 - Keep mise's `.tool-versions` discovery disabled while asdf owns those files.
   Explicit mise TOML requests remain separate; do not migrate them incidentally.
 - Preserve existing mise providers and keep provisioning independent of interactive
