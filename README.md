@@ -48,12 +48,19 @@ dotfiles/
 │       ├── tools.toml           Shared development tools
 │       └── platform*.toml       Platform providers + exclusions
 ├── packages/                    Application dotfiles deployed by mise
-│   └── aur/                     AUR package lists consumed by scripts
+│   ├── zsh/                     Zsh configuration
+│   ├── bash/                    Bash configuration
+│   ├── nvim/                    Neovim configuration
+│   └── ...
 └── scripts/                     Stage wrappers + setup outside mise
     ├── shared/                  Reusable implementations + mise calls
     ├── linux/                   Reusable Linux stage implementations
     └── <platform>/              Platform entrypoints + extensions
 ```
+
+Dotfile package directories mirror `$HOME`; each platform selects which groups
+deploy. Optional, Git-ignored local mise overrides customize configuration per
+machine without changing shared declarations.
 
 - **System packages:** mise manages Homebrew on macOS and Pacman on Omarchy;
   scripts handle interactive AUR installation.
