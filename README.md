@@ -8,33 +8,11 @@
     \/___/  \/___/  \/__/ \/_/   \/_/\/____/\/____/\/___/
 ```
 
-Dotfiles managed with [mise](https://mise.jdx.dev/dotfiles.html).
+Dotfiles managed with makefile, bash scripts and [mise](https://mise.jdx.dev/dotfiles.html).
+
 Shared for inspiration, not as a universal setup. **Use at your own risk:**
 bootstrap installs software and changes
 your configuration. Review the declarations and existing dotfiles before running.
-
-## Install
-
-```bash
-git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-make bootstrap
-```
-
-Git and Make must be available to start; bootstrap handles the remaining platform
-prerequisites. See [setup notes](docs/commands.md#setup-notes) for fresh machines.
-
-## Everyday use
-
-```bash
-make sync
-```
-
-Installs declared packages, provisions optional repositories, deploys dotfiles,
-and installs tools and plugin integrations. Update this checkout with Git first
-when you want newer declarations; sync does not pull it for you.
-
-See the [command reference](docs/commands.md) for individual stages and previews.
 
 ## Architecture
 
@@ -73,3 +51,39 @@ machine without changing shared declarations.
 
 See [mise configuration architecture](docs/architecture/mise.md) for environment
 selection, local overrides, and platform composition.
+
+## Lifecycle
+
+Bootstrap gets a new machine set up. Sync keeps an existing setup aligned with
+this checkout.
+
+```text
+make bootstrap
+  prerequisites → [ packages → repos → link → tools → plugins ] → config → hooks
+                   └─────────── make sync ───────────────────┘
+```
+
+Both commands run their steps in order and stop if a step fails.
+
+### Install
+
+```bash
+git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+make bootstrap
+```
+
+You'll need Git and Make to get started; bootstrap handles the remaining platform
+prerequisites. See [setup notes](docs/commands.md#setup-notes) for fresh machines.
+
+### Everyday use
+
+```bash
+make sync
+```
+
+Sync installs system packages, checks out optional repositories, puts dotfiles in
+place, and installs development tools and plugin integrations. Pull updates with
+Git first when you want the latest declarations; sync doesn't pull them for you.
+
+See the [command reference](docs/commands.md) for individual stages and previews.
