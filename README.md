@@ -8,11 +8,19 @@
     \/___/  \/___/  \/__/ \/_/   \/_/\/____/\/____/\/___/
 ```
 
-Dotfiles managed with makefile, bash scripts and [mise](https://mise.jdx.dev/dotfiles.html).
+Personal dotfiles are managed with a Makefile, Bash scripts, and
+[mise](https://mise.jdx.dev/dotfiles.html).
 
-Shared for inspiration, not as a universal setup. **Use at your own risk:**
-bootstrap installs software and changes
-your configuration. Review the declarations and existing dotfiles before running.
+> For an alternative to mise's dotfile management, consider
+> [chezmoi](https://www.chezmoi.io/); for a simpler, symlink-based setup, consider
+> [GNU Stow](https://www.gnu.org/software/stow/).
+
+This setup is shared for inspiration; it isn't intended for every machine.
+
+> [!WARNING]
+> Use at your own risk. Bootstrap installs software and changes your
+> configuration. Review the configuration in this repository and your existing
+> dotfiles before running it.
 
 ## Architecture
 
@@ -36,26 +44,40 @@ dotfiles/
     └── <platform>/              Platform entrypoints + extensions
 ```
 
-Dotfile package directories mirror `$HOME`; each platform selects which groups
-deploy. Optional, Git-ignored local mise overrides customize configuration per
-machine without changing shared declarations.
+Dotfile package directories mirror `$HOME`. The mise configuration defines which
+dotfile groups each platform deploys and where they go. Optional local mise
+overrides let you customize the configuration for each machine without changing
+the shared files. These overrides are ignored by Git.
 
 - **System packages:** mise manages Homebrew on macOS and Pacman on Omarchy;
   scripts handle interactive AUR installation.
 - **Platform configuration:** mise applies macOS defaults and deploys
   Omarchy settings, theme templates, and hooks.
-- **Tools:** global mise configuration supplies development tools everywhere;
-  asdf owns language runtimes.
+- **Tools:** the global mise configuration makes development tools available
+  outside this checkout as well. asdf manages language runtimes.
 - **Plugins and hooks:** scripts install TPM, asdf plugins, gh-dash, a Zellij
   plugin, and the repository's Gitleaks hook.
 
-See [mise configuration architecture](docs/architecture/mise.md) for environment
-selection, local overrides, and platform composition.
+See the [mise configuration architecture](docs/architecture/mise.md) for details
+on environment selection, local overrides, and how the platform configurations
+fit together.
+
+## Install
+
+```bash
+git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+make bootstrap
+```
+
+You'll need Git and Make to get started; bootstrap handles the remaining platform
+prerequisites. See the [setup notes](docs/commands.md#setup-notes) for help getting
+started on a fresh machine.
 
 ## Lifecycle
 
-Bootstrap gets a new machine set up. Sync keeps an existing setup aligned with
-this checkout.
+The `make bootstrap` command sets up a new machine. The `make sync` command brings
+an existing setup up to date with the configuration in this checkout.
 
 ```text
 make bootstrap
@@ -65,25 +87,15 @@ make bootstrap
 
 Both commands run their steps in order and stop if a step fails.
 
-### Install
-
-```bash
-git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-make bootstrap
-```
-
-You'll need Git and Make to get started; bootstrap handles the remaining platform
-prerequisites. See [setup notes](docs/commands.md#setup-notes) for fresh machines.
-
 ### Everyday use
 
 ```bash
 make sync
 ```
 
-Sync installs system packages, checks out optional repositories, puts dotfiles in
-place, and installs development tools and plugin integrations. Pull updates with
-Git first when you want the latest declarations; sync doesn't pull them for you.
+Sync installs system packages, checks out any optional repositories you've
+configured, puts dotfiles in place, and installs development tools and plugin
+integrations. Pull updates to this repository with Git first when you want the
+latest configuration; sync doesn't pull them for you.
 
 See the [command reference](docs/commands.md) for individual stages and previews.
