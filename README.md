@@ -8,7 +8,7 @@
     \/___/  \/___/  \/__/ \/_/   \/_/\/____/\/____/\/___/
 ```
 
-Personal dotfiles are managed with a Makefile, Bash scripts, and
+Personal dotfiles managed with Make, Bash scripts, and
 [mise](https://mise.jdx.dev/dotfiles.html).
 
 > For an alternative to mise's dotfile management, consider
@@ -49,15 +49,15 @@ dotfile groups each platform deploys and where they go. Optional local mise
 overrides let you customize the configuration for each machine without changing
 the shared files. These overrides are ignored by Git.
 
-- **System packages:** mise manages Homebrew on macOS and Pacman on Omarchy;
-  scripts handle interactive AUR installation.
-- **Platform configuration:** mise applies macOS defaults and deploys
-  Omarchy settings, theme templates, and hooks.
-- **Tools:** the global mise configuration makes development tools available
-  outside this checkout as well. Mise manages language runtimes and project
-  environments; asdf and direnv remain installed without automatic initialization.
-- **Plugins and hooks:** scripts install TPM, gh-dash, a Zellij
-  plugin, and the repository's Gitleaks hook.
+| Domain | Managed by | Responsibility |
+|---|---|---|
+| Lifecycle | Make + Bash scripts | Select the platform and run setup stages in order |
+| System packages | mise bootstrap + Homebrew/Pacman | Install platform packages (Bash scripts handle interactive AUR installation) |
+| Dotfiles | mise dotfiles | Deploy selected configuration files and templates |
+| Development tools / Language runtimes | mise | Install CLI tools / select global or project-specific versions of Go, Rust, Node.js, etc. |
+| Project environments | mise | Load project variables and PATH additions |
+| Platform configuration | mise + Bash scripts | Apply macOS preferences and deploy Omarchy settings, themes, and hooks |
+| Plugins and repository hooks | Bash scripts | Install TPM, gh-dash, a Zellij plugin, and the Gitleaks hook |
 
 See the [mise configuration architecture](docs/architecture/mise.md) for details
 on environment selection, local overrides, and how the platform configurations
