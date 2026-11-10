@@ -77,7 +77,7 @@ class MiseWorkspaceTests(unittest.TestCase):
         fragments.mkdir()
         (fragments / "10-dotfiles-tools.toml").write_text('[env]\nTEST_GLOBAL_TOOLS = "inherited"\n')
         (fragments / "20-dotfiles-platform.toml").write_text('[env]\nTEST_GLOBAL_PLATFORM = "inherited"\n')
-        shutil.copyfile(REPO_ROOT / ".config/mise/miserc.toml", self.global_config / "miserc.toml")
+        shutil.copyfile(REPO_ROOT / ".config/mise/global/miserc.toml.tera", self.global_config / "miserc.toml")
 
     def run_mise(self, *arguments, cwd=None, env=None):
         return subprocess.run(
@@ -159,11 +159,12 @@ class MiseWorkspaceTests(unittest.TestCase):
         child.mkdir(parents=True)
         self.assertEqual(self.read_environment(cwd=child)["TEST_WORKSPACE_PLATFORM"], "omarchy")
 
-    def test_workspace_default_preserves_global_asdf_discovery_guard(self):
+    def test_workspace_default_preserves_mise_tool_versions_discovery(self):
         self.seed("omarchy")
-        result = self.run_mise("settings", "get", "override_tool_versions_filenames")
+        (self.checkout / ".tool-versions").write_text("nodejs 24.0.0\n")
+        result = self.run_mise("ls", "--current", "--json")
         self.assert_success(result)
-        self.assertEqual(json.loads(result.stdout), [])
+        self.assertIn("node", json.loads(result.stdout))
 
     def test_global_default_selection_is_not_modified_by_workspace_deployment(self):
         global_default = self.global_config / "miserc.local.toml"

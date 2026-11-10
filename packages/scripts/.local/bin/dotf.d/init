@@ -29,7 +29,7 @@ fi
 # find is used instead of a glob because template filenames start with '.' and
 # bash globs exclude dotfiles by default.
 mapfile -t available < <(
-  find "$template_dir" -maxdepth 1 -name '*.template' -type f \
+  find -L "$template_dir" -maxdepth 1 -name '*.template' -type f \
     | sort \
     | xargs -I{} basename {} .template
 )
@@ -73,7 +73,7 @@ for file in "${selected[@]}"; do
     continue
   fi
 
-  if [[ -f "$dest" ]]; then
+  if [[ -e "$dest" || -L "$dest" ]]; then
     echo "  skip  ${file} (already exists)"
   else
     cp "$template" "$dest"
@@ -87,8 +87,12 @@ done
 if [[ ${#written[@]} -gt 0 ]]; then
   echo ""
   echo "Next steps:"
-  [[ -f "${PWD}/.envrc" ]] && echo "  direnv allow    # if using direnv"
   for f in "${written[@]}"; do
     echo "  edit ${f}"
   done
+  if [[ " ${written[*]} " == *" mise.toml "* ]]; then
+    echo "  mise trust     # only after reviewing mise.toml"
+    echo "  mise install   # install the runtimes you declared"
+    echo "  mise exec -- nvim  # launch with project tools and environment"
+  fi
 fi

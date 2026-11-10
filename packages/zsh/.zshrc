@@ -1,15 +1,11 @@
 # ================================================================
 # mise — dev tool activation
 # ================================================================
-# Must precede every tool init below (starship, direnv, fzf, zoxide...):
+# Must precede every tool init below (starship, fzf, zoxide...):
 # mise-managed binaries replace the former brew copies.
 # Mirrors packages/bash/.bashrc on Omarchy.
 if command -v mise &>/dev/null; then
-  if [[ "$DOTFILES_ENVIRONMENT_LOADER" == mise ]]; then
-    eval "$(mise activate zsh)"
-  else
-    eval "$(mise activate zsh --shims)"
-  fi
+  eval "$(mise activate zsh)"
 fi
 
 # ================================================================
@@ -34,22 +30,9 @@ EOF
 fi
 
 # =================================================================
-# asdf — completions and language plugin hooks (interactive only)
+# Shell completions (interactive only)
 # =================================================================
-# PATH + ASDF_DATA_DIR are set in .zshenv; only interactive extras here.
-
-# append asdf completions only when it owns runtimes
-if [[ "$DOTFILES_RUNTIME_MANAGER" == asdf ]]; then
-  fpath=("${ASDF_DATA_DIR}/completions" $fpath)
-fi
-# initialise completions
 autoload -Uz compinit && compinit
-
-# Golang plugin settings
-if [[ "$DOTFILES_RUNTIME_MANAGER" == asdf ]]; then
-  export ASDF_GOLANG_MOD_VERSION_ENABLED=true
-  [[ -r "${ASDF_DATA_DIR}/plugins/golang/set-env.zsh" ]] && source "${ASDF_DATA_DIR}/plugins/golang/set-env.zsh"
-fi
 
 # =================================================================
 # PNPM (see https://pnpm.io/installation)
@@ -67,11 +50,6 @@ esac
 # CLI Tools
 # ================================================================
 
-# direnv (see https://github.com/direnv/direnv)
-if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]] && command -v direnv &>/dev/null; then
-  eval "$(direnv hook zsh)"
-fi
-
 # fzf (see https://github.com/junegunn/fzf)
 source <(fzf --zsh)
 
@@ -79,17 +57,6 @@ source <(fzf --zsh)
 eval "$(zoxide init zsh)"
 
 source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-
-# =================================================================
-# asdf shims — re-prioritise for interactive shells
-# =================================================================
-# .zshenv sets shims early but tools like PNPM prepend to PATH later
-# in .zshrc, pushing shims down and allowing macOS system binaries
-# (e.g. system Ruby) to take precedence. Re-prepend at the end so
-# asdf-managed versions always win in interactive sessions.
-if [[ "$DOTFILES_RUNTIME_MANAGER" == asdf ]]; then
-  [[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
-fi
 
 # Neovim aliases and variant shorthands (nv, nv-*, nvim-*)
 [[ -f ~/.config/zsh/nvim.zsh ]] && source ~/.config/zsh/nvim.zsh

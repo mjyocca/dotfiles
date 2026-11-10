@@ -16,12 +16,8 @@ case ":$PATH:" in
 esac
 
 # ================================================================
-# Machine policy and runtime shims — no commands or project discovery here
+# Mise shims — no commands or project discovery here
 # ================================================================
-DOTFILES_ENVIRONMENT_LOADER=direnv
-DOTFILES_RUNTIME_MANAGER=asdf
-[[ -r "$HOME/.config/dotfiles/shell-policy.sh" ]] && source "$HOME/.config/dotfiles/shell-policy.sh"
-
 [[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
 
 # ================================================================

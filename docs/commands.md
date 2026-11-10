@@ -29,8 +29,8 @@ are not force-overwritten. Bootstrap can be rerun after resolving a failure.
 Stages run sequentially, including under `make -j`, and stop on failure. Update
 this checkout explicitly with Git before syncing when you want newer declarations.
 Neither workflow pulls this checkout, requests package upgrades/removals, or
-activates macOS LaunchAgents. In mise-runtime mode, their tools stage can install
-discovered language versions; asdf runtimes are not installed or transferred.
+activates macOS LaunchAgents. Their tools stage can install discovered language
+versions through mise; existing asdf runtime installations are not transferred.
 Sync also skips prerequisites, platform preferences, and repository hook installation.
 
 ## Individual stages
@@ -40,9 +40,9 @@ Sync also skips prerequisites, platform preferences, and repository hook install
 | `make prerequisites` | Install/reuse mise and ensure platform prerequisites |
 | `make packages` | Install system packages, including interactive AUR review on Omarchy |
 | `make repos` | Provision optional configured workspace checkouts; does not request updates to latest remote commits |
-| `make link` | Deploy selected dotfiles, global mise tool fragments, shell policy, and discovery guard |
+| `make link` | Deploy selected dotfiles, global mise tool fragments, runtime PATH helper, and discovery policy |
 | `make tools` | Install effective mise tool requests; requires deployed global configuration |
-| `make plugins` | Install TPM, asdf plugins when selected, gh-dash, and the pinned Zellij plugin |
+| `make plugins` | Install TPM, gh-dash, and the pinned Zellij plugin |
 | `make config` | Apply additional platform preferences where implemented |
 | `make hooks` | Install the repository's Gitleaks pre-commit hook when Gitleaks is available |
 

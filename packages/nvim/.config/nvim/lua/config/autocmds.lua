@@ -84,13 +84,14 @@ function M.snacks(options)
   })
 end
 
--- Sources a local Neovim config file pointed to by $NVIM_LOCAL_CONFIG in .envrc.
+-- Sources a local Neovim config file pointed to by $NVIM_LOCAL_CONFIG.
 -- Provides the same behavior as exrc/.nvim.lua for projects where committing or
 -- gitignoring .nvim.lua at the root is not practical.
 --
--- Usage in project .envrc:
---   export NVIM_LOCAL_CONFIG=".config/nvim.lua"  -- relative to project root
---   export NVIM_LOCAL_CONFIG="/abs/path/nvim.lua" -- or absolute
+-- Set before launching Neovim, for example in project mise.toml:
+--   [env]
+--   NVIM_LOCAL_CONFIG = "{{config_root}}/.config/nvim.lua"
+-- The environment is inherited at launch, not refreshed by Neovim on DirChanged.
 function M.local_config()
   local function load()
     local env = vim.env.NVIM_LOCAL_CONFIG

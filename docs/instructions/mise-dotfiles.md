@@ -27,13 +27,13 @@ composition and global versus checkout scope.
   overrides rather than rendered files.
 - Preserve checkout-local exclusions. Confirm group replacement semantics before
   editing an override; deselection does not remove previously deployed files.
-- Deploy mise's discovery guard before asdf-owned `.tool-versions` files.
+- Deploy mise's discovery policy before `.tool-versions` files.
 - Keep provisioning rules repository-scoped and tool defaults global. Prefer
   native mise features over custom configuration merging.
-- Deploy machine shell policy and discovery guard together when changing runtime
-  or environment ownership. Native dependencies order selected targets but do not
-  expand a scoped apply; template dry-runs do not validate rendered content. See
-  [machine ownership](../architecture/mise.md#choosing-runtimes-and-an-environment-loader).
+- Include the discovery policy and shared runtime PATH helper when deploying shell
+  changes. Native dependencies order selected targets but do not expand a scoped
+  apply; template dry-runs do not validate rendered content. See
+  [runtime architecture](../architecture/mise.md#runtimes-and-project-environments).
 
 ## Editing Deployment Configuration
 

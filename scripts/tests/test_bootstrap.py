@@ -333,14 +333,12 @@ class ScriptCompositionTests(CheckoutTestCase):
         ))
         self.write_command("asdf", (
             'printf "asdf %s\\n" "$*" >> "$TEST_LOG"\n'
-            'printf "%s\\n" nodejs deno ruby golang java rust zig bun\n'
+            'exit 91\n'
         ))
         self.write_command("mise", (
             'printf "mise %s\\n" "${*:3}" >> "$TEST_LOG"\n'
             'case "$*" in\n'
-            '  *"vars dotfiles_runtime_manager") printf "%s\\n" "${TEST_RUNTIME_MANAGER:-asdf}";;\n'
             f'  *"which gh --tool gh") printf "%s\\n" {shlex.quote(str(self.bin / "gh"))};;\n'
-            f'  *"which asdf --tool github:asdf-vm/asdf") printf "%s\\n" {shlex.quote(str(self.bin / "asdf"))};;\n'
             '  *) exit 91;;\n'
             'esac\n'
         ))
@@ -356,33 +354,20 @@ class ScriptCompositionTests(CheckoutTestCase):
                 self.log.unlink(missing_ok=True)
                 self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
                 self.assertEqual(self.events(), [
-                    "mise vars dotfiles_runtime_manager",
                     "mise which gh --tool gh",
-                    "mise which asdf --tool github:asdf-vm/asdf",
-                    "asdf plugin list",
                     "gh extension list",
                 ])
 
-    def test_mise_runtime_mode_skips_asdf_plugin_provisioning(self):
+    def test_obsolete_runtime_preferences_do_not_trigger_asdf_provisioning(self):
         self.prepare_plugin_test()
-        self.env["TEST_RUNTIME_MANAGER"] = "mise"
+        self.env["DOTFILES_RUNTIME_MANAGER"] = "asdf"
         for profile in ("macos", "omarchy"):
             with self.subTest(profile=profile):
                 self.log.unlink(missing_ok=True)
                 self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
                 self.assertEqual(self.events(), [
-                    "mise vars dotfiles_runtime_manager", "mise which gh --tool gh", "gh extension list",
+                    "mise which gh --tool gh", "gh extension list",
                 ])
-
-    def test_invalid_runtime_mode_stops_plugin_provisioning(self):
-        self.prepare_plugin_test()
-        self.env["TEST_RUNTIME_MANAGER"] = "invalid"
-        for profile in ("macos", "omarchy"):
-            with self.subTest(profile=profile):
-                self.log.unlink(missing_ok=True)
-                result = self.run_command(BASH, f"scripts/{profile}/plugins.sh")
-                self.assertNotEqual(result.returncode, 0)
-                self.assertEqual(self.events(), ["mise vars dotfiles_runtime_manager"])
 
     def prepare_git_hook_test(self):
         self.write_command("git", f'exec {shlex.quote(GIT)} "$@"\n')

@@ -54,10 +54,9 @@ the shared files. These overrides are ignored by Git.
 - **Platform configuration:** mise applies macOS defaults and deploys
   Omarchy settings, theme templates, and hooks.
 - **Tools:** the global mise configuration makes development tools available
-  outside this checkout as well. Language runtimes default to asdf; ignored
-  machine preferences can select mise instead and choose direnv or mise for
-  environment loading.
-- **Plugins and hooks:** scripts install TPM, asdf plugins, gh-dash, a Zellij
+  outside this checkout as well. Mise manages language runtimes and project
+  environments; asdf and direnv remain installed without automatic initialization.
+- **Plugins and hooks:** scripts install TPM, gh-dash, a Zellij
   plugin, and the repository's Gitleaks hook.
 
 See the [mise configuration architecture](docs/architecture/mise.md) for details

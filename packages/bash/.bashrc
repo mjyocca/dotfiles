@@ -17,11 +17,7 @@ case ":$PATH:" in
   *) export PATH="$HOME/bin:$PATH" ;;
 esac
 
-# Machine-wide policy; startup never reads project TOML to select hooks.
-DOTFILES_ENVIRONMENT_LOADER=direnv
-DOTFILES_RUNTIME_MANAGER=asdf
-[[ -r "$HOME/.config/dotfiles/shell-policy.sh" ]] && source "$HOME/.config/dotfiles/shell-policy.sh"
-
+# Stable mise shims for scripts; interactive activation adds real tool paths.
 [[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
 
 # XDG Base Directories
@@ -56,25 +52,8 @@ fi
 
 if [[ "$_dotfiles_omarchy_loaded" == 1 ]]; then
   # Source Omarchy defaults (starship, mise, zoxide, fzf, completions, aliases)
-  # Upstream initializes mise itself. Adapt only that startup invocation in
-  # direnv mode, before it can register a hook or load project environments.
-  # Do not replace upstream rc or leave a command wrapper in the running shell.
-  if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]]; then
-    _dotfiles_previous_mise="$(declare -f mise || true)"
-    mise() {
-      if [[ "${1:-}" == activate && "${2:-}" == bash ]]; then
-        command mise "$@" --shims
-      else
-        command mise "$@"
-      fi
-    }
-  fi
+  # Upstream's full mise activation owns runtimes and project environments.
   source "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/rc"
-  if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]]; then
-    unset -f mise
-    [[ -z "$_dotfiles_previous_mise" ]] || eval "$_dotfiles_previous_mise"
-    unset _dotfiles_previous_mise
-  fi
 fi
 
 # ================================================================
@@ -83,17 +62,13 @@ fi
 # On Omarchy, these are already handled by the rc sourced above.
 # On other systems, initialize them ourselves.
 if [[ "$_dotfiles_omarchy_loaded" == 0 ]]; then
+  # Activate before tools that may need mise-managed binaries.
+  if command -v mise &>/dev/null; then
+    eval "$(mise activate bash)"
+  fi
+
   # Starship prompt
   command -v starship &>/dev/null && eval "$(starship init bash)"
-  
-  # mise activation
-  if command -v mise &>/dev/null; then
-    if [[ "$DOTFILES_ENVIRONMENT_LOADER" == mise ]]; then
-      eval "$(mise activate bash)"
-    else
-      eval "$(mise activate bash --shims)"
-    fi
-  fi
   
   # zoxide (better cd)
   command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
@@ -131,11 +106,6 @@ if [[ "$_dotfiles_omarchy_loaded" == 1 && "${BAT_THEME:-}" == ansi &&
 fi
 unset _dotfiles_omarchy_loaded
 
-# direnv (see https://github.com/direnv/direnv)
-if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]] && command -v direnv &>/dev/null; then
-  eval "$(direnv hook bash)"
-fi
-
 # PNPM (see https://pnpm.io/installation)
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 case ":$PATH:" in
@@ -147,12 +117,6 @@ esac
 # Neovim aliases
 # ================================================================
 [[ -f ~/.config/bash/nvim.bash ]] && source ~/.config/bash/nvim.bash
-
-# ================================================================
-# Preserve asdf ownership after other tools have prepended their paths.
-if [[ "$DOTFILES_RUNTIME_MANAGER" == asdf ]]; then
-  [[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
-fi
 
 # ================================================================
 # Local overrides (machine-specific, not committed)

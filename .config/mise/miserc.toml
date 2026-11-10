@@ -1,4 +1,3 @@
-# Compatibility source for existing deployments that still symlink this file.
-# New deployments render global/miserc.toml.tera using the machine runtime policy.
-# Keep this source intact until those symlinks have been migrated by mise.
-override_tool_versions_filenames = []
+# Enable discovery in this checkout and in older global deployments linked here.
+# New deployments render the same policy from global/miserc.toml.tera.
+override_tool_versions_filenames = [".tool-versions"]

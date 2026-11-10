@@ -42,7 +42,6 @@ $aws\
 $gcloud\
 $openstack\
 $azure\
-$direnv\
 $env_var\
 $sudo\
 $cmd_duration\
@@ -177,4 +176,3 @@ format = "[$symbol ($version)]($style) "
 [aws]
 symbol = "󰸏"
 format = "[$symbol ($version)]($style) "
-

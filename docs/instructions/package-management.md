@@ -10,7 +10,7 @@ the workflow; read only the applicable platform guide for platform-specific work
 | System packages via mise bootstrap | `.config/mise/config.<platform>.toml`, under `[bootstrap.packages]` |
 | AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
 | mise dev tools | `.config/mise/global/` shared and platform tool fragments |
-| Language runtimes via the selected machine manager | `packages/tool-versions/.tool-versions`; ownership preferences in `.config/mise/config.toml` and ignored local overrides |
+| Language runtimes via mise | `packages/tool-versions/.tool-versions`; project and machine-local mise overrides |
 
 See [mise architecture](../architecture/mise.md) for composition and scope.
 Inspect effective configuration, including system defaults, before installing.
@@ -26,13 +26,11 @@ Inspect effective configuration, including system defaults, before installing.
    backend supports both platforms and it has no OS/session dependency; otherwise
    use the platform manager and document the exception.
 
-Follow the deployed machine runtime policy; do not change ownership incidentally.
-See [machine ownership](../architecture/mise.md#choosing-runtimes-and-an-environment-loader)
-for explicit migration and rollback. Terraform ownership changes remain separate.
-Managing the asdf executable through mise does not select runtime ownership.
-`make plugins` installs declared asdf plugins only when asdf is selected and never
-installs language versions. In mise mode, `make tools` can install the discovered
-runtime requests after the discovery guard has been deployed.
+Mise owns runtime selection and project environment loading. Asdf and direnv stay
+installed dependencies without shell initialization or asdf plugin provisioning.
+`make plugins` does not install runtimes; `make tools` installs effective mise
+requests after deployment. See [runtime architecture](../architecture/mise.md#runtimes-and-project-environments)
+for migration boundaries. Terraform ownership changes remain separate.
 
 When criteria do not settle a choice, compare similar tracked tools, then inspect
 the installed OS's package and mise defaults or version-matched upstream sources.
@@ -60,8 +58,8 @@ may legitimately require a system runtime alongside the selected runtime version
   requests; preview with `TOOLS_ARGS=--dry-run`. Deploy the global fragments first.
   Keep package installation, deployment, and tools as separate stages, with
   deployment before tools. The package stage uses native packages-only scoping.
-- Keep mise's `.tool-versions` discovery disabled while asdf owns those files.
-  Explicit mise TOML requests remain separate; do not migrate them incidentally.
+- Keep checkout and global `.tool-versions` discovery enabled for mise. Prefer native
+  backends; use an asdf plugin through mise only for a concrete compatibility need.
 - Preserve existing mise providers and keep provisioning independent of interactive
   shell startup and runtime activation. Inspect platform prerequisites before changing
   installation order.
@@ -71,10 +69,10 @@ may legitimately require a system runtime alongside the selected runtime version
 Inspect declarations, installed packages, and command resolution first. When
 installation/removal is authorized, verify the new provider before removing the old
 user-managed one. Preserve OS dependencies and unrelated edits. Check resolution in
-a fresh shell with `command -v <tool>` and inspect `mise config ls`, `mise current`,
-or `asdf current` as applicable. Do not infer successful installation from a text edit.
+a fresh shell with `command -v <tool>` and inspect `mise config ls` and `mise current`.
+Do not infer successful installation from a text edit.
 
 ## Upstream References
 
 - [mise configuration](https://mise.jdx.dev/configuration.html) — effective requests and discovery
-- [asdf configuration](https://asdf-vm.com/manage/configuration.html) — runtime version selection
+- [mise asdf backend](https://mise.jdx.dev/dev-tools/backends/asdf.html) — plugin compatibility

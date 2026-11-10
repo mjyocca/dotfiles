@@ -25,7 +25,7 @@ merge = true
 
 [bootstrap]
 dotfile_groups = [
-  "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
+  "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
   "gitconfig", "herdr", "hunk", "lazygit", "nvim", "nvim-next",
   "opencode", "pnpm", "rex", "scripts", "ssh", "starship", "superfile", "tmux",
   "tool-versions", "yazi", "zed", "zellij", "zsh",

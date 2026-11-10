@@ -1,4 +1,4 @@
-"""Machine policy deployment and actual startup files, isolated from the host.
+"""Mise deployment, project templates and actual startup files, isolated from the host.
 
 Native mise tests never install tools or use the real HOME. Startup tests stub
 optional commands and simulate Omarchy's upstream mise initialization.
@@ -23,10 +23,8 @@ import unittest
 
 REPO = Path(__file__).resolve().parents[2]
 MISE = shutil.which("mise")
-DIRENV = shutil.which("direnv")
 ZSH = shutil.which("zsh")
 BASH = shutil.which("bash")
-MODES = (("asdf", "direnv"), ("mise", "direnv"), ("mise", "mise"))
 
 
 class InteractiveSession:
@@ -143,10 +141,10 @@ class PolicyDeploymentTests(PolicyFixture):
     def setUp(self):
         super().setUp()
         text = (REPO / ".config/mise/config.toml").read_text()
-        # Exercise the actual declarations and templates, without loading the
+        # Exercise the actual declarations, without loading the
         # host's provisioning/tool requests or deploying any shell groups.
         tables = []
-        for header in ('vars', 'dotfiles."~/.config/dotfiles/shell-policy.sh"',
+        for header in ('dotfiles."~/.config/dotfiles/runtime-path.sh"',
                        'dotfiles."~/.config/mise/miserc.toml"'):
             table = re.search(r"(?ms)^\[" + re.escape(header) + r"\]\n.*?(?=^\[|\Z)", text)
             self.assertIsNotNone(table)
@@ -154,94 +152,74 @@ class PolicyDeploymentTests(PolicyFixture):
         self.declarations = "\n".join(tables)
         self.write(self.config / "config.toml", self.declarations)
         shutil.copytree(REPO / ".config/mise/global", self.config / "global")
+        (self.checkout / "packages").symlink_to(REPO / "packages", target_is_directory=True)
+        self.helper_source = self.checkout / "packages/shell/.config/dotfiles/runtime-path.sh"
         self.local = self.config / "config.local.toml"
 
     def mise(self, *arguments, cwd=None):
         return self.run_command([MISE, *arguments], cwd=cwd or self.checkout)
 
-    def select(self, runtime, loader):
-        self.write(self.local, '[vars]\n'
-                   f'dotfiles_runtime_manager = "{runtime}"\n'
-                   f'dotfiles_environment_loader = "{loader}"\n')
-
     def apply(self):
         # Native depends orders selected entries; it does not expand target scope.
-        self.assert_success(self.mise("dotfiles", "apply", str(self.policy), str(self.guard)))
+        self.assert_success(self.mise("dotfiles", "apply", str(self.runtime_helper), str(self.guard)))
 
-    def test_modes_render_consistent_policy_and_discovery_then_restore_defaults(self):
+    def test_mise_discovers_tool_versions_and_explicit_toml_tools(self):
         project = self.home / "project"
         project.mkdir()
         self.write(project / ".tool-versions", "nodejs 24.0.0\n")
-        for runtime, loader in MODES:
-            with self.subTest(runtime=runtime, loader=loader):
-                self.select(runtime, loader)
-                result = self.mise("vars", "dotfiles_runtime_manager")
-                self.assert_success(result)
-                self.assertEqual(result.stdout.strip(), runtime)
-                before = self.local.read_bytes()
-                self.apply()
-                self.assertEqual(self.local.read_bytes(), before)
-                result = self.run_command(["/bin/sh", "-c",
-                    '. "$HOME/.config/dotfiles/shell-policy.sh"; '
-                    'printf "%s %s" "$DOTFILES_RUNTIME_MANAGER" "$DOTFILES_ENVIRONMENT_LOADER"'])
-                self.assert_success(result)
-                self.assertEqual(result.stdout, f"{runtime} {loader}")
-                self.assertEqual(self.policy.stat().st_mode & 0o777, 0o600)
-                result = self.mise("ls", "--current", "--json", cwd=project)
-                self.assert_success(result)
-                self.assertEqual("node" in json.loads(result.stdout), runtime == "mise")
-                # Explicit TOML tools remain discoverable in every mode.
-                self.write(project / "mise.toml", '[tools]\npython = "3.13.0"\n')
-                result = self.mise("ls", "--current", "--json", cwd=project)
-                self.assert_success(result)
-                self.assertIn("python", json.loads(result.stdout))
-                (project / "mise.toml").unlink()
-        self.local.unlink()
         self.apply()
-        self.assertIn("DOTFILES_RUNTIME_MANAGER=asdf", self.policy.read_text().replace("'", ""))
-        self.assertIn("DOTFILES_ENVIRONMENT_LOADER=direnv", self.policy.read_text().replace("'", ""))
-        self.assertIn("= []", self.guard.read_text())
-
-    def test_runtime_only_override_preserves_default_environment_loader(self):
-        self.write(self.local, '[vars]\ndotfiles_runtime_manager = "mise"\n')
-        self.apply()
-        result = self.run_command(["/bin/sh", "-c",
-            '. "$HOME/.config/dotfiles/shell-policy.sh"; '
-            'printf "%s %s" "$DOTFILES_RUNTIME_MANAGER" "$DOTFILES_ENVIRONMENT_LOADER"'])
+        self.write(project / "mise.toml", '[tools]\npython = "3.13.0"\n')
+        result = self.mise("ls", "--current", "--json", cwd=project)
         self.assert_success(result)
-        self.assertEqual(result.stdout, "mise direnv")
+        self.assertEqual(set(json.loads(result.stdout)), {"node", "python"})
+        self.assertFalse(self.policy.exists())
+
+    def test_checkout_and_global_discovery_policies_agree(self):
+        self.assertEqual(
+            (REPO / ".config/mise/miserc.toml").read_text().splitlines()[-1],
+            (REPO / ".config/mise/global/miserc.toml.tera").read_text().splitlines()[-1],
+        )
+
+    def test_tracked_runtime_requests_are_discovered_without_installation(self):
+        source = (REPO / "packages/tool-versions/.tool-versions").read_text()
+        self.write(self.home / ".tool-versions", source)
+        self.apply()
+        result = self.mise("ls", "--current", "--json", cwd=self.outside)
+        self.assert_success(result)
+        aliases = {"nodejs": "node", "golang": "go"}
+        expected = {}
+        for line in source.splitlines():
+            name, version = line.split()
+            expected[aliases.get(name, name)] = version
+        tools = json.loads(result.stdout)
+        self.assertEqual({name: versions[0]["requested_version"] for name, versions in tools.items()}, expected)
+        self.assertFalse(any(version["installed"] for versions in tools.values() for version in versions))
+
+    def test_discovery_replaces_a_previous_disabled_policy(self):
+        project = self.home / "project"
+        self.write(project / ".tool-versions", "nodejs 24.0.0\n")
+        self.write(self.guard, "override_tool_versions_filenames = []\n")
+        result = self.mise("ls", "--current", "--json", cwd=project)
+        self.assert_success(result)
+        self.assertNotIn("node", json.loads(result.stdout))
+        self.apply()
+        result = self.mise("ls", "--current", "--json", cwd=project)
+        self.assert_success(result)
+        self.assertIn("node", json.loads(result.stdout))
+
+    def test_obsolete_local_preferences_do_not_change_mise_ownership(self):
+        self.write(self.local, '[vars]\ndotfiles_runtime_manager = "asdf"\n'
+                   'dotfiles_environment_loader = "direnv"\n')
+        before = self.local.read_bytes()
+        self.apply()
+        self.assertEqual(self.local.read_bytes(), before)
         self.assertIn('[".tool-versions"]', self.guard.read_text())
-        result = self.mise("vars", "dotfiles_environment_loader")
-        self.assert_success(result)
-        self.assertEqual(result.stdout.strip(), "direnv")
-
-    def test_invalid_modes_fail_rendering_before_writing_targets(self):
-        for runtime, loader in (("typo", "direnv"), ("mise", "legacy"), ("asdf", "mise"),
-                                ("mise", "$(touch unexpected)")):
-            with self.subTest(runtime=runtime, loader=loader):
-                self.select(runtime, loader)
-                for target in (self.policy, self.guard):
-                    result = self.mise("dotfiles", "apply", str(target))
-                    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertFalse(self.policy.exists())
-                self.assertFalse(self.guard.exists())
-
-    def test_invalid_selection_does_not_change_previously_deployed_policy(self):
-        self.select("mise", "direnv")
-        self.apply()
-        before = {path: path.read_bytes() for path in (self.policy, self.guard)}
-        self.select("asdf", "mise")
-        result = self.mise("dotfiles", "apply", str(self.policy), str(self.guard))
-        self.assertNotEqual(result.returncode, 0)
-        for path, content in before.items():
-            self.assertEqual(path.read_bytes(), content)
 
     def test_dry_run_does_not_deploy_or_modify_existing_global_overrides(self):
         originals = {}
         for name in ("config.toml", "config.local.toml", "miserc.local.toml"):
             path = self.guard.parent / name
             originals[path] = self.write(path, "# machine-owned\n").read_bytes()
-        self.select("mise", "mise")
         self.assert_success(self.mise("dotfiles", "apply", "--dry-run", str(self.guard)))
         self.assertFalse(self.policy.exists())
         self.assertFalse(self.guard.exists())
@@ -249,9 +227,8 @@ class PolicyDeploymentTests(PolicyFixture):
         for path, content in originals.items():
             self.assertEqual(path.read_bytes(), content)
 
-    def test_complete_platform_declarations_preview_policy_without_deployment(self):
+    def test_complete_platform_declarations_preview_without_deployment(self):
         shutil.copyfile(REPO / ".config/mise/config.toml", self.config / "config.toml")
-        (self.checkout / "packages").symlink_to(REPO / "packages", target_is_directory=True)
         for folder in ("workspace", "omarchy"):
             shutil.copytree(REPO / ".config/mise" / folder, self.config / folder)
         (self.config / "conf.d").mkdir()
@@ -260,19 +237,17 @@ class PolicyDeploymentTests(PolicyFixture):
         for profile in ("macos", "omarchy"):
             shutil.copyfile(REPO / f".config/mise/config.{profile}.toml",
                             self.config / f"config.{profile}.toml")
-            self.select("mise", "mise")
             shell_targets = [str(self.home / ".bashrc")]
             if profile == "macos":
                 shell_targets += [str(self.home / ".zshenv"), str(self.home / ".zshrc")]
             result = self.mise("-E", profile, "dotfiles", "apply", "--dry-run",
-                               str(self.policy), str(self.guard), str(self.runtime_helper), *shell_targets)
+                               str(self.guard), str(self.runtime_helper), *shell_targets)
             self.assert_success(result)
             self.assertNotIn("unknown field", result.stderr)
             self.assertNotIn("ignoring group", result.stderr)
             self.assertIn("ln -sf", result.stdout)
             self.assertIn(" ~/.bashrc", result.stdout)
-            self.assertLess(result.stdout.index("shell-policy.sh (if changed)"),
-                            result.stdout.index(" ~/.bashrc"))
+            self.assertNotIn("shell-policy.sh", result.stdout)
             self.assertLess(result.stdout.index(" ~/.config/dotfiles/runtime-path.sh"),
                             result.stdout.index(" ~/.bashrc"))
             self.assertFalse(self.policy.exists())
@@ -280,21 +255,11 @@ class PolicyDeploymentTests(PolicyFixture):
             self.assertFalse(self.runtime_helper.exists())
             self.assertFalse((self.home / ".bashrc").exists())
 
-    def test_runtime_helper_is_deployed_as_a_symlink_after_policy_outputs(self):
-        text = (REPO / ".config/mise/config.toml").read_text()
-        declaration = re.search(
-            r'(?ms)^\[dotfiles\."~/.config/dotfiles/runtime-path.sh"\]\n.*?(?=^\[|\Z)', text
-        )
-        self.assertIsNotNone(declaration)
-        self.write(self.config / "config.toml", self.declarations + "\n" + declaration.group())
-        source = self.checkout / "packages/shell/.config/dotfiles/runtime-path.sh"
-        self.write(source, (REPO / "packages/shell/.config/dotfiles/runtime-path.sh").read_text())
-        self.select("mise", "direnv")
-        result = self.mise("dotfiles", "apply", str(self.runtime_helper), str(self.policy), str(self.guard))
-        self.assert_success(result)
+    def test_runtime_helper_is_deployed_as_a_symlink(self):
+        self.apply()
         self.assertTrue(self.runtime_helper.is_symlink())
-        self.assertEqual(self.runtime_helper.resolve(), source)
-        self.assertTrue(self.policy.exists())
+        self.assertEqual(self.runtime_helper.resolve(), self.helper_source.resolve())
+        self.assertFalse(self.policy.exists())
         self.assertTrue(self.guard.exists())
 
     def test_managed_guard_symlink_migrates_without_editing_original_source(self):
@@ -305,7 +270,6 @@ class PolicyDeploymentTests(PolicyFixture):
         self.assertTrue(self.guard.is_symlink())
         before = source.read_bytes()
         self.write(self.config / "config.toml", self.declarations)
-        self.select("mise", "direnv")
         self.apply()
         self.assertFalse(self.guard.is_symlink())
         self.assertIn('[".tool-versions"]', self.guard.read_text())
@@ -323,10 +287,8 @@ class ShellStartupTests(PolicyFixture):
         self.write(self.bin / "mise", '#!/bin/sh\n'
                    'printf "mise %s\\n" "$*" >> "$TEST_LOG"\n'
                    'case "$*" in\n'
-                   '  "activate bash"|"activate zsh") printf "_mise_test_hook() { :; }\\n" ;;\n'
-                   '  "activate bash --shims"|"activate zsh --shims") '
-                   'printf \'case "$PATH:" in "%s/shims:"*) ;; *) '
-                   'export PATH="%s/shims:$PATH" ;; esac\\n\' "$MISE_DATA_DIR" "$MISE_DATA_DIR" ;;\n'
+                   '  "activate bash"|"activate zsh") '
+                   'printf \'export PATH="$HOME/runtime/bin:$PATH"\\n_mise_test_hook() { :; }\\n\' ;;\n'
                    '  *) exit 91 ;;\nesac\n', True)
         self.write(self.bin / "direnv", '#!/bin/sh\n'
                    'printf "direnv %s\\n" "$*" >> "$TEST_LOG"\n'
@@ -337,11 +299,9 @@ class ShellStartupTests(PolicyFixture):
         self.write(self.home / "brew/share/zsh-autosuggestions/zsh-autosuggestions.zsh", "# stub\n")
         for runtime, folder in (("asdf", ".asdf/shims"), ("mise", ".local/share/mise/shims")):
             self.write(self.home / folder / "node", f"#!/bin/sh\necho {runtime}\n", True)
+        self.write(self.home / "runtime/bin/node", "#!/bin/sh\necho mise\n", True)
         self.write(self.home / ".asdf/plugins/golang/set-env.zsh",
                    'export ASDF_PLUGIN_LOADED=yes\n')
-
-    def select(self, runtime, loader):
-        self.write(self.policy, f"DOTFILES_RUNTIME_MANAGER={runtime}\nDOTFILES_ENVIRONMENT_LOADER={loader}\n")
 
     def startup(self, shell, command, interactive=True, login=False):
         if shell == "bash":
@@ -371,66 +331,61 @@ class ShellStartupTests(PolicyFixture):
         self.assertEqual(unexpected, [], result.stderr)
         return result
 
-    def test_interactive_and_login_startup_register_only_selected_loader(self):
+    def test_interactive_and_login_startup_activate_only_mise(self):
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
-            for runtime, loader in MODES:
-                for login in (False, True):
-                    with self.subTest(shell=shell, runtime=runtime, loader=loader, login=login):
-                        self.select(runtime, loader)
-                        self.log.unlink(missing_ok=True)
-                        result = self.startup(shell, 'node; printf "PLUGIN:%s\\n" "${ASDF_PLUGIN_LOADED:-no}"', login=login)
-                        self.assert_success(result)
-                        self.assertIn(runtime + "\n", result.stdout)
-                        events = self.log.read_text().splitlines()
-                        activation = f"mise activate {shell}" + (" --shims" if loader == "direnv" else "")
-                        self.assertEqual(events, [activation] + ([f"direnv hook {shell}"] if loader == "direnv" else []))
-                        if shell == "zsh":
-                            self.assertIn("PLUGIN:" + ("yes" if runtime == "asdf" else "no"), result.stdout)
+            for login in (False, True):
+                with self.subTest(shell=shell, login=login):
+                    self.log.unlink(missing_ok=True)
+                    result = self.startup(shell, 'node; printf "PLUGIN:%s\\n" "${ASDF_PLUGIN_LOADED:-no}"; '
+                                          'printf "ASDF:%s:%s\\n" "${ASDF_DATA_DIR:-}" '
+                                          '"${ASDF_GOLANG_MOD_VERSION_ENABLED:-}"', login=login)
+                    self.assert_success(result)
+                    self.assertEqual(result.stdout, "mise\nPLUGIN:no\nASDF::\n")
+                    self.assertEqual(self.log.read_text().splitlines(), [f"mise activate {shell}"])
 
-    def test_missing_policy_falls_back_to_asdf_and_direnv(self):
+    def test_obsolete_policy_is_not_sourced(self):
+        self.write(self.policy, 'echo obsolete-policy-loaded\n'
+                   'DOTFILES_RUNTIME_MANAGER=asdf\nDOTFILES_ENVIRONMENT_LOADER=direnv\n')
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
             with self.subTest(shell=shell):
                 result = self.startup(shell, "node")
                 self.assert_success(result)
-                self.assertEqual(result.stdout.strip(), "asdf")
+                self.assertEqual(result.stdout.strip(), "mise")
 
     def test_missing_helper_preserves_inherited_runtime_path_without_source_errors(self):
         self.runtime_helper.unlink()
-        self.env["PATH"] = str(self.home / ".asdf/shims") + ":" + self.env["PATH"]
+        self.env["PATH"] = str(self.home / ".local/share/mise/shims") + ":" + self.env["PATH"]
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
             with self.subTest(shell=shell):
                 result = self.startup(shell, "node", interactive=False)
                 self.assert_success(result)
-                self.assertEqual(result.stdout.strip(), "asdf")
+                self.assertEqual(result.stdout.strip(), "mise")
 
     @unittest.skipUnless(BASH, "bash is required")
     def test_omarchy_path_without_bootstrap_does_not_skip_standalone_activation(self):
         self.env["OMARCHY_PATH"] = str(self.root / "not-an-omarchy-installation")
-        self.select("mise", "direnv")
         result = self.startup("bash", "node")
         self.assert_success(result)
         self.assertEqual(result.stdout.strip(), "mise")
         self.assertEqual(self.log.read_text().splitlines(),
-                         ["mise activate bash --shims", "direnv hook bash"])
+                         ["mise activate bash"])
 
     def test_noninteractive_startup_has_runtime_shims_but_no_hooks(self):
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
-            for runtime, loader in MODES:
-                with self.subTest(shell=shell, runtime=runtime, loader=loader):
-                    self.select(runtime, loader)
-                    self.log.unlink(missing_ok=True)
-                    result = self.startup(shell, "node", interactive=False)
-                    self.assert_success(result)
-                    self.assertEqual(result.stdout.strip(), runtime)
-                    self.assertFalse(self.log.exists())
+            with self.subTest(shell=shell):
+                self.log.unlink(missing_ok=True)
+                result = self.startup(shell, "node", interactive=False)
+                self.assert_success(result)
+                self.assertEqual(result.stdout.strip(), "mise")
+                self.assertFalse(self.log.exists())
 
     def test_late_shell_local_overrides_remain_last(self):
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
@@ -449,43 +404,60 @@ class ShellStartupTests(PolicyFixture):
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
-            for runtime, loader in MODES:
-                other = "asdf" if runtime == "mise" else "mise"
-                inherited = [shims[other], shims[runtime], "", shims[runtime], *original_path.split(":")]
-                for interactive in (False, True):
-                    with self.subTest(shell=shell, runtime=runtime, loader=loader, interactive=interactive):
-                        self.select(runtime, loader)
-                        self.env["PATH"] = ":".join(inherited)
-                        # Re-read the early file too: repeated initialization
-                        # must not accumulate selected-runtime shim entries.
-                        entry = ".bashrc" if shell == "bash" else ".zshenv"
-                        command = f'source "$HOME/{entry}"; node; printf "__PATH__%s\\n" "$PATH"'
-                        result = self.startup(shell, command, interactive=interactive)
-                        self.assert_success(result)
-                        self.assertEqual(result.stdout.splitlines()[0], runtime)
-                        path = next(line[len("__PATH__"):] for line in result.stdout.splitlines()
-                                    if line.startswith("__PATH__")).split(":")
-                        self.assertEqual(path.count(shims[runtime]), 1)
-                        self.assertLess(path.index(shims[runtime]), path.index(shims[other]))
-                        self.assertEqual(path.count(""), 1)
+            inherited = [shims["asdf"], shims["mise"], "", shims["mise"], *original_path.split(":")]
+            for interactive in (False, True):
+                with self.subTest(shell=shell, interactive=interactive):
+                    self.env["PATH"] = ":".join(inherited)
+                    entry = ".bashrc" if shell == "bash" else ".zshenv"
+                    command = f'source "$HOME/{entry}"; node; printf "__PATH__%s\\n" "$PATH"'
+                    result = self.startup(shell, command, interactive=interactive)
+                    self.assert_success(result)
+                    self.assertEqual(result.stdout.splitlines()[0], "mise")
+                    path = next(line[len("__PATH__"):] for line in result.stdout.splitlines()
+                                if line.startswith("__PATH__")).split(":")
+                    self.assertEqual(path.count(shims["mise"]), 1)
+                    self.assertNotIn(shims["asdf"], path)
+                    self.assertEqual(path.count(""), 1)
 
     def test_runtime_shim_directory_names_are_matched_literally(self):
         original_path = self.env["PATH"]
-        for runtime, variable in (("asdf", "ASDF_DATA_DIR"), ("mise", "MISE_DATA_DIR")):
-            data = self.home / f"{runtime} [custom]"
-            self.write(data / "shims/node", f"#!/bin/sh\necho {runtime}\n", True)
-            self.env[variable] = str(data)
-            self.select(runtime, "direnv")
-            for shell, available in (("bash", BASH), ("zsh", ZSH)):
-                if not available:
-                    continue
-                with self.subTest(runtime=runtime, shell=shell):
-                    self.env["PATH"] = f"{original_path}:{data}/shims:{data}/shims"
-                    result = self.startup(shell, 'node; printf "__PATH__%s\\n" "$PATH"')
-                    self.assert_success(result)
-                    self.assertEqual(result.stdout.splitlines()[0], runtime)
-                    path = result.stdout.split("__PATH__", 1)[1].strip().split(":")
-                    self.assertEqual(path.count(str(data / "shims")), 1)
+        data = self.home / "mise [custom]"
+        asdf_data = self.home / "asdf [custom]"
+        self.write(data / "shims/node", "#!/bin/sh\necho mise\n", True)
+        self.env.update(MISE_DATA_DIR=str(data), ASDF_DATA_DIR=str(asdf_data))
+        for shell, available in (("bash", BASH), ("zsh", ZSH)):
+            if not available:
+                continue
+            with self.subTest(shell=shell):
+                self.env["PATH"] = f"{asdf_data}/shims:{original_path}:{data}/shims:{data}/shims"
+                result = self.startup(shell, 'node; printf "__PATH__%s\\n" "$PATH"; '
+                                      'printf "__ASDF__%s\\n" "$ASDF_DATA_DIR"')
+                self.assert_success(result)
+                self.assertEqual(result.stdout.splitlines()[0], "mise")
+                path = result.stdout.split("__PATH__", 1)[1].splitlines()[0].split(":")
+                self.assertEqual(path.count(str(data / "shims")), 1)
+                self.assertNotIn(str(asdf_data / "shims"), path)
+                self.assertIn("__ASDF__" + str(asdf_data), result.stdout)
+
+    def test_activation_tool_paths_are_not_replaced_by_late_shim_priority(self):
+        for shell, available in (("bash", BASH), ("zsh", ZSH)):
+            if not available:
+                continue
+            with self.subTest(shell=shell):
+                result = self.startup(shell, 'command -v node; '
+                                      'set | grep "^_dotfiles_.*=" || true')
+                self.assert_success(result)
+                self.assertEqual(result.stdout.strip(), str(self.home / "runtime/bin/node"))
+
+    def test_missing_helper_still_allows_full_interactive_activation(self):
+        self.runtime_helper.unlink()
+        for shell, available in (("bash", BASH), ("zsh", ZSH)):
+            if not available:
+                continue
+            with self.subTest(shell=shell):
+                result = self.startup(shell, "node")
+                self.assert_success(result)
+                self.assertEqual(result.stdout.strip(), "mise")
 
     def prepare_omarchy_defaults(self):
         omarchy = self.root / "omarchy"
@@ -496,59 +468,43 @@ class ShellStartupTests(PolicyFixture):
         return omarchy
 
     @unittest.skipUnless(BASH, "bash is required")
-    def test_omarchy_upstream_activation_obeys_policy_without_leaking_wrapper(self):
+    def test_omarchy_upstream_activates_mise_once_without_an_adapter(self):
         omarchy = self.prepare_omarchy_defaults()
         self.env["OMARCHY_PATH"] = str(omarchy)
-        for runtime, loader in MODES:
-            with self.subTest(runtime=runtime, loader=loader):
-                self.select(runtime, loader)
-                self.log.unlink(missing_ok=True)
-                result = self.startup("bash", 'node; printf "OMARCHY:%s\\n" "$OMARCHY_DEFAULTS_LOADED"; '
-                                      'declare -F mise; declare -p _dotfiles_previous_mise 2>/dev/null; true')
-                self.assert_success(result)
-                self.assertEqual(result.stdout, runtime + "\nOMARCHY:yes\n")
-                activation = "mise activate bash" + (" --shims" if loader == "direnv" else "")
-                self.assertEqual(self.log.read_text().splitlines(), [activation] +
-                                 (["direnv hook bash"] if loader == "direnv" else []))
+        result = self.startup("bash", 'node; printf "OMARCHY:%s\\n" "$OMARCHY_DEFAULTS_LOADED"; '
+                              'declare -F mise; declare -p _dotfiles_previous_mise 2>/dev/null; true')
+        self.assert_success(result)
+        self.assertEqual(result.stdout, "mise\nOMARCHY:yes\n")
+        self.assertEqual(self.log.read_text().splitlines(), ["mise activate bash"])
 
     def prepare_native_projects(self):
-        for name, binary in (("mise", MISE), ("direnv", DIRENV)):
-            (self.bin / name).unlink()
-            (self.bin / name).symlink_to(binary)
+        (self.bin / "mise").unlink()
+        (self.bin / "mise").symlink_to(MISE)
         (self.home / ".local/share/mise/shims/node").unlink()
         install = self.root / "synthetic-node"
         self.write(install / "bin/node", "#!/bin/sh\necho mise\n", True)
         self.assert_success(self.run_command([MISE, "link", "node@24.0.0", str(install)]))
-        self.env.update(APP_MODE="original", DIRENV_LOG_FORMAT="", MISE_NOT_FOUND_AUTO_INSTALL="0")
+        self.env.update(APP_MODE="original", MISE_NOT_FOUND_AUTO_INSTALL="0")
+        shutil.copyfile(REPO / ".config/mise/global/miserc.toml.tera", self.guard)
+        self.write(self.guard.parent / "config.toml", '[tools]\nnode = "24.0.0"\n'
+                   '[settings]\nnot_found_auto_install = false\n')
         first, second = self.home / "project-a", self.home / "project-b"
-        # These files must be ignored in mise-only mode, even though approved.
+        # .envrc must not be evaluated implicitly.
         for project, value in ((first, "a"), (second, "b")):
-            self.write(project / ".envrc", f"export APP_MODE={value}\n")
+            self.write(project / ".envrc", "export APP_MODE=must-not-load\n")
             self.write(project / ".tool-versions", "nodejs 24.0.0\n")
-            self.assert_success(self.run_command([DIRENV, "allow", str(project)]))
+            self.write(project / "mise.toml", f'[env]\nAPP_MODE = "{value}"\n')
         return first, second
 
-    def configure_native_mode(self, runtime, loader, projects):
-        self.select(runtime, loader)
-        self.write(self.guard, "override_tool_versions_filenames = " +
-                   ('[".tool-versions"]\n' if runtime == "mise" else "[]\n"))
-        global_tools = '[tools]\nnode = "24.0.0"\n' if runtime == "mise" else ""
-        self.write(self.guard.parent / "config.toml", global_tools +
-                   "[settings]\nnot_found_auto_install = false\n")
-        for project, value in zip(projects, ("a", "b")):
-            # In direnv mode these [env] keys must not reach the shell.
-            mise_value = value if loader == "mise" else "must-not-load"
-            self.write(project / "mise.toml", f'[env]\nAPP_MODE = "{mise_value}"\n')
-
-    def assert_active_hooks(self, session, shell, loader):
+    def assert_active_hooks(self, session, shell):
         mise_hook = "_mise_hook_precmd" if shell == "zsh" else "_mise_hook_prompt_command"
         output = session.command(
             'if typeset -f _direnv_hook >/dev/null; then echo __DIRENV__yes; '
             'else echo __DIRENV__no; fi; '
             f'if typeset -f {mise_hook} >/dev/null; then echo __MISE__yes; '
             'else echo __MISE__no; fi')
-        self.assertIn("__DIRENV__" + ("yes" if loader == "direnv" else "no") + "\r\n", output)
-        self.assertIn("__MISE__" + ("yes" if loader == "mise" else "no") + "\r\n", output)
+        self.assertIn("__DIRENV__no\r\n", output)
+        self.assertIn("__MISE__yes\r\n", output)
 
     def assert_project_state(self, session, folder, value, runtime):
         session.command("cd " + shlex.quote(str(folder)))
@@ -557,31 +513,125 @@ class ShellStartupTests(PolicyFixture):
         self.assertIn("__VALUE__" + value + "\r\n", output)
         self.assertIn("__RUNTIME__" + runtime + "\r\n", output)
 
-    @unittest.skipUnless(MISE and DIRENV and BASH and ZSH, "native mise, direnv, Bash and Zsh are required")
-    def test_native_single_loader_restores_shared_keys_across_sibling_projects(self):
+    @unittest.skipUnless(MISE and BASH and ZSH, "native mise, Bash and Zsh are required")
+    def test_native_mise_restores_shared_keys_across_sibling_and_nested_projects(self):
         # Real generators and prompt callbacks, actual repository startup files,
         # synthetic runtime binaries, and no host prompt/plugins or credentials.
         first, second = self.prepare_native_projects()
+        child = first / "nested"
+        self.write(child / "mise.toml", '[env]\nAPP_MODE = "child"\n')
+        self.write(second / "mise.local.toml", '[env]\nAPP_MODE = "b-local"\n')
         omarchy = self.prepare_omarchy_defaults()
         for shell in ("bash", "zsh", "omarchy"):
             if shell == "omarchy":
                 self.env["OMARCHY_PATH"] = str(omarchy)
             else:
                 self.env.pop("OMARCHY_PATH", None)
-            for runtime, loader in MODES:
-                with self.subTest(shell=shell, runtime=runtime, loader=loader):
-                    self.configure_native_mode(runtime, loader, (first, second))
-                    arguments = ([BASH, "--noprofile", "--rcfile", str(self.home / ".bashrc"), "-i"]
-                                 if shell != "zsh" else [ZSH, "-d", "-i"])
-                    session = InteractiveSession(arguments, self.outside, self.env)
-                    try:
-                        self.assert_active_hooks(session, shell, loader)
-                        for folder, expected in ((first, "a"), (second, "b"), (first, "a"),
-                                                 (self.outside, "original"), (second, "b"),
-                                                 (self.outside, "original")):
-                            self.assert_project_state(session, folder, expected, runtime)
-                    finally:
-                        session.close()
+            with self.subTest(shell=shell):
+                arguments = ([BASH, "--noprofile", "--rcfile", str(self.home / ".bashrc"), "-i"]
+                             if shell != "zsh" else [ZSH, "-d", "-i"])
+                session = InteractiveSession(arguments, self.outside, self.env)
+                try:
+                    self.assert_active_hooks(session, shell)
+                    for folder, expected in ((first, "a"), (child, "child"), (first, "a"),
+                                             (second, "b-local"), (self.outside, "original"),
+                                             (second, "b-local"), (self.outside, "original")):
+                        self.assert_project_state(session, folder, expected, "mise")
+                finally:
+                    session.close()
+
+    @unittest.skipUnless(MISE, "native mise is required")
+    def test_explicit_exec_keeps_launching_project_tools_when_child_changes_directory(self):
+        first, second = self.prepare_native_projects()
+        alternate = self.root / "alternate-node"
+        self.write(alternate / "bin/node", "#!/bin/sh\necho project-runtime\n", True)
+        self.assert_success(self.run_command([MISE, "link", "node@25.0.0", str(alternate)]))
+        self.write(first / ".tool-versions", "nodejs 25.0.0\n")
+        result = self.run_command([MISE, "exec", "--", "/bin/sh", "-c",
+                                   'cd "$HOME/outside"; node'], cwd=first)
+        self.assert_success(result)
+        self.assertEqual(result.stdout.strip(), "project-runtime")
+
+
+class ProjectTemplateTests(PolicyFixture):
+    def setUp(self):
+        super().setUp()
+        self.templates = self.home / ".config/nvim/templates"
+        shutil.copytree(REPO / "packages/nvim/.config/nvim/templates", self.templates)
+        self.scaffolder = REPO / "packages/scripts/.local/bin/dotf.d/init"
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_scaffolder_generates_mise_not_envrc_without_running_trust_or_install(self):
+        self.write(self.bin / "mise", '#!/bin/sh\nprintf "%s\\n" "$*" >> "$TEST_LOG"\nexit 91\n', True)
+        result = self.run_command([BASH, str(self.scaffolder), "--all"])
+        self.assert_success(result)
+        self.assertTrue((self.outside / "mise.toml").is_file())
+        self.assertFalse((self.outside / ".envrc").exists())
+        self.assertIn("mise trust", result.stdout)
+        self.assertIn("mise exec -- nvim", result.stdout)
+        self.assertNotIn("direnv allow", result.stdout)
+        self.assertFalse(self.log.exists())
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_scaffolder_preserves_existing_project_files(self):
+        originals = {"mise.toml": "# personal mise config\n", ".envrc": "# existing environment\n"}
+        for name, text in originals.items():
+            self.write(self.outside / name, text)
+        result = self.run_command([BASH, str(self.scaffolder), "--all"])
+        self.assert_success(result)
+        for name, text in originals.items():
+            self.assertEqual((self.outside / name).read_text(), text)
+        self.assertNotIn("mise trust", result.stdout)
+        self.assertNotIn("direnv allow", result.stdout)
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_scaffolder_reads_symlinked_templates(self):
+        template = self.templates / "mise.toml.template"
+        source = self.root / "mise.template"
+        template.rename(source)
+        template.symlink_to(source)
+        result = self.run_command([BASH, str(self.scaffolder), "--all"])
+        self.assert_success(result)
+        self.assertEqual((self.outside / "mise.toml").read_bytes(), source.read_bytes())
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_scaffolder_preserves_dangling_symlinks(self):
+        target = self.root / "missing-personal-config.toml"
+        destination = self.outside / "mise.toml"
+        destination.symlink_to(target)
+        result = self.run_command([BASH, str(self.scaffolder), "--all"])
+        self.assert_success(result)
+        self.assertTrue(destination.is_symlink())
+        self.assertFalse(target.exists())
+        self.assertNotIn("mise trust", result.stdout)
+
+    @unittest.skipUnless(MISE, "native mise is required")
+    def test_neovim_template_loads_opt_in_settings_without_asdf_exports(self):
+        text = (self.templates / "mise.toml.template").read_text()
+        self.write(self.outside / "mise.toml", text)
+        result = self.run_command([MISE, "env", "--json"])
+        self.assert_success(result)
+        environment = json.loads(result.stdout)
+        self.assertNotIn("NVIM_DAP_ENABLED", environment)
+        self.assertNotIn("NVIM_LOCAL_CONFIG", environment)
+        text = text.replace('# NVIM_DAP_ENABLED =', 'NVIM_DAP_ENABLED =')
+        text = text.replace('# NVIM_LOCAL_CONFIG =', 'NVIM_LOCAL_CONFIG =')
+        self.write(self.outside / "mise.toml", text)
+        result = self.run_command([MISE, "env", "--json"])
+        self.assert_success(result)
+        environment = json.loads(result.stdout)
+        self.assertEqual(environment["NVIM_DAP_ENABLED"], "1")
+        self.assertEqual(environment["NVIM_LOCAL_CONFIG"], str(self.outside / ".config/nvim.lua"))
+        self.assertFalse(any(name.startswith("ASDF_") for name in environment))
+
+    def test_asdf_and_direnv_dependencies_remain_without_asdf_deployment(self):
+        self.assertIn('"github:asdf-vm/asdf" = "latest"',
+                      (REPO / ".config/mise/global/tools.toml").read_text())
+        for profile, dependency in (("macos", "brew:direnv"), ("omarchy", "pacman:direnv")):
+            text = (REPO / f".config/mise/config.{profile}.toml").read_text()
+            self.assertIn(f'"{dependency}"', text)
+            self.assertNotIn('"asdf",', text)
+        self.assertNotIn("[dotfile_groups.asdf]", (REPO / ".config/mise/config.toml").read_text())
 
 
 if __name__ == "__main__":

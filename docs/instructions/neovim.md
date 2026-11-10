@@ -36,7 +36,10 @@ verify registry support and the actual consumer before promising either.
   secure reads and user trust decisions; do not substitute unchecked `dofile` or
   `loadfile` calls.
 - Review `templates/` and the `dotf init` scaffolder before changing project setup.
-  Generating a template is not authorization to trust Lua or allow direnv.
+  Generating a template is not authorization to trust Lua, trust mise config, or
+  install project runtimes. Environment variables are inherited at editor launch;
+  changing Neovim's cwd does not refresh them. Test subprocess tool resolution
+  separately when replacing runtime-environment workarounds.
 - Global snippets use `snippets/package.json` plus per-language JSON files, loaded
   in `lua/plugins/coding.lua`. Project snippets can be loaded additively from
   trusted project config.

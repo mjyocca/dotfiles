@@ -1,0 +1,32 @@
+# mise.toml — project runtimes and environment
+# Copy to the project root, review/uncomment as needed, then run: mise trust
+# Install declared runtimes explicitly with mise install.
+# Keep machine-specific overrides in an ignored mise.local.toml.
+
+# Mise also reads .tool-versions; do not duplicate its requests here unless
+# intentionally overriding them. Enable legacy version files explicitly if needed.
+[tools]
+# node = "24"
+
+# Plugin gating (opt-in)
+# These values must be set before Neovim starts. Launch from an activated shell
+# or use mise exec -- nvim to pass the launching project's tool paths to children.
+[env]
+
+# Load DAP + DAP UI for this project
+# NVIM_DAP_ENABLED = "1"
+
+# Per-project Neovim config (alternative to .nvim.lua)
+# Use when committing or gitignoring .nvim.lua at the project root is not
+# practical. An absolute path stays valid if Neovim changes directories.
+# Neovim still asks for trust before executing this Lua file.
+# NVIM_LOCAL_CONFIG = "{{config_root}}/.config/nvim.lua"
+
+# Optional nonsecret project environment. Review scripts before sourcing; mise
+# does not automatically evaluate .envrc or provide direnv's standard library.
+# _.file = ".env"
+# _.source = "scripts/env.sh"
+
+# Opt into ecosystem version files only where needed, for example .go-version.
+# [settings]
+# idiomatic_version_file_enable_tools = ["go"]

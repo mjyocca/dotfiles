@@ -2,12 +2,6 @@
 # Platform-neutral dotfile definitions and deployment defaults.
 # Platform configurations select packages and dotfile groups via MISE_ENV.
 
-# Machine-wide ownership. Override in this checkout's ignored config.local.toml,
-# then deploy the policy and discovery guard together before opening a new shell.
-[vars]
-dotfiles_environment_loader = "direnv"
-dotfiles_runtime_manager = "asdf"
-
 # Seed checkout-local configuration without overwriting private edits.
 [dotfiles.workspace-config]
 source = "conf.d/workspace.toml.example"
@@ -40,30 +34,16 @@ mode = "symlink"
 source = "global/miserc.toml.tera"
 mode = "template"
 
-[dotfiles."~/.config/dotfiles/shell-policy.sh"]
-source = "global/shell-policy.sh.tera"
-mode = "template"
-permissions = "0600"
-depends = ["~/.config/mise/miserc.toml"]
-
 [dotfiles."~/.config/dotfiles/runtime-path.sh"]
 source = "../../packages/shell/.config/dotfiles/runtime-path.sh"
 mode = "symlink"
-depends = ["~/.config/dotfiles/shell-policy.sh"]
+depends = ["~/.config/mise/miserc.toml"]
 
 [settings.dotfiles]
 root = "../../packages"
 default_mode = "symlink-each"
 
 # Deploy only tracked files; keep repository-only packages/aur out of these groups.
-[dotfile_groups.asdf]
-root = "asdf"
-manifest = "git"
-
-[dotfile_groups.asdf.entries]
-"~/.asdfrc" = { mode = "symlink" }
-"~/.asdf-direnv.sh" = { mode = "symlink" }
-
 [dotfile_groups.bash]
 root = "bash"
 manifest = "git"
