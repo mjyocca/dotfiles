@@ -14,9 +14,9 @@ ZSH = shutil.which("zsh")
 BASH = shutil.which("bash")
 
 
-class PolicyFixture(unittest.TestCase):
+class MiseFixture(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="dotfiles-shell-policy-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="dotfiles-mise-")
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.home = self.root / "home with spaces"
@@ -24,9 +24,9 @@ class PolicyFixture(unittest.TestCase):
         self.checkout = self.home / "checkout"
         self.config = self.checkout / ".config/mise"
         self.config.mkdir(parents=True)
-        self.policy = self.home / ".config/dotfiles/shell-policy.sh"
-        self.guard = self.home / ".config/mise/miserc.toml"
-        self.guard.parent.mkdir(parents=True)
+        self.legacy_policy = self.home / ".config/dotfiles/shell-policy.sh"
+        self.discovery_policy = self.home / ".config/mise/miserc.toml"
+        self.discovery_policy.parent.mkdir(parents=True)
         self.log = self.root / "commands.log"
         self.bin = self.home / ".local/bin"
         self.bin.mkdir(parents=True)
@@ -38,7 +38,7 @@ class PolicyFixture(unittest.TestCase):
             "XDG_DATA_HOME": str(self.home / ".local/share"),
             "XDG_STATE_HOME": str(self.home / ".local/state"),
             "XDG_CACHE_HOME": str(self.home / ".cache"),
-            "MISE_CONFIG_DIR": str(self.guard.parent),
+            "MISE_CONFIG_DIR": str(self.discovery_policy.parent),
             "MISE_SYSTEM_CONFIG_DIR": str(self.root / "system-mise"),
             "MISE_DATA_DIR": str(self.home / ".local/share/mise"),
             "MISE_STATE_DIR": str(self.home / ".local/state/mise"),

@@ -228,8 +228,7 @@ and inspect effective configuration rather than relying on a copied precedence l
 
 Both shells use full mise activation for interactive runtime and environment
 updates. No direnv hook, asdf completion/plugin initialization, or global asdf
-version-export mechanism is registered. The former runtime/environment selectors
-are no longer read; old checkout-local preference values have no effect.
+version-export mechanism is registered. Legacy ownership preferences have no effect.
 
 Zsh activates mise in `.zshrc`; standalone Bash activates it in the interactive
 portion of `.bashrc`, which `.bash_profile` also sources. Activation adds real
@@ -251,12 +250,24 @@ make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc
 make link DOTFILES_ARGS='~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
 ```
 
-For Bash, select `~/.bashrc` and `~/.bash_profile` instead of the Zsh files. The
-Neovim templates, scaffolder, and prompt configuration also need deployment on a
-first installation. Already-linked files expose checkout edits before deployment.
-Native `depends` orders selected entries without expanding a scoped apply. Open
-a fresh shell afterward; re-sourcing does not reliably remove old hooks or
-environment state.
+For Bash, select `~/.bashrc` and `~/.bash_profile` instead of the Zsh files. These
+commands deploy only shell startup and discovery policy, not the complete migration.
+Native `depends` orders selected entries without expanding a scoped apply.
+
+For a complete migration, including upgrades of existing installations, preview
+all selected dotfiles and apply only after reviewing the changes and conflicts:
+
+```bash
+make link DOTFILES_ARGS=--dry-run
+make link
+```
+
+This also deploys the Neovim templates, scaffolder, and prompt configuration.
+Already-linked files expose checkout edits immediately, but file-by-file symlinks
+do not expose newly added files until deployment. In particular, existing
+installations need deployment to gain `templates/mise.toml.template` in the
+platform's Neovim config. Open a fresh shell afterward; re-sourcing does not
+reliably remove old hooks or environment state.
 
 Review `.tool-versions` requests for mise backend compatibility before installing.
 The checkout discovery policy and deployed global policy both enable these files.
@@ -284,15 +295,13 @@ Use `mise exec -- nvim` when children should inherit the launching project's too
 paths; validate the actual editor/plugin workflows that matter to the project.
 
 Existing project `.envrc` files, runtime installations, and machine-local settings
-are not rewritten or deleted. The old `packages/asdf/` sources remain for existing
-symlink consumers, but neither platform deploys them anymore. Old deployed
-`shell-policy.sh` files are no longer sourced. Removing stale deployed files or
-uninstalling dependencies is a separate, explicitly scoped operation.
-
-Preserving `.envrc` and `.asdf-direnv.sh` keeps them available to older setups;
-it does not load their variables in a mise-only shell. Migrate each project's
-environment manually before relying on those variables under mise. Retain the
-legacy helper until its consumers have been migrated across machines.
+are not rewritten or deleted. The `packages/asdf/` sources, including
+`.asdf-direnv.sh`, remain for existing symlink consumers, but neither platform
+deploys them anymore. Preserving these files supports older setups; it does not
+load their variables in a mise-only shell. Migrate project environments manually
+and retain the legacy helper until its consumers have migrated across machines.
+Stale shell integration files are no longer sourced; removing them or uninstalling
+dependencies requires a separate, explicitly scoped operation.
 
 ## Official Documentation
 

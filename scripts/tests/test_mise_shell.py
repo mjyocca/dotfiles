@@ -19,7 +19,7 @@ import time
 import unittest
 
 
-from mise_test_support import BASH, MISE, REPO, ZSH, PolicyFixture
+from mise_test_support import BASH, MISE, REPO, ZSH, MiseFixture
 
 
 class InteractiveSession:
@@ -78,7 +78,7 @@ class InteractiveSession:
 
 
 @unittest.skipUnless(MISE, "mise is required")
-class PolicyDeploymentTests(PolicyFixture):
+class DiscoveryPolicyDeploymentTests(MiseFixture):
     def setUp(self):
         super().setUp()
         text = (REPO / ".config/mise/config.toml").read_text()
@@ -98,7 +98,7 @@ class PolicyDeploymentTests(PolicyFixture):
         return self.run_command([MISE, *arguments], cwd=cwd or self.checkout)
 
     def apply(self):
-        self.assert_success(self.mise("dotfiles", "apply", str(self.guard)))
+        self.assert_success(self.mise("dotfiles", "apply", str(self.discovery_policy)))
 
     def test_mise_discovers_tool_versions_and_explicit_toml_tools(self):
         project = self.home / "project"
@@ -109,12 +109,12 @@ class PolicyDeploymentTests(PolicyFixture):
         result = self.mise("ls", "--current", "--json", cwd=project)
         self.assert_success(result)
         self.assertEqual(set(json.loads(result.stdout)), {"node", "python"})
-        self.assertFalse(self.policy.exists())
+        self.assertFalse(self.legacy_policy.exists())
 
     def test_checkout_and_global_discovery_policies_agree(self):
         self.apply()
-        self.assertFalse(self.guard.is_symlink())
-        self.assertEqual(self.guard.read_bytes(), (REPO / ".config/mise/miserc.toml").read_bytes())
+        self.assertFalse(self.discovery_policy.is_symlink())
+        self.assertEqual(self.discovery_policy.read_bytes(), (REPO / ".config/mise/miserc.toml").read_bytes())
 
     def test_tracked_runtime_requests_are_discovered_without_installation(self):
         source = (REPO / "packages/tool-versions/.tool-versions").read_text()
@@ -134,7 +134,7 @@ class PolicyDeploymentTests(PolicyFixture):
     def test_discovery_replaces_a_previous_disabled_policy(self):
         project = self.home / "project"
         self.write(project / ".tool-versions", "nodejs 24.0.0\n")
-        self.write(self.guard, "override_tool_versions_filenames = []\n")
+        self.write(self.discovery_policy, "override_tool_versions_filenames = []\n")
         result = self.mise("ls", "--current", "--json", cwd=project)
         self.assert_success(result)
         self.assertNotIn("node", json.loads(result.stdout))
@@ -149,16 +149,16 @@ class PolicyDeploymentTests(PolicyFixture):
         before = self.local.read_bytes()
         self.apply()
         self.assertEqual(self.local.read_bytes(), before)
-        self.assertIn('[".tool-versions"]', self.guard.read_text())
+        self.assertIn('[".tool-versions"]', self.discovery_policy.read_text())
 
     def test_dry_run_does_not_deploy_or_modify_existing_global_overrides(self):
         originals = {}
         for name in ("config.toml", "config.local.toml", "miserc.local.toml"):
-            path = self.guard.parent / name
+            path = self.discovery_policy.parent / name
             originals[path] = self.write(path, "# machine-owned\n").read_bytes()
-        self.assert_success(self.mise("dotfiles", "apply", "--dry-run", str(self.guard)))
-        self.assertFalse(self.policy.exists())
-        self.assertFalse(self.guard.exists())
+        self.assert_success(self.mise("dotfiles", "apply", "--dry-run", str(self.discovery_policy)))
+        self.assertFalse(self.legacy_policy.exists())
+        self.assertFalse(self.discovery_policy.exists())
         self.apply()
         for path, content in originals.items():
             self.assertEqual(path.read_bytes(), content)
@@ -177,7 +177,7 @@ class PolicyDeploymentTests(PolicyFixture):
             if profile == "macos":
                 shell_targets += [str(self.home / ".zshenv"), str(self.home / ".zshrc")]
             result = self.mise("-E", profile, "dotfiles", "apply", "--dry-run",
-                               str(self.guard), *shell_targets)
+                               str(self.discovery_policy), *shell_targets)
             self.assert_success(result)
             self.assertNotIn("unknown field", result.stderr)
             self.assertNotIn("ignoring group", result.stderr)
@@ -186,41 +186,41 @@ class PolicyDeploymentTests(PolicyFixture):
             self.assertNotIn("shell-policy.sh", result.stdout)
             self.assertLess(result.stdout.index(" ~/.config/mise/miserc.toml"),
                             result.stdout.index(" ~/.bashrc"))
-            self.assertFalse(self.policy.exists())
-            self.assertFalse(self.guard.exists())
+            self.assertFalse(self.legacy_policy.exists())
+            self.assertFalse(self.discovery_policy.exists())
             self.assertFalse((self.home / ".bashrc").exists())
 
     def test_runtime_path_helper_is_not_declared(self):
         self.assertNotIn("runtime-path.sh", (REPO / ".config/mise/config.toml").read_text())
 
-    def test_managed_guard_symlink_migrates_without_editing_original_source(self):
-        source = self.write(self.config / "old-guard.toml", "override_tool_versions_filenames = []\n")
+    def test_managed_discovery_policy_symlink_migrates_without_editing_original_source(self):
+        source = self.write(self.config / "old-discovery-policy.toml", "override_tool_versions_filenames = []\n")
         self.write(self.config / "config.toml", '[dotfiles."~/.config/mise/miserc.toml"]\n'
-                   'source = "old-guard.toml"\nmode = "symlink"\n')
-        self.assert_success(self.mise("dotfiles", "apply", str(self.guard)))
-        self.assertTrue(self.guard.is_symlink())
+                   'source = "old-discovery-policy.toml"\nmode = "symlink"\n')
+        self.assert_success(self.mise("dotfiles", "apply", str(self.discovery_policy)))
+        self.assertTrue(self.discovery_policy.is_symlink())
         before = source.read_bytes()
         self.write(self.config / "config.toml", self.declarations)
         self.apply()
-        self.assertFalse(self.guard.is_symlink())
-        self.assertIn('[".tool-versions"]', self.guard.read_text())
+        self.assertFalse(self.discovery_policy.is_symlink())
+        self.assertIn('[".tool-versions"]', self.discovery_policy.read_text())
         self.assertEqual(source.read_bytes(), before)
 
-    def test_managed_guard_template_refreshes_from_canonical_policy_without_editing_source(self):
-        source = self.write(self.config / "old-guard.tera", "override_tool_versions_filenames = []\n")
+    def test_managed_discovery_policy_template_refreshes_from_canonical_policy_without_editing_source(self):
+        source = self.write(self.config / "old-discovery-policy.tera", "override_tool_versions_filenames = []\n")
         self.write(self.config / "config.toml", '[dotfiles."~/.config/mise/miserc.toml"]\n'
-                   'source = "old-guard.tera"\nmode = "template"\n')
-        self.assert_success(self.mise("dotfiles", "apply", str(self.guard)))
-        self.assertIn("= []", self.guard.read_text())
+                   'source = "old-discovery-policy.tera"\nmode = "template"\n')
+        self.assert_success(self.mise("dotfiles", "apply", str(self.discovery_policy)))
+        self.assertIn("= []", self.discovery_policy.read_text())
         before = source.read_bytes()
         self.write(self.config / "config.toml", self.declarations)
         self.apply()
-        self.assertFalse(self.guard.is_symlink())
-        self.assertEqual(self.guard.read_bytes(), (REPO / ".config/mise/miserc.toml").read_bytes())
+        self.assertFalse(self.discovery_policy.is_symlink())
+        self.assertEqual(self.discovery_policy.read_bytes(), (REPO / ".config/mise/miserc.toml").read_bytes())
         self.assertEqual(source.read_bytes(), before)
 
 
-class ShellStartupTests(PolicyFixture):
+class ShellStartupTests(MiseFixture):
     def setUp(self):
         super().setUp()
         for shell, names in (("bash", (".bashrc", ".bash_profile")),
@@ -289,7 +289,7 @@ class ShellStartupTests(PolicyFixture):
                     self.assertEqual(self.log.read_text().splitlines(), [f"mise activate {shell}"])
 
     def test_obsolete_policy_is_not_sourced(self):
-        self.write(self.policy, 'echo obsolete-policy-loaded\n'
+        self.write(self.legacy_policy, 'echo obsolete-policy-loaded\n'
                    'DOTFILES_RUNTIME_MANAGER=asdf\nDOTFILES_ENVIRONMENT_LOADER=direnv\n')
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
@@ -427,8 +427,8 @@ class ShellStartupTests(PolicyFixture):
         self.write(install / "bin/node", "#!/bin/sh\necho mise\n", True)
         self.assert_success(self.run_command([MISE, "link", "node@24.0.0", str(install)]))
         self.env.update(APP_MODE="original", MISE_NOT_FOUND_AUTO_INSTALL="0")
-        shutil.copyfile(REPO / ".config/mise/miserc.toml", self.guard)
-        self.write(self.guard.parent / "config.toml", '[tools]\nnode = "24.0.0"\n'
+        shutil.copyfile(REPO / ".config/mise/miserc.toml", self.discovery_policy)
+        self.write(self.discovery_policy.parent / "config.toml", '[tools]\nnode = "24.0.0"\n'
                    '[settings]\nnot_found_auto_install = false\n')
         first, second = self.home / "project-a", self.home / "project-b"
         # .envrc must not be evaluated implicitly.
@@ -500,7 +500,7 @@ class ShellStartupTests(PolicyFixture):
                 self.assertEqual(result.stderr, "")
 
 
-class ProjectTemplateTests(PolicyFixture):
+class ProjectTemplateTests(MiseFixture):
     def setUp(self):
         super().setUp()
         self.templates = self.home / ".config/nvim/templates"
@@ -561,6 +561,35 @@ class ProjectTemplateTests(PolicyFixture):
         result = self.run_command([BASH, str(self.scaffolder), "--all"])
         self.assert_success(result)
         self.assertEqual((self.outside / "mise.toml").read_bytes(), source.read_bytes())
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_scaffolder_discovers_sorted_hidden_and_spaced_templates_only(self):
+        self.write(self.templates / ".hidden.template", "# hidden template\n")
+        self.write(self.templates / "a project.template", "# spaced template\n")
+        self.write(self.templates / "z-last.template", "# last template\n")
+        self.write(self.templates / "notes.txt", "not a template\n")
+        (self.templates / "directory.template").mkdir()
+        (self.templates / "dangling.template").symlink_to(self.root / "missing-template")
+
+        result = self.run_command([BASH, str(self.scaffolder), "--all"])
+        self.assert_success(result)
+        expected = [".hidden", ".nvim.lua", "a project", "mise.toml", "z-last"]
+        written = [line.removeprefix("  wrote ") for line in result.stdout.splitlines()
+                   if line.startswith("  wrote ")]
+        self.assertEqual(written, expected)
+        self.assertEqual(sorted(path.name for path in self.outside.iterdir()), expected)
+        for name in expected:
+            self.assertEqual((self.outside / name).read_bytes(),
+                             (self.templates / f"{name}.template").read_bytes())
+
+    @unittest.skipUnless(BASH, "bash is required")
+    def test_scaffolder_reports_empty_template_directory(self):
+        self.templates.rename(self.root / "original-templates")
+        self.templates.mkdir()
+        result = self.run_command([BASH, str(self.scaffolder), "--all"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no templates found", result.stderr)
+        self.assertEqual(list(self.outside.iterdir()), [])
 
     @unittest.skipUnless(BASH, "bash is required")
     def test_scaffolder_preserves_dangling_symlinks(self):

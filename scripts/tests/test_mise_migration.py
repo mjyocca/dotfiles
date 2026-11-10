@@ -10,7 +10,7 @@ import re
 import shutil
 import unittest
 
-from mise_test_support import BASH, MISE, REPO, ZSH, PolicyFixture
+from mise_test_support import BASH, MISE, REPO, ZSH, MiseFixture
 
 
 MAKE = shutil.which("make")
@@ -19,7 +19,7 @@ ZOXIDE = shutil.which("zoxide")
 
 
 @unittest.skipUnless(MISE and MAKE and BASH, "mise, make and bash are required")
-class MiseMigrationTests(PolicyFixture):
+class MiseMigrationTests(MiseFixture):
     def setUp(self):
         super().setUp()
         sources = (
@@ -78,7 +78,7 @@ class MiseMigrationTests(PolicyFixture):
             shell = "bash" if target.name.startswith(".bash") else "zsh"
             self.assertTrue(target.is_symlink(), str(target))
             self.assertEqual(target.resolve(), REPO / "packages" / shell / target.name)
-        self.assertIn('[".tool-versions"]', self.guard.read_text())
+        self.assertIn('[".tool-versions"]', self.discovery_policy.read_text())
         self.assertTrue((self.home / ".tool-versions").is_symlink())
         editor = "nvim-dotfiles" if profile == "omarchy" else "nvim"
         template = self.home / f".config/{editor}/templates/mise.toml.template"
@@ -94,7 +94,7 @@ class MiseMigrationTests(PolicyFixture):
         if profile == "omarchy":
             self.write(upstream, "-- upstream config, preserve\n")
         self.link(profile, dry_run=True)
-        self.assertFalse(self.guard.exists())
+        self.assertFalse(self.discovery_policy.exists())
         for target in self.startup_paths(profile):
             self.assertFalse(target.exists())
         self.link(profile)
@@ -145,14 +145,14 @@ class MiseMigrationTests(PolicyFixture):
         self.write(self.config / "config.toml", "\n".join(tables))
         result = self.run_command([MISE, "dotfiles", "apply"], cwd=self.checkout)
         self.assert_success(result)
-        self.assertIn("= []", self.guard.read_text())
-        self.assertTrue(self.policy.is_file())
+        self.assertIn("= []", self.discovery_policy.read_text())
+        self.assertTrue(self.legacy_policy.is_file())
         self.assertTrue((self.home / ".asdf-direnv.sh").is_file())
 
     def exercise_legacy_migration(self, profile):
         self.deploy_legacy_configuration(profile)
         preserved = {
-            self.policy: self.policy.read_bytes(),
+            self.legacy_policy: self.legacy_policy.read_bytes(),
             self.home / ".asdfrc": (self.home / ".asdfrc").read_bytes(),
             self.home / ".asdf-direnv.sh": (self.home / ".asdf-direnv.sh").read_bytes(),
         }
@@ -161,7 +161,7 @@ class MiseMigrationTests(PolicyFixture):
             (self.home / ".zshrc.local", "# personal startup\n"),
             (self.home / ".bashrc.local", "# personal startup\n"),
             (self.outside / ".envrc", "export APP_MODE=legacy\n"),
-            (self.guard.parent / "config.local.toml", "# personal mise settings\n"),
+            (self.discovery_policy.parent / "config.local.toml", "# personal mise settings\n"),
             (self.config / "config.local.toml", '[vars]\ndotfiles_runtime_manager = "asdf"\n'),
         ):
             preserved[path] = self.write(path, content).read_bytes()
@@ -209,8 +209,8 @@ class MiseMigrationTests(PolicyFixture):
         self.write(self.bin / "brew", '#!/bin/sh\nprintf "%s\\n" "$HOME/brew"\n', True)
         self.write(self.home / "brew/share/zsh-autosuggestions/zsh-autosuggestions.zsh", "# fixture\n")
         # Exercise installed hook generators, not language installation. Runtime
-        # selection has separate synthetic-runtime coverage in test_shell_policy.
-        self.write(self.guard.parent / "config.toml", "[settings]\nenable_tools = []\n")
+        # selection has separate synthetic-runtime coverage in test_mise_shell.
+        self.write(self.discovery_policy.parent / "config.toml", "[settings]\nenable_tools = []\n")
         self.env["TERM"] = "xterm-256color"
         result = self.run_command([
             ZSH, "-d", "-i", "-c",
