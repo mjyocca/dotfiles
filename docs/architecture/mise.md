@@ -289,6 +289,11 @@ symlink consumers, but neither platform deploys them anymore. Old deployed
 `shell-policy.sh` files are no longer sourced. Removing stale deployed files or
 uninstalling dependencies is a separate, explicitly scoped operation.
 
+Preserving `.envrc` and `.asdf-direnv.sh` keeps them available to older setups;
+it does not load their variables in a mise-only shell. Migrate each project's
+environment manually before relying on those variables under mise. Retain the
+legacy helper until its consumers have been migrated across machines.
+
 ## Official Documentation
 
 - [Configuration and discovery](https://mise.jdx.dev/configuration.html)

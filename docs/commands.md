@@ -85,6 +85,12 @@ mise dot apply --dry-run
 mise bootstrap --only packages --dry-run
 ```
 
+Shell startup does not export a default `MISE_ENV`, and the checkout-local default
+does not set that shell variable. An empty `echo "$MISE_ENV"` is therefore expected.
+To verify platform selection, use `mise config ls` and look for
+`.config/mise/config.<platform>.toml`; `(none)` in its Tools column means it declares
+no runtime tools, not that the configuration is inactive.
+
 Before initial deployment, use Make or explicitly select the environment with
 `mise -E <platform> ...`. Existing workspace defaults and shell exports are
 preserved; deployment will not repair an incorrect create-only default.

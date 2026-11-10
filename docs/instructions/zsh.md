@@ -12,6 +12,9 @@ relying on a copied snapshot of its contents.
   belong in `.zshenv`, not here.
 - Keep `~/.zshrc.local` ignored and sourced **last**.
   Keep machine-specific settings and credentials there, not in shared files.
+- Do not set a shell-wide default for `MISE_ENV`. Keep dotfiles platform selection
+  in Make and the checkout-local environment seed; preserve explicit user exports
+  so unrelated projects can select their own environments.
 
 ## PATH and Hook Ordering
 
