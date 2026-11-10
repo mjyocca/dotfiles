@@ -554,6 +554,27 @@ class ProjectTemplateTests(PolicyFixture):
         shutil.copytree(REPO / "packages/nvim/.config/nvim/templates", self.templates)
         self.scaffolder = REPO / "packages/scripts/.local/bin/dotf.d/init"
 
+    @unittest.skipUnless(shutil.which("git"), "git is required")
+    def test_local_mise_overrides_are_ignored_without_hiding_shared_configs(self):
+        self.assert_success(self.run_command(["git", "init", "-q"]))
+        private = ["mise.local.toml", "mise.dev.local.toml",
+                   ".mise.local.toml", ".mise.dev.local.toml"]
+        private += ["nested/" + name for name in private]
+        shared = ["mise.toml", "mise.dev.toml", ".mise.toml", ".mise.dev.toml",
+                  "nested/mise.toml", "mise.toml.template"]
+        sources = (REPO / ".gitignore",
+                   REPO / "packages/gitconfig/.config/git/.gitignore_global")
+        for source in sources:
+            with self.subTest(source=source):
+                # Check each policy independently, without host ignore settings.
+                ignore = self.write(self.root / "ignore-rules", source.read_text())
+                result = self.run_command([
+                    "git", "-c", f"core.excludesFile={ignore}",
+                    "check-ignore", "--no-index", *private, *shared,
+                ])
+                self.assert_success(result)
+                self.assertEqual(result.stdout.splitlines(), private)
+
     @unittest.skipUnless(BASH, "bash is required")
     def test_scaffolder_generates_mise_not_envrc_without_running_trust_or_install(self):
         self.write(self.bin / "mise", '#!/bin/sh\nprintf "%s\\n" "$*" >> "$TEST_LOG"\nexit 91\n', True)

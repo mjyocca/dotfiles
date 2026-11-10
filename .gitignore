@@ -5,6 +5,12 @@
 .env
 .envrc
 
+# Private project mise overrides, including environment-specific variants.
+mise.local.toml
+mise.*.local.toml
+.mise.local.toml
+.mise.*.local.toml
+
 # Checkout-specific mise deployment exceptions (never deployed).
 .miserc.local.toml
 .config/mise/config.local.toml
