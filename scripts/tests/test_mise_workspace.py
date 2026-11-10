@@ -77,7 +77,7 @@ class MiseWorkspaceTests(unittest.TestCase):
         fragments.mkdir()
         (fragments / "10-dotfiles-tools.toml").write_text('[env]\nTEST_GLOBAL_TOOLS = "inherited"\n')
         (fragments / "20-dotfiles-platform.toml").write_text('[env]\nTEST_GLOBAL_PLATFORM = "inherited"\n')
-        shutil.copyfile(REPO_ROOT / ".config/mise/global/miserc.toml.tera", self.global_config / "miserc.toml")
+        shutil.copyfile(REPO_ROOT / ".config/mise/miserc.toml", self.global_config / "miserc.toml")
 
     def run_mise(self, *arguments, cwd=None, env=None):
         return subprocess.run(

@@ -30,7 +30,7 @@ dotfiles/
 ├── .config/mise/                Declarative provisioning + deployment
 │   ├── config.toml              Shared dotfile definitions
 │   ├── config.<platform>.toml   Platform packages, settings + deployment rules
-│   └── global/                 Global tools + machine policy templates
+│   └── global/                 Global tool fragments
 │       ├── tools.toml           Shared development tools
 │       └── platform*.toml       Platform providers + exclusions
 ├── packages/                    Application dotfiles deployed by mise

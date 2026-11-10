@@ -10,7 +10,7 @@ import re
 import shutil
 import unittest
 
-from test_shell_policy import BASH, MISE, REPO, ZSH, PolicyFixture
+from mise_test_support import BASH, MISE, REPO, ZSH, PolicyFixture
 
 
 MAKE = shutil.which("make")
@@ -28,7 +28,6 @@ class MiseMigrationTests(PolicyFixture):
             ".config/mise/config.toml", ".config/mise/miserc.toml",
             ".config/mise/global/tools.toml", ".config/mise/global/platform.toml",
             ".config/mise/global/platform.omarchy.toml",
-            ".config/mise/global/miserc.toml.tera",
             ".config/mise/conf.d/workspace.toml.example",
             ".config/mise/workspace/opencode.jsonc.example",
             ".config/mise/workspace/miserc.macos.toml",

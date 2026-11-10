@@ -12,7 +12,6 @@ All source files below live in `<repo>/.config/mise/`.
 | `global/tools.toml` | Shared user-global development tools, without runtime requests |
 | `global/platform.toml` | No platform overrides; shared defaults for macOS and other platforms |
 | `global/platform.omarchy.toml` | Omarchy provider selections and exclusions |
-| `global/miserc.toml.tera` | Generated early policy enabling mise's `.tool-versions` discovery |
 | `config.toml` | Platform-neutral dotfile definitions and deployment defaults |
 | `config.macos.toml` | Complete macOS package set, Brew policy, preferences, LaunchAgents, and dotfile selections |
 | `config.omarchy.toml` | Complete Omarchy package set and deployment overrides |
@@ -22,7 +21,7 @@ All source files below live in `<repo>/.config/mise/`.
 | `conf.d/workspace.toml` | Gitignored checkout provisioning, seeded only when missing |
 | `workspace/opencode.jsonc.example` | Sanitized workspace-local OpenCode scaffold |
 | `workspace/miserc.<platform>.toml` | Create-only source for the checkout's ignored `.miserc.local.toml` environment default |
-| `miserc.toml` | Checkout discovery policy and compatibility source for older global symlinks |
+| `miserc.toml` | Checkout discovery policy, also rendered globally; older global symlinks remain compatible |
 | `macos/` | Reserved for future macOS supporting files; retained with `.gitkeep` |
 | `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
 
@@ -93,14 +92,14 @@ without shell initialization. It selects mise's environment, not a parent-shell
 export, and does not select a platform in unrelated projects.
 
 Explicit `-E` and then `MISE_ENV` take precedence over the workspace default.
-Existing shell exports remain unchanged, including Zsh's `macos` default. Initial
-deployment still needs Make's profile selection or explicit `-E`. The seed is
+Shell startup does not set a default `MISE_ENV`; explicit exports remain valid.
+Initial deployment needs Make's profile selection or explicit `-E`. The seed is
 create-only: edit the ignored file locally to change an existing checkout's
 default, rather than expecting another deployment to overwrite it. Environment
 names alone do not perform OS or hostname detection.
 
 Global tools and machine-local configuration still compose normally. Keep the
-workspace selection out of `global/miserc.toml.tera`: that discovery guard
+workspace selection out of `miserc.toml`: that discovery policy
 deploys globally and must not impose this checkout's platform on other projects.
 Do not assume workspace and global `miserc` environment defaults are combined on
 every mise version. If a global environment profile must apply here too, include
@@ -197,7 +196,7 @@ Deployment links tool fragments and renders the machine discovery policy:
     20-dotfiles-platform.toml ───────► global/platform[.omarchy].toml
   config.toml                         Existing machine configuration, preserved
   config.local.toml                   Optional untracked machine overrides
-  miserc.toml                         Rendered from global/miserc.toml.tera
+  miserc.toml                         Rendered from miserc.toml
 ```
 
 Bootstrap and deployment rules are not loaded globally. A declaration does not

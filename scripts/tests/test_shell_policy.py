@@ -8,23 +8,18 @@ import errno
 import fcntl
 import json
 import os
-from pathlib import Path
 import pty
 import re
 import select
 import shlex
 import shutil
 import subprocess
-import tempfile
 import termios
 import time
 import unittest
 
 
-REPO = Path(__file__).resolve().parents[2]
-MISE = shutil.which("mise")
-ZSH = shutil.which("zsh")
-BASH = shutil.which("bash")
+from mise_test_support import BASH, MISE, REPO, ZSH, PolicyFixture
 
 
 class InteractiveSession:
@@ -82,59 +77,6 @@ class InteractiveSession:
         self.process.wait(timeout=5)
 
 
-class PolicyFixture(unittest.TestCase):
-    def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="dotfiles-shell-policy-")
-        self.addCleanup(self.temporary.cleanup)
-        self.root = Path(self.temporary.name).resolve()
-        self.home = self.root / "home with spaces"
-        self.home.mkdir()
-        self.checkout = self.home / "checkout"
-        self.config = self.checkout / ".config/mise"
-        self.config.mkdir(parents=True)
-        self.policy = self.home / ".config/dotfiles/shell-policy.sh"
-        self.guard = self.home / ".config/mise/miserc.toml"
-        self.guard.parent.mkdir(parents=True)
-        self.log = self.root / "commands.log"
-        self.bin = self.home / ".local/bin"
-        self.bin.mkdir(parents=True)
-        self.outside = self.home / "outside"
-        self.outside.mkdir()
-        self.env = {
-            "HOME": str(self.home), "PATH": f"{self.bin}:/usr/bin:/bin",
-            "XDG_CONFIG_HOME": str(self.home / ".config"),
-            "XDG_DATA_HOME": str(self.home / ".local/share"),
-            "XDG_STATE_HOME": str(self.home / ".local/state"),
-            "XDG_CACHE_HOME": str(self.home / ".cache"),
-            "MISE_CONFIG_DIR": str(self.guard.parent),
-            "MISE_SYSTEM_CONFIG_DIR": str(self.root / "system-mise"),
-            "MISE_DATA_DIR": str(self.home / ".local/share/mise"),
-            "MISE_STATE_DIR": str(self.home / ".local/state/mise"),
-            "MISE_CACHE_DIR": str(self.home / ".cache/mise"),
-            "MISE_TRUSTED_CONFIG_PATHS": str(self.home),
-            "MISE_AUTO_INSTALL": "0", "MISE_OFFLINE": "1",
-            "MISE_DISABLE_UPDATE_WARNING": "1",
-            "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
-            "TEST_LOG": str(self.log), "TERM": "dumb",
-        }
-        if "TMPDIR" in os.environ:
-            self.env["TMPDIR"] = os.environ["TMPDIR"]
-
-    def write(self, path, text, executable=False):
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text)
-        if executable:
-            path.chmod(0o755)
-        return path
-
-    def run_command(self, arguments, cwd=None):
-        return subprocess.run(arguments, cwd=cwd or self.outside, env=self.env,
-                              capture_output=True, text=True, timeout=30)
-
-    def assert_success(self, result):
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-
 @unittest.skipUnless(MISE, "mise is required")
 class PolicyDeploymentTests(PolicyFixture):
     def setUp(self):
@@ -142,13 +84,12 @@ class PolicyDeploymentTests(PolicyFixture):
         text = (REPO / ".config/mise/config.toml").read_text()
         # Exercise the actual declarations, without loading the
         # host's provisioning/tool requests or deploying any shell groups.
-        tables = []
-        for header in ('dotfiles."~/.config/mise/miserc.toml"',):
-            table = re.search(r"(?ms)^\[" + re.escape(header) + r"\]\n.*?(?=^\[|\Z)", text)
-            self.assertIsNotNone(table)
-            tables.append(table.group())
-        self.declarations = "\n".join(tables)
+        header = 'dotfiles."~/.config/mise/miserc.toml"'
+        table = re.search(r"(?ms)^\[" + re.escape(header) + r"\]\n.*?(?=^\[|\Z)", text)
+        self.assertIsNotNone(table)
+        self.declarations = table.group()
         self.write(self.config / "config.toml", self.declarations)
+        shutil.copyfile(REPO / ".config/mise/miserc.toml", self.config / "miserc.toml")
         shutil.copytree(REPO / ".config/mise/global", self.config / "global")
         (self.checkout / "packages").symlink_to(REPO / "packages", target_is_directory=True)
         self.local = self.config / "config.local.toml"
@@ -171,10 +112,9 @@ class PolicyDeploymentTests(PolicyFixture):
         self.assertFalse(self.policy.exists())
 
     def test_checkout_and_global_discovery_policies_agree(self):
-        self.assertEqual(
-            (REPO / ".config/mise/miserc.toml").read_text().splitlines()[-1],
-            (REPO / ".config/mise/global/miserc.toml.tera").read_text().splitlines()[-1],
-        )
+        self.apply()
+        self.assertFalse(self.guard.is_symlink())
+        self.assertEqual(self.guard.read_bytes(), (REPO / ".config/mise/miserc.toml").read_bytes())
 
     def test_tracked_runtime_requests_are_discovered_without_installation(self):
         source = (REPO / "packages/tool-versions/.tool-versions").read_text()
@@ -264,6 +204,19 @@ class PolicyDeploymentTests(PolicyFixture):
         self.apply()
         self.assertFalse(self.guard.is_symlink())
         self.assertIn('[".tool-versions"]', self.guard.read_text())
+        self.assertEqual(source.read_bytes(), before)
+
+    def test_managed_guard_template_refreshes_from_canonical_policy_without_editing_source(self):
+        source = self.write(self.config / "old-guard.tera", "override_tool_versions_filenames = []\n")
+        self.write(self.config / "config.toml", '[dotfiles."~/.config/mise/miserc.toml"]\n'
+                   'source = "old-guard.tera"\nmode = "template"\n')
+        self.assert_success(self.mise("dotfiles", "apply", str(self.guard)))
+        self.assertIn("= []", self.guard.read_text())
+        before = source.read_bytes()
+        self.write(self.config / "config.toml", self.declarations)
+        self.apply()
+        self.assertFalse(self.guard.is_symlink())
+        self.assertEqual(self.guard.read_bytes(), (REPO / ".config/mise/miserc.toml").read_bytes())
         self.assertEqual(source.read_bytes(), before)
 
 
@@ -474,7 +427,7 @@ class ShellStartupTests(PolicyFixture):
         self.write(install / "bin/node", "#!/bin/sh\necho mise\n", True)
         self.assert_success(self.run_command([MISE, "link", "node@24.0.0", str(install)]))
         self.env.update(APP_MODE="original", MISE_NOT_FOUND_AUTO_INSTALL="0")
-        shutil.copyfile(REPO / ".config/mise/global/miserc.toml.tera", self.guard)
+        shutil.copyfile(REPO / ".config/mise/miserc.toml", self.guard)
         self.write(self.guard.parent / "config.toml", '[tools]\nnode = "24.0.0"\n'
                    '[settings]\nnot_found_auto_install = false\n')
         first, second = self.home / "project-a", self.home / "project-b"

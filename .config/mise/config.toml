@@ -31,7 +31,8 @@ source = "global/platform.toml"
 mode = "symlink"
 
 [dotfiles."~/.config/mise/miserc.toml"]
-source = "global/miserc.toml.tera"
+source = "miserc.toml"
+# Copy/symlink previews misparse this early policy as ordinary config.
 mode = "template"
 
 [settings.dotfiles]

@@ -1,2 +1,0 @@
-# Mise owns language runtimes, including shared and project .tool-versions files.
-override_tool_versions_filenames = [".tool-versions"]

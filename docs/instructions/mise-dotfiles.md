@@ -17,7 +17,7 @@ composition and global versus checkout scope.
   `.miserc.local.toml` supplies a default only when `-E` and `MISE_ENV` are absent;
   confirm loaded config before applying. Initial deployment needs explicit selection.
 - Keep the workspace environment seed create-only and checkout-scoped. Do not put
-  its `env` selection in the globally rendered discovery guard template.
+  its `env` selection in `miserc.toml`, which is also rendered globally.
 - Preserve Git-filtered manifests and explicit platform group selections. Do not
   turn an empty base selection into an implicit all-platform deployment.
 - Preserve machine-local files, credentials, provider/service configuration, and

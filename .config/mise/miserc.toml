@@ -1,3 +1,3 @@
-# Enable discovery in this checkout and in older global deployments linked here.
-# New deployments render the same policy from global/miserc.toml.tera.
+# Enable discovery in this checkout and in the deployed global policy.
+# Keep checkout-only environment defaults in .miserc.local.toml, not here.
 override_tool_versions_filenames = [".tool-versions"]
