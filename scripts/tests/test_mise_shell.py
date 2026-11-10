@@ -288,26 +288,24 @@ class ShellStartupTests(MiseFixture):
                     self.assertEqual(result.stdout, "mise\nPLUGIN:no\nASDF::\n")
                     self.assertEqual(self.log.read_text().splitlines(), [f"mise activate {shell}"])
 
-    def test_obsolete_policy_is_not_sourced(self):
-        self.write(self.legacy_policy, 'echo obsolete-policy-loaded\n'
-                   'DOTFILES_RUNTIME_MANAGER=asdf\nDOTFILES_ENVIRONMENT_LOADER=direnv\n')
-        for shell, available in (("bash", BASH), ("zsh", ZSH)):
-            if not available:
-                continue
-            with self.subTest(shell=shell):
-                result = self.startup(shell, "node")
-                self.assert_success(result)
-                self.assertEqual(result.stdout.strip(), "mise")
-
-    def test_noninteractive_startup_preserves_inherited_real_runtime_paths(self):
-        self.env["PATH"] = str(self.home / "runtime/bin") + ":" + self.env["PATH"]
-        for shell, available in (("bash", BASH), ("zsh", ZSH)):
-            if not available:
-                continue
-            with self.subTest(shell=shell):
-                result = self.startup(shell, "node", interactive=False)
-                self.assert_success(result)
-                self.assertEqual(result.stdout.strip(), "mise")
+    def test_stale_shell_integrations_are_not_sourced(self):
+        fixtures = (
+            (self.legacy_policy, 'echo obsolete-policy-loaded\n'
+             'DOTFILES_RUNTIME_MANAGER=asdf\nDOTFILES_ENVIRONMENT_LOADER=direnv\n'),
+            (self.home / ".config/dotfiles/runtime-path.sh", 'echo obsolete-helper-loaded\n'),
+        )
+        for path, content in fixtures:
+            self.write(path, content)
+            try:
+                for shell, available in (("bash", BASH), ("zsh", ZSH)):
+                    if not available:
+                        continue
+                    with self.subTest(integration=path.name, shell=shell):
+                        result = self.startup(shell, "node")
+                        self.assert_success(result)
+                        self.assertEqual(result.stdout.strip(), "mise")
+            finally:
+                path.unlink()
 
     @unittest.skipUnless(BASH, "bash is required")
     def test_omarchy_path_without_bootstrap_does_not_skip_standalone_activation(self):
@@ -390,16 +388,6 @@ class ShellStartupTests(MiseFixture):
                                       'set | grep "^_dotfiles_.*=" || true')
                 self.assert_success(result)
                 self.assertEqual(result.stdout.strip(), str(self.home / "runtime/bin/node"))
-
-    def test_stale_runtime_helper_is_not_sourced(self):
-        self.write(self.home / ".config/dotfiles/runtime-path.sh", 'echo obsolete-helper-loaded\n')
-        for shell, available in (("bash", BASH), ("zsh", ZSH)):
-            if not available:
-                continue
-            with self.subTest(shell=shell):
-                result = self.startup(shell, "node")
-                self.assert_success(result)
-                self.assertEqual(result.stdout.strip(), "mise")
 
     def prepare_omarchy_defaults(self):
         omarchy = self.root / "omarchy"

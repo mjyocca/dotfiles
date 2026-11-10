@@ -349,25 +349,18 @@ class ScriptCompositionTests(CheckoutTestCase):
 
     def test_plugins_reuse_existing_installations(self):
         self.prepare_plugin_test()
-        for profile in ("macos", "omarchy"):
-            with self.subTest(profile=profile):
-                self.log.unlink(missing_ok=True)
-                self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
-                self.assertEqual(self.events(), [
-                    "mise which gh --tool gh",
-                    "gh extension list",
-                ])
-
-    def test_obsolete_runtime_preferences_do_not_trigger_asdf_provisioning(self):
-        self.prepare_plugin_test()
-        self.env["DOTFILES_RUNTIME_MANAGER"] = "asdf"
-        for profile in ("macos", "omarchy"):
-            with self.subTest(profile=profile):
-                self.log.unlink(missing_ok=True)
-                self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
-                self.assertEqual(self.events(), [
-                    "mise which gh --tool gh", "gh extension list",
-                ])
+        for preference in (None, "asdf"):
+            if preference is None:
+                self.env.pop("DOTFILES_RUNTIME_MANAGER", None)
+            else:
+                self.env["DOTFILES_RUNTIME_MANAGER"] = preference
+            for profile in ("macos", "omarchy"):
+                with self.subTest(profile=profile, obsolete_runtime_preference=preference):
+                    self.log.unlink(missing_ok=True)
+                    self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
+                    self.assertEqual(self.events(), [
+                        "mise which gh --tool gh", "gh extension list",
+                    ])
 
     def prepare_git_hook_test(self):
         self.write_command("git", f'exec {shlex.quote(GIT)} "$@"\n')
