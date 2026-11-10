@@ -67,6 +67,42 @@ example above covers only Bash startup and discovery policy; see the
 [complete migration deployment](architecture/mise.md#runtimes-and-project-environments)
 for the remaining dotfiles.
 
+## Upgrades
+
+| Command | Scope |
+|---|---|
+| `make upgrade` | Upgrade effective mise tools and runtimes within configured version ranges; keep old versions |
+| `make upgrade-system` | macOS: upgrade installed system packages declared in the effective mise configuration, including Brew formulae and casks. Omarchy: run the official full-system updater |
+
+These are separate from bootstrap and sync. Exact runtime pins stay pinned;
+neither target bumps version requests, deploys dotfiles, or pulls this checkout.
+Effective configuration includes machine-local overrides, not just tracked defaults.
+The macOS system target skips missing packages; use `make packages` to install them.
+
+On Omarchy, `make upgrade-system` requires an interactive terminal and confirmation
+that the update covers the whole system and may prompt for a reboot. It then calls
+`omarchy-update` without bypassing its own prompts. Omarchy manages snapshots,
+migrations, AUR updates, and orphan cleanup. There is no direct Pacman/Yay fallback:
+upgrading only declared Pacman packages risks an unsupported partial upgrade.
+See the [official Omarchy update workflow](https://omarchy.org/manual/updates/).
+
+To run both sequentially, with system updates last because Omarchy may reboot:
+
+```bash
+make upgrade && make upgrade-system
+```
+
+Do not pass both targets to parallel Make; they are independent and could run
+concurrently. For a mise-only preview, select the platform as described below:
+
+```bash
+mise -E macos upgrade --no-prune --dry-run
+mise -E macos bootstrap packages upgrade --dry-run
+```
+
+The second preview is macOS-only; it is not a safe Omarchy upgrade path. The
+Omarchy updater has no equivalent full dry-run exposed by these targets.
+
 ## Utilities
 
 | Command | Responsibility |

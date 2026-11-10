@@ -7,7 +7,7 @@ MISE_ENV ?= $(PROFILE)
 export PROFILE MISE_ENV
 
 .PHONY: help check-profile bootstrap sync prerequisites packages repos link tools \
-        plugins config hooks aur ghostty-shader
+         plugins config hooks upgrade upgrade-system aur ghostty-shader
 
 help:
 	@printf '%s\n' \
@@ -28,6 +28,8 @@ help:
 	  '  hooks          Install the repository Gitleaks pre-commit hook' \
 	  '' \
 	  'Utilities:' \
+	  '  upgrade        Upgrade effective mise tools within configured ranges' \
+	  '  upgrade-system Upgrade configured macOS packages or the whole Omarchy system' \
 	  '  aur            Install Omarchy AUR packages with interactive review' \
 	  '  ghostty-shader Import shaders; requires REPO=<git-url>' \
 	  '' \
@@ -43,7 +45,7 @@ check-profile:
 	@test "$$MISE_ENV" = "$$PROFILE" || \
 	  { echo "MISE_ENV=$$MISE_ENV conflicts with PROFILE=$$PROFILE; select the same single platform." >&2; exit 1; }
 
-bootstrap sync prerequisites packages repos link tools plugins config hooks aur: | check-profile
+bootstrap sync prerequisites packages repos link tools plugins config hooks upgrade upgrade-system aur: | check-profile
 
 # Platform entrypoints are explicit; inheritance lives in their source statements.
 define run_platform_script
@@ -86,6 +88,12 @@ link:
 
 tools:
 	@bash ./scripts/shared/tools.sh $(TOOLS_ARGS)
+
+upgrade:
+	@bash ./scripts/shared/upgrade.sh
+
+upgrade-system:
+	$(call run_platform_script,upgrade-system)
 
 plugins:
 	$(call run_platform_script,plugins)
