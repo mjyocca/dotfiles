@@ -198,9 +198,6 @@ Deployment links tool fragments and renders the machine discovery policy:
   config.toml                         Existing machine configuration, preserved
   config.local.toml                   Optional untracked machine overrides
   miserc.toml                         Rendered from global/miserc.toml.tera
-
-~/.config/dotfiles/
-  runtime-path.sh                     Linked from <repo>/packages/shell/.config/dotfiles/runtime-path.sh
 ```
 
 Bootstrap and deployment rules are not loaded globally. A declaration does not
@@ -235,12 +232,11 @@ updates. No direnv hook, asdf completion/plugin initialization, or global asdf
 version-export mechanism is registered. The former runtime/environment selectors
 are no longer read; old checkout-local preference values have no effect.
 
-Zsh loads the shared mise shim helper in `.zshenv`; Bash loads it in `.bashrc`,
-which `.bash_profile` also sources. The helper uses only shell built-ins, removes
-inherited asdf shim entries, deduplicates mise shims, and preserves other PATH
-entries, including empty fields. It leaves no temporary variables or functions.
-Interactive activation then adds real tool paths; startup does not re-prepend
-shims afterward. Machine-local shell overrides remain last.
+Zsh activates mise in `.zshrc`; standalone Bash activates it in the interactive
+portion of `.bashrc`, which `.bash_profile` also sources. Activation adds real
+tool paths. Non-interactive startup does not inject shims ahead of inherited
+paths, so child shells retain the launching runtime even when their working
+directory changes. Machine-local shell overrides remain last.
 
 Ordinary non-interactive Bash does not automatically read `.bashrc`. Scripts
 inherit PATH or use `mise exec -- <command>` to resolve a project explicitly.
@@ -249,19 +245,19 @@ not wrap that invocation or activate it a second time. Verify actual startup
 against the installed Omarchy version.
 
 Before deployment, inspect effective mise configuration, platform group selection,
-and target collisions. A scoped preview and apply for discovery and the helper are:
+and target collisions. A scoped preview and apply for discovery and Zsh startup are:
 
 ```bash
-make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.config/dotfiles/runtime-path.sh'
-make link DOTFILES_ARGS='~/.config/mise/miserc.toml ~/.config/dotfiles/runtime-path.sh'
+make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
+make link DOTFILES_ARGS='~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
 ```
 
-The updated shell files, Neovim templates, scaffolder, and prompt configuration
-also need deployment on a first installation. Already-linked files expose checkout
-edits before deployment. Helper loading is guarded while its target is absent,
-but its PATH cleanup requires deployment. Native `depends` orders selected entries
-without expanding a scoped apply. Open a fresh shell afterward; re-sourcing does
-not reliably remove old hooks or environment state.
+For Bash, select `~/.bashrc` and `~/.bash_profile` instead of the Zsh files. The
+Neovim templates, scaffolder, and prompt configuration also need deployment on a
+first installation. Already-linked files expose checkout edits before deployment.
+Native `depends` orders selected entries without expanding a scoped apply. Open
+a fresh shell afterward; re-sourcing does not reliably remove old hooks or
+environment state.
 
 Review `.tool-versions` requests for mise backend compatibility before installing.
 The checkout discovery policy and deployed global policy both enable these files.

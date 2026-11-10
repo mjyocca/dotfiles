@@ -17,9 +17,8 @@ paths; do not assume non-interactive Bash reads `.bashrc`.
 ## Change Constraints
 
 - Add PATH entries with idempotent `case ":$PATH:"` guards. Inspect the resulting
-  order after tool activation. Use `packages/shell/.config/dotfiles/runtime-path.sh`
-  for early mise shim setup and deduplication. Do not re-prepend shims over the
-  real tool paths added by full mise activation.
+  order after tool activation. Keep mise activation after the interactive guard;
+  non-interactive children inherit real tool paths. Do not prepend shims over them.
 - Put script-relevant exports before the interactive check; keep prompts,
   aliases, completions, and hooks after it. Guard new optional hooks with
   `command -v` and keep one concern per commented section.

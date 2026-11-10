@@ -30,8 +30,8 @@ composition and global versus checkout scope.
 - Deploy mise's discovery policy before `.tool-versions` files.
 - Keep provisioning rules repository-scoped and tool defaults global. Prefer
   native mise features over custom configuration merging.
-- Include the discovery policy and shared runtime PATH helper when deploying shell
-  changes. Native dependencies order selected targets but do not expand a scoped
+- Include the discovery policy when deploying interactive shell changes.
+  Native dependencies order selected targets but do not expand a scoped
   apply; template dry-runs do not validate rendered content. See
   [runtime architecture](../architecture/mise.md#runtimes-and-project-environments).
 

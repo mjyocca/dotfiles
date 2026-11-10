@@ -4,6 +4,8 @@
 # Must precede every tool init below (starship, fzf, zoxide...):
 # mise-managed binaries replace the former brew copies.
 # Mirrors packages/bash/.bashrc on Omarchy.
+# Non-interactive children inherit real tool paths. Keep shim setup out of
+# .zshenv so child shells do not reselect runtimes using their own cwd.
 if command -v mise &>/dev/null; then
   eval "$(mise activate zsh)"
 fi

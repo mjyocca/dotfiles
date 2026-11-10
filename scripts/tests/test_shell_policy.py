@@ -93,7 +93,6 @@ class PolicyFixture(unittest.TestCase):
         self.config = self.checkout / ".config/mise"
         self.config.mkdir(parents=True)
         self.policy = self.home / ".config/dotfiles/shell-policy.sh"
-        self.runtime_helper = self.home / ".config/dotfiles/runtime-path.sh"
         self.guard = self.home / ".config/mise/miserc.toml"
         self.guard.parent.mkdir(parents=True)
         self.log = self.root / "commands.log"
@@ -144,8 +143,7 @@ class PolicyDeploymentTests(PolicyFixture):
         # Exercise the actual declarations, without loading the
         # host's provisioning/tool requests or deploying any shell groups.
         tables = []
-        for header in ('dotfiles."~/.config/dotfiles/runtime-path.sh"',
-                       'dotfiles."~/.config/mise/miserc.toml"'):
+        for header in ('dotfiles."~/.config/mise/miserc.toml"',):
             table = re.search(r"(?ms)^\[" + re.escape(header) + r"\]\n.*?(?=^\[|\Z)", text)
             self.assertIsNotNone(table)
             tables.append(table.group())
@@ -153,15 +151,13 @@ class PolicyDeploymentTests(PolicyFixture):
         self.write(self.config / "config.toml", self.declarations)
         shutil.copytree(REPO / ".config/mise/global", self.config / "global")
         (self.checkout / "packages").symlink_to(REPO / "packages", target_is_directory=True)
-        self.helper_source = self.checkout / "packages/shell/.config/dotfiles/runtime-path.sh"
         self.local = self.config / "config.local.toml"
 
     def mise(self, *arguments, cwd=None):
         return self.run_command([MISE, *arguments], cwd=cwd or self.checkout)
 
     def apply(self):
-        # Native depends orders selected entries; it does not expand target scope.
-        self.assert_success(self.mise("dotfiles", "apply", str(self.runtime_helper), str(self.guard)))
+        self.assert_success(self.mise("dotfiles", "apply", str(self.guard)))
 
     def test_mise_discovers_tool_versions_and_explicit_toml_tools(self):
         project = self.home / "project"
@@ -241,26 +237,21 @@ class PolicyDeploymentTests(PolicyFixture):
             if profile == "macos":
                 shell_targets += [str(self.home / ".zshenv"), str(self.home / ".zshrc")]
             result = self.mise("-E", profile, "dotfiles", "apply", "--dry-run",
-                               str(self.guard), str(self.runtime_helper), *shell_targets)
+                               str(self.guard), *shell_targets)
             self.assert_success(result)
             self.assertNotIn("unknown field", result.stderr)
             self.assertNotIn("ignoring group", result.stderr)
             self.assertIn("ln -sf", result.stdout)
             self.assertIn(" ~/.bashrc", result.stdout)
             self.assertNotIn("shell-policy.sh", result.stdout)
-            self.assertLess(result.stdout.index(" ~/.config/dotfiles/runtime-path.sh"),
+            self.assertLess(result.stdout.index(" ~/.config/mise/miserc.toml"),
                             result.stdout.index(" ~/.bashrc"))
             self.assertFalse(self.policy.exists())
             self.assertFalse(self.guard.exists())
-            self.assertFalse(self.runtime_helper.exists())
             self.assertFalse((self.home / ".bashrc").exists())
 
-    def test_runtime_helper_is_deployed_as_a_symlink(self):
-        self.apply()
-        self.assertTrue(self.runtime_helper.is_symlink())
-        self.assertEqual(self.runtime_helper.resolve(), self.helper_source.resolve())
-        self.assertFalse(self.policy.exists())
-        self.assertTrue(self.guard.exists())
+    def test_runtime_path_helper_is_not_declared(self):
+        self.assertNotIn("runtime-path.sh", (REPO / ".config/mise/config.toml").read_text())
 
     def test_managed_guard_symlink_migrates_without_editing_original_source(self):
         source = self.write(self.config / "old-guard.toml", "override_tool_versions_filenames = []\n")
@@ -279,7 +270,6 @@ class PolicyDeploymentTests(PolicyFixture):
 class ShellStartupTests(PolicyFixture):
     def setUp(self):
         super().setUp()
-        self.write(self.runtime_helper, (REPO / "packages/shell/.config/dotfiles/runtime-path.sh").read_text())
         for shell, names in (("bash", (".bashrc", ".bash_profile")),
                              ("zsh", (".zshrc", ".zshenv"))):
             for name in names:
@@ -356,9 +346,8 @@ class ShellStartupTests(PolicyFixture):
                 self.assert_success(result)
                 self.assertEqual(result.stdout.strip(), "mise")
 
-    def test_missing_helper_preserves_inherited_runtime_path_without_source_errors(self):
-        self.runtime_helper.unlink()
-        self.env["PATH"] = str(self.home / ".local/share/mise/shims") + ":" + self.env["PATH"]
+    def test_noninteractive_startup_preserves_inherited_real_runtime_paths(self):
+        self.env["PATH"] = str(self.home / "runtime/bin") + ":" + self.env["PATH"]
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
@@ -376,7 +365,8 @@ class ShellStartupTests(PolicyFixture):
         self.assertEqual(self.log.read_text().splitlines(),
                          ["mise activate bash"])
 
-    def test_noninteractive_startup_has_runtime_shims_but_no_hooks(self):
+    def test_noninteractive_startup_does_not_activate_mise(self):
+        self.env["PATH"] = str(self.home / "runtime/bin") + ":" + self.env["PATH"]
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
@@ -397,45 +387,44 @@ class ShellStartupTests(PolicyFixture):
             self.assert_success(result)
             self.assertEqual(result.stdout.strip(), "local")
 
-    def test_inherited_runtime_paths_are_reordered_without_adding_duplicates(self):
+    def test_noninteractive_startup_preserves_inherited_runtime_path_order(self):
         shims = {"asdf": str(self.home / ".asdf/shims"),
                  "mise": str(self.home / ".local/share/mise/shims")}
         original_path = self.env["PATH"]
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
-            inherited = [shims["asdf"], shims["mise"], "", shims["mise"], *original_path.split(":")]
-            for interactive in (False, True):
-                with self.subTest(shell=shell, interactive=interactive):
-                    self.env["PATH"] = ":".join(inherited)
-                    entry = ".bashrc" if shell == "bash" else ".zshenv"
-                    command = f'source "$HOME/{entry}"; node; printf "__PATH__%s\\n" "$PATH"'
-                    result = self.startup(shell, command, interactive=interactive)
-                    self.assert_success(result)
-                    self.assertEqual(result.stdout.splitlines()[0], "mise")
-                    path = next(line[len("__PATH__"):] for line in result.stdout.splitlines()
-                                if line.startswith("__PATH__")).split(":")
-                    self.assertEqual(path.count(shims["mise"]), 1)
-                    self.assertNotIn(shims["asdf"], path)
-                    self.assertEqual(path.count(""), 1)
+            inherited = [str(self.home / "runtime/bin"), shims["asdf"], shims["mise"], "", *original_path.split(":")]
+            with self.subTest(shell=shell):
+                self.env["PATH"] = ":".join(inherited)
+                entry = ".bashrc" if shell == "bash" else ".zshenv"
+                command = f'source "$HOME/{entry}"; node; printf "__PATH__%s\\n" "$PATH"'
+                result = self.startup(shell, command, interactive=False)
+                self.assert_success(result)
+                self.assertEqual(result.stdout.splitlines()[0], "mise")
+                path = next(line[len("__PATH__"):] for line in result.stdout.splitlines()
+                            if line.startswith("__PATH__")).split(":")
+                self.assertEqual(path.count(shims["mise"]), 1)
+                self.assertEqual(path[-len(inherited):], inherited)
+                self.assertEqual(path.count(""), 1)
 
-    def test_runtime_shim_directory_names_are_matched_literally(self):
+    def test_noninteractive_startup_does_not_inject_custom_shim_directories(self):
         original_path = self.env["PATH"]
         data = self.home / "mise [custom]"
         asdf_data = self.home / "asdf [custom]"
-        self.write(data / "shims/node", "#!/bin/sh\necho mise\n", True)
+        self.write(data / "installs/node/24/bin/node", "#!/bin/sh\necho mise\n", True)
         self.env.update(MISE_DATA_DIR=str(data), ASDF_DATA_DIR=str(asdf_data))
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
             with self.subTest(shell=shell):
-                self.env["PATH"] = f"{asdf_data}/shims:{original_path}:{data}/shims:{data}/shims"
+                self.env["PATH"] = f"{data}/installs/node/24/bin:{original_path}"
                 result = self.startup(shell, 'node; printf "__PATH__%s\\n" "$PATH"; '
-                                      'printf "__ASDF__%s\\n" "$ASDF_DATA_DIR"')
+                                      'printf "__ASDF__%s\\n" "$ASDF_DATA_DIR"', interactive=False)
                 self.assert_success(result)
                 self.assertEqual(result.stdout.splitlines()[0], "mise")
                 path = result.stdout.split("__PATH__", 1)[1].splitlines()[0].split(":")
-                self.assertEqual(path.count(str(data / "shims")), 1)
+                self.assertNotIn(str(data / "shims"), path)
                 self.assertNotIn(str(asdf_data / "shims"), path)
                 self.assertIn("__ASDF__" + str(asdf_data), result.stdout)
 
@@ -449,8 +438,8 @@ class ShellStartupTests(PolicyFixture):
                 self.assert_success(result)
                 self.assertEqual(result.stdout.strip(), str(self.home / "runtime/bin/node"))
 
-    def test_missing_helper_still_allows_full_interactive_activation(self):
-        self.runtime_helper.unlink()
+    def test_stale_runtime_helper_is_not_sourced(self):
+        self.write(self.home / ".config/dotfiles/runtime-path.sh", 'echo obsolete-helper-loaded\n')
         for shell, available in (("bash", BASH), ("zsh", ZSH)):
             if not available:
                 continue
@@ -547,10 +536,15 @@ class ShellStartupTests(PolicyFixture):
         self.write(alternate / "bin/node", "#!/bin/sh\necho project-runtime\n", True)
         self.assert_success(self.run_command([MISE, "link", "node@25.0.0", str(alternate)]))
         self.write(first / ".tool-versions", "nodejs 25.0.0\n")
-        result = self.run_command([MISE, "exec", "--", "/bin/sh", "-c",
-                                   'cd "$HOME/outside"; node'], cwd=first)
-        self.assert_success(result)
-        self.assertEqual(result.stdout.strip(), "project-runtime")
+        for shell in ("/bin/sh", BASH, ZSH):
+            if not shell:
+                continue
+            with self.subTest(shell=shell):
+                result = self.run_command([MISE, "exec", "--", shell, "-c",
+                                           'cd "$HOME/outside"; node'], cwd=first)
+                self.assert_success(result)
+                self.assertEqual(result.stdout.strip(), "project-runtime")
+                self.assertEqual(result.stderr, "")
 
 
 class ProjectTemplateTests(PolicyFixture):

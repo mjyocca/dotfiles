@@ -34,11 +34,6 @@ mode = "symlink"
 source = "global/miserc.toml.tera"
 mode = "template"
 
-[dotfiles."~/.config/dotfiles/runtime-path.sh"]
-source = "../../packages/shell/.config/dotfiles/runtime-path.sh"
-mode = "symlink"
-depends = ["~/.config/mise/miserc.toml"]
-
 [settings.dotfiles]
 root = "../../packages"
 default_mode = "symlink-each"
@@ -50,8 +45,8 @@ manifest = "git"
 
 # Explicit targets allow a scoped apply without selecting every home-rooted group.
 [dotfile_groups.bash.entries]
-"~/.bashrc" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
-"~/.bash_profile" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
+"~/.bashrc" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
+"~/.bash_profile" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
 "~/.config/bash/nvim.bash" = { mode = "symlink" }
 
 [dotfile_groups.bat]
@@ -214,8 +209,8 @@ root = "zsh"
 manifest = "git"
 
 [dotfile_groups.zsh.entries]
-"~/.zshenv" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
-"~/.zshrc" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
+"~/.zshenv" = { mode = "symlink" }
+"~/.zshrc" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
 
 [bootstrap]
 # Select a platform environment before deploying; no implicit all-platform apply.

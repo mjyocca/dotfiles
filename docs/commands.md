@@ -40,7 +40,7 @@ Sync also skips prerequisites, platform preferences, and repository hook install
 | `make prerequisites` | Install/reuse mise and ensure platform prerequisites |
 | `make packages` | Install system packages, including interactive AUR review on Omarchy |
 | `make repos` | Provision optional configured workspace checkouts; does not request updates to latest remote commits |
-| `make link` | Deploy selected dotfiles, global mise tool fragments, runtime PATH helper, and discovery policy |
+| `make link` | Deploy selected dotfiles, global mise tool fragments, and discovery policy |
 | `make tools` | Install effective mise tool requests; requires deployed global configuration |
 | `make plugins` | Install TPM, gh-dash, and the pinned Zellij plugin |
 | `make config` | Apply additional platform preferences where implemented |

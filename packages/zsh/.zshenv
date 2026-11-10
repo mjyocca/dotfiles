@@ -16,11 +16,6 @@ case ":$PATH:" in
 esac
 
 # ================================================================
-# Mise shims — no commands or project discovery here
-# ================================================================
-[[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
-
-# ================================================================
 # XDG Base Directories
 # ================================================================
 # Force XDG paths on macOS so tools default to ~/.config, ~/.local/share, etc.

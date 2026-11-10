@@ -17,9 +17,6 @@ case ":$PATH:" in
   *) export PATH="$HOME/bin:$PATH" ;;
 esac
 
-# Stable mise shims for scripts; interactive activation adds real tool paths.
-[[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
-
 # XDG Base Directories
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -62,7 +59,8 @@ fi
 # On Omarchy, these are already handled by the rc sourced above.
 # On other systems, initialize them ourselves.
 if [[ "$_dotfiles_omarchy_loaded" == 0 ]]; then
-  # Activate before tools that may need mise-managed binaries.
+  # Activate before tools that may need mise-managed binaries. Non-interactive
+  # children inherit these real tool paths; do not put shims ahead of them.
   if command -v mise &>/dev/null; then
     eval "$(mise activate bash)"
   fi

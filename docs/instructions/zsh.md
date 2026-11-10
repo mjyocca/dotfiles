@@ -18,12 +18,12 @@ relying on a copied snapshot of its contents.
 Use idempotent `case ":$PATH:"` guards for new PATH entries in either startup
 file. Interactive-only entries are allowed in `.zshrc`; entries scripts need go
 in `.zshenv`. Keep one concern per commented section.
-Use `packages/shell/.config/dotfiles/runtime-path.sh` for early mise shim setup and
-deduplication rather than adding shell-specific implementations. Do not re-prepend
-shims after full mise activation adds real tool paths.
+Keep mise activation in `.zshrc`. Do not inject shims in `.zshenv`: non-interactive
+children must retain inherited real runtime paths rather than reselect versions
+from their own working directory.
 
-Check non-interactive shims separately from interactive activation; local overrides
-may intentionally change command resolution afterward.
+Check non-interactive inheritance separately from interactive activation; local
+overrides may intentionally change command resolution afterward.
 
 Keep mise activation before hooks that need its tools. Add availability guards
 for new optional hooks; do not assume every machine has an optional dependency.
