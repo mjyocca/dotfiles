@@ -16,16 +16,6 @@ case ":$PATH:" in
 esac
 
 # ================================================================
-# asdf — shims must be on PATH for all shells and scripts
-# ================================================================
-export ASDF_DATA_DIR="$HOME/.asdf"
-
-case ":$PATH:" in
-  *":${ASDF_DATA_DIR}/shims:"*) ;;
-  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
-esac
-
-# ================================================================
 # XDG Base Directories
 # ================================================================
 # Force XDG paths on macOS so tools default to ~/.config, ~/.local/share, etc.
@@ -35,13 +25,6 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
-
-# ================================================================
-# mise platform selection
-# ================================================================
-# Set platform for mise dotfiles configuration. This must be in .zshenv so it's
-# available in all shells (interactive, scripts, cron). Preserve explicit overrides.
-export MISE_ENV="${MISE_ENV:-macos}"
 
 # ================================================================
 # Standard environment

@@ -1,4 +1,10 @@
 
+# Private project mise overrides, including environment-specific variants.
+mise.local.toml
+mise.*.local.toml
+.mise.local.toml
+.mise.*.local.toml
+
 # OSX/MacOS generated files
 .AppleDB
 .AppleDesktop

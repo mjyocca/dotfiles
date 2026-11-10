@@ -1,3 +1,6 @@
+# Legacy compatibility source; no longer deployed by the dotfiles.
+# Retained so existing linked copies and project .envrc consumers do not break.
+# Migrate consumers to mise; new projects use the mise.toml Neovim template.
 # ~/.asdf-direnv.sh — source this from a project's .envrc via:
 #   source ~/.asdf-direnv.sh
 #

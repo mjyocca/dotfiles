@@ -6,6 +6,14 @@
   store, never shared configuration. Use `$HOME` or `~`, not user-specific paths.
 - Preserve Git-filtered deployment manifests and ignore machine-local files in
   the source tree. Inspect effective deployment scope before assuming a file is excluded.
+- Before writing private values to a local mise override, verify the destination
+  is ignored with `git check-ignore` and is not already tracked. A `.local.toml`
+  suffix alone does not protect a file from commits.
+- Do not read or source existing secret-bearing `.envrc`, dotenv, or local override
+  files during routine migration audits. Use synthetic fixtures or request narrowly
+  scoped, redacted input when needed. Avoid resolved environment dumps such as
+  `mise env` or `printenv`; use `mise config ls` to inspect config selection without
+  printing resolved values.
 - Enter SSH key passphrases only through interactive prompts, never environment
   variables, command arguments, or key comments. Do not overwrite existing keys.
   If the old `scripts/github-ssh.sh` helper was used with a real `SSH_PASSPHRASE`,

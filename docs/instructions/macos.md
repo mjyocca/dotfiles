@@ -9,7 +9,7 @@ canonical `docs/instructions/package-management.md` policy.
 - `.config/mise/config.macos.toml` owns the complete macOS system package set;
   `.config/mise/config.toml` holds platform-neutral deployment definitions.
   Formulas use `brew:`, casks use `brew-cask:` under `[bootstrap.packages]`.
-- Shared dev tools and asdf-owned runtimes have separate declarations identified
+- Shared dev tools and language runtimes have separate declarations identified
   in the package policy; do not change runtime ownership incidentally.
 - Fresh setup requires completed Command Line Tools, then installs standalone
   mise (if absent) before Homebrew. Existing mise providers are preserved.

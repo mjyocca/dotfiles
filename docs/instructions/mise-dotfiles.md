@@ -17,7 +17,7 @@ composition and global versus checkout scope.
   `.miserc.local.toml` supplies a default only when `-E` and `MISE_ENV` are absent;
   confirm loaded config before applying. Initial deployment needs explicit selection.
 - Keep the workspace environment seed create-only and checkout-scoped. Do not put
-  its `env` selection in the shared `miserc.toml`, which also deploys globally.
+  its `env` selection in `miserc.toml`, which is also rendered globally.
 - Preserve Git-filtered manifests and explicit platform group selections. Do not
   turn an empty base selection into an implicit all-platform deployment.
 - Preserve machine-local files, credentials, provider/service configuration, and
@@ -27,9 +27,13 @@ composition and global versus checkout scope.
   overrides rather than rendered files.
 - Preserve checkout-local exclusions. Confirm group replacement semantics before
   editing an override; deselection does not remove previously deployed files.
-- Deploy mise's discovery guard before asdf-owned `.tool-versions` files.
+- Deploy mise's discovery policy before `.tool-versions` files.
 - Keep provisioning rules repository-scoped and tool defaults global. Prefer
   native mise features over custom configuration merging.
+- Include the discovery policy when deploying interactive shell changes.
+  Native dependencies order selected targets but do not expand a scoped
+  apply; template dry-runs do not validate rendered content. See
+  [runtime architecture](../architecture/mise.md#runtimes-and-project-environments).
 
 ## Editing Deployment Configuration
 

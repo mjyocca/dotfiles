@@ -31,6 +31,7 @@ a site deployment, not a content change; an absent date is not evidence of stale
 ## Configuration Managers
 
 - [mise configuration](https://mise.jdx.dev/configuration.html) · [dotfiles](https://mise.jdx.dev/dotfiles.html)
+- [mise development tools and runtimes](https://mise.jdx.dev/dev-tools/) · [project environment variables](https://mise.jdx.dev/environments/)
 - [asdf configuration](https://asdf-vm.com/manage/configuration.html)
 - [Omarchy manual](https://omarchy.org/manual/)
 

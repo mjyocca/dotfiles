@@ -25,14 +25,16 @@ if [[ ! -d "$template_dir" ]]; then
   exit 1
 fi
 
-# Build list of available templates (strip .template suffix for display)
-# find is used instead of a glob because template filenames start with '.' and
-# bash globs exclude dotfiles by default.
-mapfile -t available < <(
-  find "$template_dir" -maxdepth 1 -name '*.template' -type f \
-    | sort \
-    | xargs -I{} basename {} .template
-)
+# Globs include hidden templates and sort names without external commands.
+# Accept symlinks to files, but skip directories and dangling symlinks.
+shopt -s nullglob dotglob
+available=()
+for template in "$template_dir"/*.template; do
+  [[ -f "$template" ]] || continue
+  file="${template##*/}"
+  available+=("${file%.template}")
+done
+shopt -u nullglob dotglob
 
 if [[ ${#available[@]} -eq 0 ]]; then
   echo "init: no templates found in $template_dir" >&2
@@ -73,7 +75,7 @@ for file in "${selected[@]}"; do
     continue
   fi
 
-  if [[ -f "$dest" ]]; then
+  if [[ -e "$dest" || -L "$dest" ]]; then
     echo "  skip  ${file} (already exists)"
   else
     cp "$template" "$dest"
@@ -87,8 +89,12 @@ done
 if [[ ${#written[@]} -gt 0 ]]; then
   echo ""
   echo "Next steps:"
-  [[ -f "${PWD}/.envrc" ]] && echo "  direnv allow    # if using direnv"
   for f in "${written[@]}"; do
     echo "  edit ${f}"
   done
+  if [[ " ${written[*]} " == *" mise.toml "* ]]; then
+    echo "  mise trust     # only after reviewing mise.toml"
+    echo "  mise install   # install the runtimes you declared"
+    echo "  mise exec -- nvim  # launch with project tools and environment"
+  fi
 fi

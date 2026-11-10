@@ -17,13 +17,6 @@ case ":$PATH:" in
   *) export PATH="$HOME/bin:$PATH" ;;
 esac
 
-# asdf shims (for all shells and scripts)
-export ASDF_DATA_DIR="$HOME/.asdf"
-case ":$PATH:" in
-  *":${ASDF_DATA_DIR}/shims:"*) ;;
-  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
-esac
-
 # XDG Base Directories
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -37,20 +30,27 @@ export PAGER="less"
 # ================================================================
 # Omarchy bootstrap (Linux only)
 # ================================================================
-if [[ -r /usr/share/omarchy/default/bash/env-bootstrap ]]; then
-  source /usr/share/omarchy/default/bash/env-bootstrap
+_dotfiles_omarchy_loaded=0
+if [[ -r "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/env-bootstrap" ]]; then
+  source "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/env-bootstrap"
+  _dotfiles_omarchy_loaded=1
   # Keep Omarchy's Neovim untouched; prefer our isolated config when deployed.
   # Explicit NVIM_APPNAME selections (including variant aliases) take precedence.
   if [[ -d "$XDG_CONFIG_HOME/nvim-dotfiles" ]]; then
     export NVIM_APPNAME="${NVIM_APPNAME:-nvim-dotfiles}"
   fi
-  # Non-interactive shells stop here (after env setup)
-  [[ $- != *i* ]] && return
+fi
+
+# Non-interactive shells stop after environment setup.
+if [[ $- != *i* ]]; then
+  unset _dotfiles_omarchy_loaded
+  return
+fi
+
+if [[ "$_dotfiles_omarchy_loaded" == 1 ]]; then
   # Source Omarchy defaults (starship, mise, zoxide, fzf, completions, aliases)
+  # Upstream's full mise activation owns runtimes and project environments.
   source "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/rc"
-else
-  # Non-Omarchy: exit early for non-interactive
-  [[ $- != *i* ]] && return
 fi
 
 # ================================================================
@@ -58,12 +58,15 @@ fi
 # ================================================================
 # On Omarchy, these are already handled by the rc sourced above.
 # On other systems, initialize them ourselves.
-if [[ -z "${OMARCHY_PATH:-}" ]]; then
+if [[ "$_dotfiles_omarchy_loaded" == 0 ]]; then
+  # Activate before tools that may need mise-managed binaries. Non-interactive
+  # children inherit these real tool paths; do not put shims ahead of them.
+  if command -v mise &>/dev/null; then
+    eval "$(mise activate bash)"
+  fi
+
   # Starship prompt
   command -v starship &>/dev/null && eval "$(starship init bash)"
-  
-  # mise activation
-  command -v mise &>/dev/null && eval "$(mise activate bash)"
   
   # zoxide (better cd)
   command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
@@ -94,14 +97,12 @@ fi
 # ================================================================
 
 # Let the deployed bat config select its custom theme instead of Omarchy's ANSI default.
-if [[ -n "${OMARCHY_PATH:-}" && "${BAT_THEME:-}" == ansi &&
+if [[ "$_dotfiles_omarchy_loaded" == 1 && "${BAT_THEME:-}" == ansi &&
       -r "$XDG_CONFIG_HOME/bat/config" &&
       -r "$XDG_CONFIG_HOME/bat/themes/GitHub Dark.tmTheme" ]]; then
   unset BAT_THEME
 fi
-
-# direnv (see https://github.com/direnv/direnv)
-command -v direnv &>/dev/null && eval "$(direnv hook bash)"
+unset _dotfiles_omarchy_loaded
 
 # PNPM (see https://pnpm.io/installation)
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"

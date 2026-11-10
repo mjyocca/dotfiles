@@ -12,21 +12,28 @@ relying on a copied snapshot of its contents.
   belong in `.zshenv`, not here.
 - Keep `~/.zshrc.local` ignored and sourced **last**.
   Keep machine-specific settings and credentials there, not in shared files.
+- Do not set a shell-wide default for `MISE_ENV`. Keep dotfiles platform selection
+  in Make and the checkout-local environment seed; preserve explicit user exports
+  so unrelated projects can select their own environments.
 
 ## PATH and Hook Ordering
 
 Use idempotent `case ":$PATH:"` guards for new PATH entries in either startup
 file. Interactive-only entries are allowed in `.zshrc`; entries scripts need go
 in `.zshenv`. Keep one concern per commented section.
+Keep mise activation in `.zshrc`. Do not inject shims in `.zshenv`: non-interactive
+children must retain inherited real runtime paths rather than reselect versions
+from their own working directory.
 
-Preserve asdf shim availability in non-interactive shells and priority after
-interactive tool activation. Inspect the late `.zshrc` PATH adjustment before
-deduplicating entries; local overrides may intentionally change resolution afterward.
+Check non-interactive inheritance separately from interactive activation; local
+overrides may intentionally change command resolution afterward.
 
 Keep mise activation before hooks that need its tools. Add availability guards
 for new optional hooks; do not assume every machine has an optional dependency.
-Inspect current asdf plugin/completion and Homebrew sourcing paths when changing
-startup; do not silently migrate runtime ownership as part of shell cleanup.
+Preserve Homebrew source-path quoting. Mise owns runtimes and project environments;
+asdf and direnv remain dependencies without automatic initialization. Do not add
+per-project hook switching or register another environment loader; see the
+[runtime architecture](../architecture/mise.md#runtimes-and-project-environments).
 
 ## Verification
 

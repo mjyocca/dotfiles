@@ -28,9 +28,10 @@ are not force-overwritten. Bootstrap can be rerun after resolving a failure.
 
 Stages run sequentially, including under `make -j`, and stop on failure. Update
 this checkout explicitly with Git before syncing when you want newer declarations.
-Neither workflow pulls this checkout, requests package upgrades/removals, installs
-language runtimes, or activates macOS LaunchAgents. Sync also skips prerequisites,
-platform preferences, and repository hook installation.
+Neither workflow pulls this checkout, requests package upgrades/removals, or
+activates macOS LaunchAgents. Their tools stage can install discovered language
+versions through mise; existing asdf runtime installations are not transferred.
+Sync also skips prerequisites, platform preferences, and repository hook installation.
 
 ## Individual stages
 
@@ -41,7 +42,7 @@ platform preferences, and repository hook installation.
 | `make repos` | Provision optional configured workspace checkouts; does not request updates to latest remote commits |
 | `make link` | Deploy selected dotfiles, global mise tool fragments, and discovery policy |
 | `make tools` | Install effective mise tool requests; requires deployed global configuration |
-| `make plugins` | Install TPM, declared asdf plugins, gh-dash, and the pinned Zellij plugin |
+| `make plugins` | Install TPM, gh-dash, and the pinned Zellij plugin |
 | `make config` | Apply additional platform preferences where implemented |
 | `make hooks` | Install the repository's Gitleaks pre-commit hook when Gitleaks is available |
 
@@ -50,13 +51,21 @@ installation and updates remain explicit; installing TPM does not install them.
 
 ### Scoped previews
 
+Before using `make tools`, including its dry-run, deploy the global mise
+configuration and discovery policy with `make link`.
+
 ```bash
-make link DOTFILES_ARGS='--dry-run ~/.bashrc'
+make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.bashrc ~/.bash_profile'
 make tools TOOLS_ARGS=--dry-run
 ```
 
 `DOTFILES_ARGS` passes arguments to `mise dotfiles apply`; `TOOLS_ARGS` passes
 arguments to `mise install`.
+
+Include discovery policy when previewing or applying shell startup changes. The
+example above covers only Bash startup and discovery policy; see the
+[complete migration deployment](architecture/mise.md#runtimes-and-project-environments)
+for the remaining dotfiles.
 
 ## Utilities
 
@@ -74,6 +83,17 @@ selections or a missing platform configuration. Override detection explicitly:
 make bootstrap PROFILE=omarchy
 ```
 
+If your shell exports another project's environment, such as `MISE_ENV=staging`,
+select a matching profile and environment for this invocation:
+
+```bash
+make link PROFILE=macos MISE_ENV=macos
+# On Omarchy:
+make link PROFILE=omarchy MISE_ENV=omarchy
+```
+
+These command-line assignments do not change the parent shell's environment.
+
 Deployment seeds an ignored, create-only `.miserc.local.toml` with the selected
 platform. After deployment, direct mise commands inside the checkout can use that
 default when neither `-E` nor `MISE_ENV` is set:
@@ -83,6 +103,12 @@ mise config ls
 mise dot apply --dry-run
 mise bootstrap --only packages --dry-run
 ```
+
+Shell startup does not export a default `MISE_ENV`, and the checkout-local default
+does not set that shell variable. An empty `echo "$MISE_ENV"` is therefore expected.
+To verify platform selection, use `mise config ls` and look for
+`.config/mise/config.<platform>.toml`; `(none)` in its Tools column means it declares
+no runtime tools, not that the configuration is inactive.
 
 Before initial deployment, use Make or explicitly select the environment with
 `mise -E <platform> ...`. Existing workspace defaults and shell exports are

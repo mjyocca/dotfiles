@@ -32,29 +32,22 @@ mode = "symlink"
 
 [dotfiles."~/.config/mise/miserc.toml"]
 source = "miserc.toml"
-mode = "symlink"
+# Copy/symlink previews misparse this early policy as ordinary config.
+mode = "template"
 
 [settings.dotfiles]
 root = "../../packages"
 default_mode = "symlink-each"
 
 # Deploy only tracked files; keep repository-only packages/aur out of these groups.
-[dotfile_groups.asdf]
-root = "asdf"
-manifest = "git"
-
-[dotfile_groups.asdf.entries]
-"~/.asdfrc" = { mode = "symlink" }
-"~/.asdf-direnv.sh" = { mode = "symlink" }
-
 [dotfile_groups.bash]
 root = "bash"
 manifest = "git"
 
 # Explicit targets allow a scoped apply without selecting every home-rooted group.
 [dotfile_groups.bash.entries]
-"~/.bashrc" = { mode = "symlink" }
-"~/.bash_profile" = { mode = "symlink" }
+"~/.bashrc" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
+"~/.bash_profile" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
 "~/.config/bash/nvim.bash" = { mode = "symlink" }
 
 [dotfile_groups.bat]
@@ -215,6 +208,10 @@ manifest = "git"
 [dotfile_groups.zsh]
 root = "zsh"
 manifest = "git"
+
+[dotfile_groups.zsh.entries]
+"~/.zshenv" = { mode = "symlink" }
+"~/.zshrc" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
 
 [bootstrap]
 # Select a platform environment before deploying; no implicit all-platform apply.

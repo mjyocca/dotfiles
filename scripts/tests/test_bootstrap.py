@@ -326,20 +326,19 @@ class ScriptCompositionTests(CheckoutTestCase):
         self.assert_success(self.run_command(MAKE, "link", "DOTFILES_ARGS=--dry-run ~/.bashrc"))
         self.assertEqual(self.events(), [f"mise dotfiles apply --dry-run {self.home}/.bashrc"])
 
-    def test_plugins_reuse_existing_installations(self):
+    def prepare_plugin_test(self):
         self.write_command("gh", (
             'printf "gh %s\\n" "$*" >> "$TEST_LOG"\n'
             'printf "dlvhdr/gh-dash\\n"\n'
         ))
         self.write_command("asdf", (
             'printf "asdf %s\\n" "$*" >> "$TEST_LOG"\n'
-            'printf "%s\\n" nodejs deno ruby golang java rust zig bun\n'
+            'exit 91\n'
         ))
         self.write_command("mise", (
             'printf "mise %s\\n" "${*:3}" >> "$TEST_LOG"\n'
             'case "$*" in\n'
             f'  *"which gh --tool gh") printf "%s\\n" {shlex.quote(str(self.bin / "gh"))};;\n'
-            f'  *"which asdf --tool github:asdf-vm/asdf") printf "%s\\n" {shlex.quote(str(self.bin / "asdf"))};;\n'
             '  *) exit 91;;\n'
             'esac\n'
         ))
@@ -347,16 +346,21 @@ class ScriptCompositionTests(CheckoutTestCase):
         plugin = self.home / ".config/zellij/plugins/zellij-autolock.wasm"
         plugin.parent.mkdir(parents=True)
         plugin.write_bytes(b"\x00asm\x01\x00\x00\x00")
-        for profile in ("macos", "omarchy"):
-            with self.subTest(profile=profile):
-                self.log.unlink(missing_ok=True)
-                self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
-                self.assertEqual(self.events(), [
-                    "mise which gh --tool gh",
-                    "mise which asdf --tool github:asdf-vm/asdf",
-                    "asdf plugin list",
-                    "gh extension list",
-                ])
+
+    def test_plugins_reuse_existing_installations(self):
+        self.prepare_plugin_test()
+        for preference in (None, "asdf"):
+            if preference is None:
+                self.env.pop("DOTFILES_RUNTIME_MANAGER", None)
+            else:
+                self.env["DOTFILES_RUNTIME_MANAGER"] = preference
+            for profile in ("macos", "omarchy"):
+                with self.subTest(profile=profile, obsolete_runtime_preference=preference):
+                    self.log.unlink(missing_ok=True)
+                    self.assert_success(self.run_command(BASH, f"scripts/{profile}/plugins.sh"))
+                    self.assertEqual(self.events(), [
+                        "mise which gh --tool gh", "gh extension list",
+                    ])
 
     def prepare_git_hook_test(self):
         self.write_command("git", f'exec {shlex.quote(GIT)} "$@"\n')

@@ -159,11 +159,12 @@ class MiseWorkspaceTests(unittest.TestCase):
         child.mkdir(parents=True)
         self.assertEqual(self.read_environment(cwd=child)["TEST_WORKSPACE_PLATFORM"], "omarchy")
 
-    def test_workspace_default_preserves_global_asdf_discovery_guard(self):
+    def test_workspace_default_preserves_mise_tool_versions_discovery(self):
         self.seed("omarchy")
-        result = self.run_mise("settings", "get", "override_tool_versions_filenames")
+        (self.checkout / ".tool-versions").write_text("nodejs 24.0.0\n")
+        result = self.run_mise("ls", "--current", "--json")
         self.assert_success(result)
-        self.assertEqual(json.loads(result.stdout), [])
+        self.assertIn("node", json.loads(result.stdout))
 
     def test_global_default_selection_is_not_modified_by_workspace_deployment(self):
         global_default = self.global_config / "miserc.local.toml"
@@ -200,6 +201,35 @@ class MiseWorkspaceTests(unittest.TestCase):
         )
         self.assert_success(result)
         self.assertEqual(json.loads(result.stdout)["TEST_WORKSPACE_PLATFORM"], "omarchy")
+
+    @unittest.skipUnless(ZSH, "zsh is required")
+    def test_zsh_startup_respects_project_defaults_and_explicit_environment(self):
+        shutil.copyfile(REPO_ROOT / "packages/zsh/.zshenv", self.home / ".zshenv")
+        self.seed("macos")
+        (self.outside / ".miserc.local.toml").write_text('env = ["dev"]\n')
+        for profile in ("dev", "staging"):
+            (self.outside / f"mise.{profile}.toml").write_text(
+                f'[env]\nTEST_PROJECT_ENV = "{profile}"\n'
+            )
+        env = dict(self.env, MISE_TRUSTED_CONFIG_PATHS=str(self.home))
+        cases = (
+            (self.checkout, env, "TEST_WORKSPACE_PLATFORM", "macos"),
+            (self.outside, env, "TEST_PROJECT_ENV", "dev"),
+            (self.outside, dict(env, MISE_ENV="staging"), "TEST_PROJECT_ENV", "staging"),
+        )
+        for cwd, environment, key, expected in cases:
+            with self.subTest(cwd=cwd, expected=expected):
+                expected_env = shlex.quote(environment.get("MISE_ENV", "__unset__"))
+                command = (f'[[ "${{MISE_ENV-__unset__}}" == {expected_env} ]] && '
+                           f"exec {shlex.quote(MISE)} env --json")
+                result = subprocess.run(
+                    [ZSH, "-d", "-c", command],
+                    cwd=cwd, env=environment, capture_output=True, text=True, timeout=30,
+                )
+                self.assert_success(result)
+                resolved = json.loads(result.stdout)
+                self.assertEqual(resolved[key], expected)
+                self.assertEqual(result.stderr, "")
 
     @unittest.skipUnless(ZSH, "zsh is required")
     def test_zsh_uses_native_workspace_default_without_startup_files(self):

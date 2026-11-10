@@ -1,10 +1,14 @@
 # ================================================================
 # mise — dev tool activation
 # ================================================================
-# Must precede every tool init below (starship, direnv, fzf, zoxide...):
+# Must precede every tool init below (starship, fzf, zoxide...):
 # mise-managed binaries replace the former brew copies.
 # Mirrors packages/bash/.bashrc on Omarchy.
-command -v mise &>/dev/null && eval "$(mise activate zsh)"
+# Non-interactive children inherit real tool paths. Keep shim setup out of
+# .zshenv so child shells do not reselect runtimes using their own cwd.
+if command -v mise &>/dev/null; then
+  eval "$(mise activate zsh)"
+fi
 
 # ================================================================
 # Starship.io (see https://starship.rs/guide/)
@@ -28,18 +32,9 @@ EOF
 fi
 
 # =================================================================
-# asdf — completions and language plugin hooks (interactive only)
+# Shell completions (interactive only)
 # =================================================================
-# PATH + ASDF_DATA_DIR are set in .zshenv; only interactive extras here.
-
-# append completions to fpath
-fpath=(${ASDF_DATA_DIR}/completions $fpath)
-# initialise completions
 autoload -Uz compinit && compinit
-
-# Golang plugin settings
-export ASDF_GOLANG_MOD_VERSION_ENABLED=true
-. "${ASDF_DATA_DIR}/plugins/golang/set-env.zsh"
 
 # =================================================================
 # PNPM (see https://pnpm.io/installation)
@@ -57,25 +52,13 @@ esac
 # CLI Tools
 # ================================================================
 
-# direnv (see https://github.com/direnv/direnv)
-eval "$(direnv hook zsh)"
-
 # fzf (see https://github.com/junegunn/fzf)
 source <(fzf --zsh)
 
 # zoxide (see https://github.com/ajeetdsouza/zoxide)
 eval "$(zoxide init zsh)"
 
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# =================================================================
-# asdf shims — re-prioritise for interactive shells
-# =================================================================
-# .zshenv sets shims early but tools like PNPM prepend to PATH later
-# in .zshrc, pushing shims down and allowing macOS system binaries
-# (e.g. system Ruby) to take precedence. Re-prepend at the end so
-# asdf-managed versions always win in interactive sessions.
-export PATH="$HOME/.asdf/shims:$PATH"
+source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 # Neovim aliases and variant shorthands (nv, nv-*, nvim-*)
 [[ -f ~/.config/zsh/nvim.zsh ]] && source ~/.config/zsh/nvim.zsh

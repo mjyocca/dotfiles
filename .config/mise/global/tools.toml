@@ -1,5 +1,6 @@
-# Shared user-global development tools. Language runtimes remain with asdf.
+# Shared user-global development tools; language versions are declared separately.
 [tools]
+# Retained for explicit legacy use, not automatic runtime selection.
 "github:asdf-vm/asdf" = "latest"
 gitleaks = "latest"
 lazydocker = "latest"

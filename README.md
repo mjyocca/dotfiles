@@ -8,11 +8,11 @@
     \/___/  \/___/  \/__/ \/_/   \/_/\/____/\/____/\/___/
 ```
 
-Personal dotfiles are managed with a Makefile, Bash scripts, and
+Personal dotfiles managed with Make, Bash scripts, and
 [mise](https://mise.jdx.dev/dotfiles.html).
 
 > For an alternative to mise's dotfile management, consider
-> [chezmoi](https://www.chezmoi.io/); for a simpler, symlink-based setup, consider
+> [chezmoi](https://www.chezmoi.io/); for a symlink-focused setup, consider
 > [GNU Stow](https://www.gnu.org/software/stow/).
 
 This setup is shared for inspiration; it isn't intended for every machine.
@@ -30,7 +30,7 @@ dotfiles/
 ├── .config/mise/                Declarative provisioning + deployment
 │   ├── config.toml              Shared dotfile definitions
 │   ├── config.<platform>.toml   Platform packages, settings + deployment rules
-│   └── global/                 Tools deployed into user-global mise config
+│   └── global/                 Global tool fragments
 │       ├── tools.toml           Shared development tools
 │       └── platform*.toml       Platform providers + exclusions
 ├── packages/                    Application dotfiles deployed by mise
@@ -49,14 +49,15 @@ dotfile groups each platform deploys and where they go. Optional local mise
 overrides let you customize the configuration for each machine without changing
 the shared files. These overrides are ignored by Git.
 
-- **System packages:** mise manages Homebrew on macOS and Pacman on Omarchy;
-  scripts handle interactive AUR installation.
-- **Platform configuration:** mise applies macOS defaults and deploys
-  Omarchy settings, theme templates, and hooks.
-- **Tools:** the global mise configuration makes development tools available
-  outside this checkout as well. asdf manages language runtimes.
-- **Plugins and hooks:** scripts install TPM, asdf plugins, gh-dash, a Zellij
-  plugin, and the repository's Gitleaks hook.
+| Domain | Managed by | Responsibility |
+|---|---|---|
+| Lifecycle | Make + Bash scripts | Select the platform and run setup stages in order |
+| System packages | mise bootstrap + Homebrew/Pacman | Install platform packages (Bash scripts handle interactive AUR installation) |
+| Dotfiles | mise dotfiles | Deploy selected configuration files and templates |
+| Development tools / Language runtimes | mise | Install CLI tools / select global or project-specific versions of Go, Rust, Node.js, etc. |
+| Project environments | mise | Load project variables and PATH additions |
+| Platform configuration | mise + Bash scripts | Apply macOS preferences and deploy Omarchy settings, themes, and hooks |
+| Plugins and repository hooks | Bash scripts | Install TPM, gh-dash, a Zellij plugin, and the Gitleaks hook |
 
 See the [mise configuration architecture](docs/architecture/mise.md) for details
 on environment selection, local overrides, and how the platform configurations
@@ -64,15 +65,15 @@ fit together.
 
 ## Install
 
+This setup supports Apple Silicon macOS and Omarchy machines. Git and Make must
+already be available; see the [setup notes](docs/commands.md#setup-notes) for
+platform prerequisites. Bootstrap handles the remaining prerequisites.
+
 ```bash
 git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 make bootstrap
 ```
-
-You'll need Git and Make to get started; bootstrap handles the remaining platform
-prerequisites. See the [setup notes](docs/commands.md#setup-notes) for help getting
-started on a fresh machine.
 
 ## Lifecycle
 
@@ -93,9 +94,9 @@ Both commands run their steps in order and stop if a step fails.
 make sync
 ```
 
-Sync installs system packages, checks out any optional repositories you've
-configured, puts dotfiles in place, and installs development tools and plugin
-integrations. Pull updates to this repository with Git first when you want the
-latest configuration; sync doesn't pull them for you.
+Sync installs system packages, provisions optional workspace repositories, deploys
+dotfiles, and installs development tools, language runtimes, and plugin
+integrations. Pull repository updates with Git first; sync doesn't pull them for you.
 
 See the [command reference](docs/commands.md) for individual stages and previews.
+For project scaffolding and daily utilities, see the [dotf toolbox](docs/reference/dotf.md).

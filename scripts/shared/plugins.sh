@@ -19,8 +19,6 @@ install_plugins() {
         git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
     fi
 
-    bash "$DOTFILES_ROOT/scripts/shared/install-asdf-plugins.sh"
-
     installed_gh_extensions="$("$gh_binary" extension list)"
     if ! grep -Eq '(^|[[:space:]])dlvhdr/gh-dash([[:space:]]|$)' <<< "$installed_gh_extensions"; then
         "$gh_binary" extension install dlvhdr/gh-dash

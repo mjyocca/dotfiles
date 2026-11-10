@@ -46,7 +46,7 @@
 
 -- ---------------------------------------------------------------------------
 -- DAP launch configurations
--- Only applied if NVIM_DAP_ENABLED=1 was set in .envrc (plugin must be loaded).
+-- Only applied if NVIM_DAP_ENABLED=1 was set before startup (e.g. in mise.toml).
 -- ---------------------------------------------------------------------------
 
 -- if vim.env.NVIM_DAP_ENABLED == "1" then

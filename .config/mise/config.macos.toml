@@ -1,6 +1,6 @@
 # macOS-specific mise configuration
 # Complete macOS package set, preferences, LaunchAgents, and deployment selections.
-# Selected via MISE_ENV=macos (exported by Make or macOS zsh startup).
+# Selected by Make, explicit -E/MISE_ENV, or the checkout-local environment seed.
 
 # Seed a checkout-only default; never select the platform globally.
 [dotfiles.workspace-mise-env]
@@ -25,7 +25,7 @@ merge = true
 
 [bootstrap]
 dotfile_groups = [
-  "asdf", "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
+  "bash", "bat", "btop", "colima", "colima-scripts", "ghostty",
   "gitconfig", "herdr", "hunk", "lazygit", "nvim", "nvim-next",
   "opencode", "pnpm", "rex", "scripts", "ssh", "starship", "superfile", "tmux",
   "tool-versions", "yazi", "zed", "zellij", "zsh",

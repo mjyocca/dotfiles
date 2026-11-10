@@ -17,12 +17,14 @@ paths; do not assume non-interactive Bash reads `.bashrc`.
 ## Change Constraints
 
 - Add PATH entries with idempotent `case ":$PATH:"` guards. Inspect the resulting
-  order after tool activation; early asdf insertion alone does not prove
-  its shims remain first in interactive shells.
+  order after tool activation. Keep mise activation after the interactive guard;
+  non-interactive children inherit real tool paths. Do not prepend shims over them.
 - Put script-relevant exports before the interactive check; keep prompts,
   aliases, completions, and hooks after it. Guard new optional hooks with
   `command -v` and keep one concern per commented section.
-- Preserve asdf runtime ownership; shell edits are not a runtime migration.
+- Mise owns runtimes and project environments. Keep asdf and direnv installed but
+  uninitialized. Omarchy's upstream rc owns full mise activation; do not wrap it or
+  add a second activation. Verify upstream initialization before changing it.
 
 ## Verification and References
 
@@ -34,4 +36,3 @@ instead of copying tool initialization recipes:
 - [Bash startup files](https://www.gnu.org/software/bash/manual/bash.html#Bash-Startup-Files)
 - [Omarchy manual](https://omarchy.org/manual/)
 - [mise activation](https://mise.jdx.dev/cli/activate.html)
-- [direnv hooks](https://direnv.net/docs/hook.html)

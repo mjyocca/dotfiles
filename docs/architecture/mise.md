@@ -21,7 +21,7 @@ All source files below live in `<repo>/.config/mise/`.
 | `conf.d/workspace.toml` | Gitignored checkout provisioning, seeded only when missing |
 | `workspace/opencode.jsonc.example` | Sanitized workspace-local OpenCode scaffold |
 | `workspace/miserc.<platform>.toml` | Create-only source for the checkout's ignored `.miserc.local.toml` environment default |
-| `miserc.toml` | Early discovery policy leaving `.tool-versions` to asdf |
+| `miserc.toml` | Checkout discovery policy, also rendered globally; older global symlinks remain compatible |
 | `macos/` | Reserved for future macOS supporting files; retained with `.gitkeep` |
 | `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
 
@@ -92,14 +92,14 @@ without shell initialization. It selects mise's environment, not a parent-shell
 export, and does not select a platform in unrelated projects.
 
 Explicit `-E` and then `MISE_ENV` take precedence over the workspace default.
-Existing shell exports remain unchanged, including Zsh's `macos` default. Initial
-deployment still needs Make's profile selection or explicit `-E`. The seed is
+Shell startup does not set a default `MISE_ENV`; explicit exports remain valid.
+Initial deployment needs Make's profile selection or explicit `-E`. The seed is
 create-only: edit the ignored file locally to change an existing checkout's
 default, rather than expecting another deployment to overwrite it. Environment
 names alone do not perform OS or hostname detection.
 
 Global tools and machine-local configuration still compose normally. Keep the
-workspace selection out of `.config/mise/miserc.toml`: that discovery guard also
+workspace selection out of `miserc.toml`: that discovery policy
 deploys globally and must not impose this checkout's platform on other projects.
 Do not assume workspace and global `miserc` environment defaults are combined on
 every mise version. If a global environment profile must apply here too, include
@@ -187,7 +187,7 @@ scripts pin mise operations to the repository root rather than interactive shell
 
 ## Global Deployment and Overrides
 
-The declared deployment links only tool fragments and discovery policy globally:
+Deployment links tool fragments and renders the machine discovery policy:
 
 ```text
 ~/.config/mise/                        Source in <repo>/.config/mise/
@@ -196,7 +196,7 @@ The declared deployment links only tool fragments and discovery policy globally:
     20-dotfiles-platform.toml ───────► global/platform[.omarchy].toml
   config.toml                         Existing machine configuration, preserved
   config.local.toml                   Optional untracked machine overrides
-  miserc.toml ──────────────────────► miserc.toml
+  miserc.toml                         Rendered from miserc.toml
 ```
 
 Bootstrap and deployment rules are not loaded globally. A declaration does not
@@ -213,13 +213,95 @@ and inspect effective configuration rather than relying on a copied precedence l
 - **Platform:** `config.macos.toml` and `config.omarchy.toml` are environment
   selections, not hostname overlays. No automatic machine-overlay loader exists.
 - **Machine:** the preserved `~/.config/mise/config.toml` is machine-local.
-- **Checkout:** `<repo>/.config/mise/config.local.toml` affects this checkout only.
-  It is distinct from the user-global file with the same basename.
+- **Checkout:** `<repo>/.config/mise/config.local.toml` configures this checkout's
+  provisioning and deployment. It is distinct from the user-global file with the
+  same basename.
 - **Boundary:** provisioning files contain no machine-specific tool requests.
   Put machine-specific requests in global local configuration, not a platform file.
-- **Runtimes:** asdf reads `.tool-versions`; mise's deployed `miserc.toml` disables
-  that discovery without disabling explicit TOML tool requests. Managing the asdf
-  executable with mise does not transfer runtime ownership.
+- **Project:** `mise.toml` declares shared tools and environments; an ignored
+  `mise.local.toml` overrides them for one checkout on one machine.
+- **Runtimes:** mise reads `.tool-versions` and explicit TOML tool requests. Asdf
+  and direnv remain installed dependencies, not automatic runtime or environment
+  providers. Existing asdf installations are not reused by mise.
+
+### Runtimes and project environments
+
+Both shells use full mise activation for interactive runtime and environment
+updates. No direnv hook, asdf completion/plugin initialization, or global asdf
+version-export mechanism is registered. Legacy ownership preferences have no effect.
+
+Zsh activates mise in `.zshrc`; standalone Bash activates it in the interactive
+portion of `.bashrc`, which `.bash_profile` also sources. Activation adds real
+tool paths. Non-interactive startup does not inject shims ahead of inherited
+paths, so child shells retain the launching runtime even when their working
+directory changes. Machine-local shell overrides remain last.
+
+Ordinary non-interactive Bash does not automatically read `.bashrc`. Scripts
+inherit PATH or use `mise exec -- <command>` to resolve a project explicitly.
+Omarchy's upstream Bash defaults already activate mise; the local startup does
+not wrap that invocation or activate it a second time. Verify actual startup
+against the installed Omarchy version.
+
+Before deployment, inspect effective mise configuration, platform group selection,
+and target collisions. A scoped preview and apply for discovery and Zsh startup are:
+
+```bash
+make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
+make link DOTFILES_ARGS='~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
+```
+
+For Bash, select `~/.bashrc` and `~/.bash_profile` instead of the Zsh files. These
+commands deploy only shell startup and discovery policy, not the complete migration.
+Native `depends` orders selected entries without expanding a scoped apply.
+
+For a complete migration, including upgrades of existing installations, preview
+all selected dotfiles and apply only after reviewing the changes and conflicts:
+
+```bash
+make link DOTFILES_ARGS=--dry-run
+make link
+```
+
+This also deploys the Neovim templates, scaffolder, and prompt configuration.
+Already-linked files expose checkout edits immediately, but file-by-file symlinks
+do not expose newly added files until deployment. In particular, existing
+installations need deployment to gain `templates/mise.toml.template` in the
+platform's Neovim config. Open a fresh shell afterward; re-sourcing does not
+reliably remove old hooks or environment state.
+
+Review `.tool-versions` requests for mise backend compatibility before installing.
+The checkout discovery policy and deployed global policy both enable these files.
+Preserved machine-local overrides can still affect discovery. After deployment,
+preview `make tools TOOLS_ARGS=--dry-run`, then run `make tools` when ready to install.
+Prefer native mise backends; select an asdf plugin through mise only when needed.
+Using that backend does not require the asdf manager or share its install directory.
+
+### Migrating project environments and editor setup
+
+Mise does not automatically execute `.envrc`. Migrate exports into `[env]`, dotenv
+loading into `_.file`, and PATH additions into `_.path`. Compatible Bash scripts
+can be loaded explicitly with `_.source`, but direnv functions such as `PATH_add`,
+`layout`, and `source_up` are not automatically available. Sourced scripts may run
+repeatedly; review them for side effects and credential fetching before opting in.
+Do not globally discover or source `.envrc` files, and do not register both loaders.
+Secrets delivery remains a separate decision.
+
+`dotf init` offers `mise.toml` instead of `.envrc`, including optional Neovim plugin
+gating and `NVIM_LOCAL_CONFIG`. Review the generated file before trusting it; the
+scaffolder neither trusts configs nor installs runtimes and never overwrites an
+existing destination. Neovim's separate Lua trust check remains in place. Its
+environment is inherited at launch, not refreshed when its working directory changes.
+Use `mise exec -- nvim` when children should inherit the launching project's tool
+paths; validate the actual editor/plugin workflows that matter to the project.
+
+Existing project `.envrc` files, runtime installations, and machine-local settings
+are not rewritten or deleted. The `packages/asdf/` sources, including
+`.asdf-direnv.sh`, remain for existing symlink consumers, but neither platform
+deploys them anymore. Preserving these files supports older setups; it does not
+load their variables in a mise-only shell. Migrate project environments manually
+and retain the legacy helper until its consumers have migrated across machines.
+Stale shell integration files are no longer sourced; removing them or uninstalling
+dependencies requires a separate, explicitly scoped operation.
 
 ## Official Documentation
 
@@ -228,7 +310,8 @@ and inspect effective configuration rather than relying on a copied precedence l
 - [Dotfiles](https://mise.jdx.dev/dotfiles.html)
 - [macOS preferences](https://mise.jdx.dev/bootstrap/macos-defaults.html)
 - [macOS LaunchAgents](https://mise.jdx.dev/bootstrap/launchd.html)
-- [asdf version selection](https://asdf-vm.com/manage/configuration.html)
+- [Project environments](https://mise.jdx.dev/environments/)
+- [asdf plugin backend](https://mise.jdx.dev/dev-tools/backends/asdf.html)
 
 For agent safety and verification, see [deployment instructions](../instructions/mise-dotfiles.md)
 and [package ownership policy](../instructions/package-management.md).

@@ -64,6 +64,6 @@ require("lazy").setup({
   }
 })
 
--- Source per-project config from $NVIM_LOCAL_CONFIG (set in .envrc).
+-- Source per-project config from $NVIM_LOCAL_CONFIG (inherited at launch, e.g. from mise).
 -- Placed after lazy.setup so plugins are available, matching exrc/.nvim.lua timing.
 autocmds.local_config()
