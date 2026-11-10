@@ -16,14 +16,13 @@ case ":$PATH:" in
 esac
 
 # ================================================================
-# asdf — shims must be on PATH for all shells and scripts
+# Machine policy and runtime shims — no commands or project discovery here
 # ================================================================
-export ASDF_DATA_DIR="$HOME/.asdf"
+DOTFILES_ENVIRONMENT_LOADER=direnv
+DOTFILES_RUNTIME_MANAGER=asdf
+[[ -r "$HOME/.config/dotfiles/shell-policy.sh" ]] && source "$HOME/.config/dotfiles/shell-policy.sh"
 
-case ":$PATH:" in
-  *":${ASDF_DATA_DIR}/shims:"*) ;;
-  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
-esac
+[[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
 
 # ================================================================
 # XDG Base Directories

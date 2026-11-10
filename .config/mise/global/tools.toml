@@ -1,4 +1,4 @@
-# Shared user-global development tools. Language runtimes remain with asdf.
+# Shared user-global development tools. Runtime ownership is selected separately.
 [tools]
 "github:asdf-vm/asdf" = "latest"
 gitleaks = "latest"

@@ -17,12 +17,12 @@ case ":$PATH:" in
   *) export PATH="$HOME/bin:$PATH" ;;
 esac
 
-# asdf shims (for all shells and scripts)
-export ASDF_DATA_DIR="$HOME/.asdf"
-case ":$PATH:" in
-  *":${ASDF_DATA_DIR}/shims:"*) ;;
-  *) export PATH="${ASDF_DATA_DIR}/shims:$PATH" ;;
-esac
+# Machine-wide policy; startup never reads project TOML to select hooks.
+DOTFILES_ENVIRONMENT_LOADER=direnv
+DOTFILES_RUNTIME_MANAGER=asdf
+[[ -r "$HOME/.config/dotfiles/shell-policy.sh" ]] && source "$HOME/.config/dotfiles/shell-policy.sh"
+
+[[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
 
 # XDG Base Directories
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -37,20 +37,44 @@ export PAGER="less"
 # ================================================================
 # Omarchy bootstrap (Linux only)
 # ================================================================
-if [[ -r /usr/share/omarchy/default/bash/env-bootstrap ]]; then
-  source /usr/share/omarchy/default/bash/env-bootstrap
+_dotfiles_omarchy_loaded=0
+if [[ -r "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/env-bootstrap" ]]; then
+  source "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/env-bootstrap"
+  _dotfiles_omarchy_loaded=1
   # Keep Omarchy's Neovim untouched; prefer our isolated config when deployed.
   # Explicit NVIM_APPNAME selections (including variant aliases) take precedence.
   if [[ -d "$XDG_CONFIG_HOME/nvim-dotfiles" ]]; then
     export NVIM_APPNAME="${NVIM_APPNAME:-nvim-dotfiles}"
   fi
-  # Non-interactive shells stop here (after env setup)
-  [[ $- != *i* ]] && return
+fi
+
+# Non-interactive shells stop after environment setup.
+if [[ $- != *i* ]]; then
+  unset _dotfiles_omarchy_loaded
+  return
+fi
+
+if [[ "$_dotfiles_omarchy_loaded" == 1 ]]; then
   # Source Omarchy defaults (starship, mise, zoxide, fzf, completions, aliases)
+  # Upstream initializes mise itself. Adapt only that startup invocation in
+  # direnv mode, before it can register a hook or load project environments.
+  # Do not replace upstream rc or leave a command wrapper in the running shell.
+  if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]]; then
+    _dotfiles_previous_mise="$(declare -f mise || true)"
+    mise() {
+      if [[ "${1:-}" == activate && "${2:-}" == bash ]]; then
+        command mise "$@" --shims
+      else
+        command mise "$@"
+      fi
+    }
+  fi
   source "${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/rc"
-else
-  # Non-Omarchy: exit early for non-interactive
-  [[ $- != *i* ]] && return
+  if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]]; then
+    unset -f mise
+    [[ -z "$_dotfiles_previous_mise" ]] || eval "$_dotfiles_previous_mise"
+    unset _dotfiles_previous_mise
+  fi
 fi
 
 # ================================================================
@@ -58,12 +82,18 @@ fi
 # ================================================================
 # On Omarchy, these are already handled by the rc sourced above.
 # On other systems, initialize them ourselves.
-if [[ -z "${OMARCHY_PATH:-}" ]]; then
+if [[ "$_dotfiles_omarchy_loaded" == 0 ]]; then
   # Starship prompt
   command -v starship &>/dev/null && eval "$(starship init bash)"
   
   # mise activation
-  command -v mise &>/dev/null && eval "$(mise activate bash)"
+  if command -v mise &>/dev/null; then
+    if [[ "$DOTFILES_ENVIRONMENT_LOADER" == mise ]]; then
+      eval "$(mise activate bash)"
+    else
+      eval "$(mise activate bash --shims)"
+    fi
+  fi
   
   # zoxide (better cd)
   command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
@@ -94,14 +124,17 @@ fi
 # ================================================================
 
 # Let the deployed bat config select its custom theme instead of Omarchy's ANSI default.
-if [[ -n "${OMARCHY_PATH:-}" && "${BAT_THEME:-}" == ansi &&
+if [[ "$_dotfiles_omarchy_loaded" == 1 && "${BAT_THEME:-}" == ansi &&
       -r "$XDG_CONFIG_HOME/bat/config" &&
       -r "$XDG_CONFIG_HOME/bat/themes/GitHub Dark.tmTheme" ]]; then
   unset BAT_THEME
 fi
+unset _dotfiles_omarchy_loaded
 
 # direnv (see https://github.com/direnv/direnv)
-command -v direnv &>/dev/null && eval "$(direnv hook bash)"
+if [[ "$DOTFILES_ENVIRONMENT_LOADER" == direnv ]] && command -v direnv &>/dev/null; then
+  eval "$(direnv hook bash)"
+fi
 
 # PNPM (see https://pnpm.io/installation)
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
@@ -114,6 +147,12 @@ esac
 # Neovim aliases
 # ================================================================
 [[ -f ~/.config/bash/nvim.bash ]] && source ~/.config/bash/nvim.bash
+
+# ================================================================
+# Preserve asdf ownership after other tools have prepended their paths.
+if [[ "$DOTFILES_RUNTIME_MANAGER" == asdf ]]; then
+  [[ -r "$HOME/.config/dotfiles/runtime-path.sh" ]] && source "$HOME/.config/dotfiles/runtime-path.sh"
+fi
 
 # ================================================================
 # Local overrides (machine-specific, not committed)

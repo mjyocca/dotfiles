@@ -10,7 +10,7 @@ the workflow; read only the applicable platform guide for platform-specific work
 | System packages via mise bootstrap | `.config/mise/config.<platform>.toml`, under `[bootstrap.packages]` |
 | AUR packages via interactive yay | `packages/aur/packages.txt`; machine-specific tracking under `packages/aur/machines/` |
 | mise dev tools | `.config/mise/global/` shared and platform tool fragments |
-| Language runtimes via asdf | `packages/tool-versions/.tool-versions` |
+| Language runtimes via the selected machine manager | `packages/tool-versions/.tool-versions`; ownership preferences in `.config/mise/config.toml` and ignored local overrides |
 
 See [mise architecture](../architecture/mise.md) for composition and scope.
 Inspect effective configuration, including system defaults, before installing.
@@ -26,17 +26,19 @@ Inspect effective configuration, including system defaults, before installing.
    backend supports both platforms and it has no OS/session dependency; otherwise
    use the platform manager and document the exception.
 
-Language runtimes remain on asdf until a separately scoped migration. Do not
-install duplicate mise runtimes or move runtime ownership incidentally; Terraform
-ownership changes are also a separate migration, not implied by these rules.
-mise owns the asdf executable, not its runtimes. `make plugins` installs the
-declared asdf plugins without installing language versions.
+Follow the deployed machine runtime policy; do not change ownership incidentally.
+See [machine ownership](../architecture/mise.md#choosing-runtimes-and-an-environment-loader)
+for explicit migration and rollback. Terraform ownership changes remain separate.
+Managing the asdf executable through mise does not select runtime ownership.
+`make plugins` installs declared asdf plugins only when asdf is selected and never
+installs language versions. In mise mode, `make tools` can install the discovered
+runtime requests after the discovery guard has been deployed.
 
 When criteria do not settle a choice, compare similar tracked tools, then inspect
 the installed OS's package and mise defaults or version-matched upstream sources.
 These are tie-breakers, not overrides. Package names and executable names can differ.
 Do not remove OS-required packages merely to eliminate an overlap; build dependencies
-may legitimately require a system runtime alongside the selected asdf version.
+may legitimately require a system runtime alongside the selected runtime version.
 
 ## Declaration and Installation Boundaries
 

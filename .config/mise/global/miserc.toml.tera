@@ -1,0 +1,10 @@
+{% set policy = vars.dotfiles_runtime_manager ~ "+" ~ vars.dotfiles_environment_loader -%}
+{% if policy not in ["asdf+direnv", "mise+direnv", "mise+mise"] -%}
+{{ throw(message="Supported runtime+environment policies: asdf+direnv, mise+direnv, mise+mise") }}
+{% endif -%}
+# Generated machine runtime discovery policy; explicit TOML tools remain active.
+{% if vars.dotfiles_runtime_manager == "mise" -%}
+override_tool_versions_filenames = [".tool-versions"]
+{% else -%}
+override_tool_versions_filenames = []
+{% endif -%}

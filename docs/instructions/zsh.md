@@ -18,15 +18,20 @@ relying on a copied snapshot of its contents.
 Use idempotent `case ":$PATH:"` guards for new PATH entries in either startup
 file. Interactive-only entries are allowed in `.zshrc`; entries scripts need go
 in `.zshenv`. Keep one concern per commented section.
+Use `packages/shell/.config/dotfiles/runtime-path.sh` for runtime shim priority and
+deduplication rather than adding shell-specific implementations.
 
-Preserve asdf shim availability in non-interactive shells and priority after
-interactive tool activation. Inspect the late `.zshrc` PATH adjustment before
+Follow the deployed machine runtime policy for non-interactive shims and priority
+after interactive tool activation. Inspect the late `.zshrc` PATH adjustment before
 deduplicating entries; local overrides may intentionally change resolution afterward.
 
 Keep mise activation before hooks that need its tools. Add availability guards
 for new optional hooks; do not assume every machine has an optional dependency.
 Inspect current asdf plugin/completion and Homebrew sourcing paths when changing
 startup; do not silently migrate runtime ownership as part of shell cleanup.
+Keep the policy load in `.zshenv` before runtime PATH setup. Do not add per-project
+hook switching or register both environment loaders; see the
+[machine ownership architecture](../architecture/mise.md#choosing-runtimes-and-an-environment-loader).
 
 ## Verification
 

@@ -30,7 +30,7 @@ dotfiles/
 ├── .config/mise/                Declarative provisioning + deployment
 │   ├── config.toml              Shared dotfile definitions
 │   ├── config.<platform>.toml   Platform packages, settings + deployment rules
-│   └── global/                 Tools deployed into user-global mise config
+│   └── global/                 Global tools + machine policy templates
 │       ├── tools.toml           Shared development tools
 │       └── platform*.toml       Platform providers + exclusions
 ├── packages/                    Application dotfiles deployed by mise
@@ -54,7 +54,9 @@ the shared files. These overrides are ignored by Git.
 - **Platform configuration:** mise applies macOS defaults and deploys
   Omarchy settings, theme templates, and hooks.
 - **Tools:** the global mise configuration makes development tools available
-  outside this checkout as well. asdf manages language runtimes.
+  outside this checkout as well. Language runtimes default to asdf; ignored
+  machine preferences can select mise instead and choose direnv or mise for
+  environment loading.
 - **Plugins and hooks:** scripts install TPM, asdf plugins, gh-dash, a Zellij
   plugin, and the repository's Gitleaks hook.
 

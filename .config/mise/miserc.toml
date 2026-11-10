@@ -1,3 +1,4 @@
-# asdf owns .tool-versions, including project-local runtime selections.
-# Keep mise's explicit TOML tool requests active.
+# Compatibility source for existing deployments that still symlink this file.
+# New deployments render global/miserc.toml.tera using the machine runtime policy.
+# Keep this source intact until those symlinks have been migrated by mise.
 override_tool_versions_filenames = []

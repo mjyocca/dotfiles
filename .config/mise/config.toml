@@ -2,6 +2,12 @@
 # Platform-neutral dotfile definitions and deployment defaults.
 # Platform configurations select packages and dotfile groups via MISE_ENV.
 
+# Machine-wide ownership. Override in this checkout's ignored config.local.toml,
+# then deploy the policy and discovery guard together before opening a new shell.
+[vars]
+dotfiles_environment_loader = "direnv"
+dotfiles_runtime_manager = "asdf"
+
 # Seed checkout-local configuration without overwriting private edits.
 [dotfiles.workspace-config]
 source = "conf.d/workspace.toml.example"
@@ -31,8 +37,19 @@ source = "global/platform.toml"
 mode = "symlink"
 
 [dotfiles."~/.config/mise/miserc.toml"]
-source = "miserc.toml"
+source = "global/miserc.toml.tera"
+mode = "template"
+
+[dotfiles."~/.config/dotfiles/shell-policy.sh"]
+source = "global/shell-policy.sh.tera"
+mode = "template"
+permissions = "0600"
+depends = ["~/.config/mise/miserc.toml"]
+
+[dotfiles."~/.config/dotfiles/runtime-path.sh"]
+source = "../../packages/shell/.config/dotfiles/runtime-path.sh"
 mode = "symlink"
+depends = ["~/.config/dotfiles/shell-policy.sh"]
 
 [settings.dotfiles]
 root = "../../packages"
@@ -53,8 +70,8 @@ manifest = "git"
 
 # Explicit targets allow a scoped apply without selecting every home-rooted group.
 [dotfile_groups.bash.entries]
-"~/.bashrc" = { mode = "symlink" }
-"~/.bash_profile" = { mode = "symlink" }
+"~/.bashrc" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
+"~/.bash_profile" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
 "~/.config/bash/nvim.bash" = { mode = "symlink" }
 
 [dotfile_groups.bat]
@@ -215,6 +232,10 @@ manifest = "git"
 [dotfile_groups.zsh]
 root = "zsh"
 manifest = "git"
+
+[dotfile_groups.zsh.entries]
+"~/.zshenv" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
+"~/.zshrc" = { mode = "symlink", depends = ["~/.config/dotfiles/runtime-path.sh"] }
 
 [bootstrap]
 # Select a platform environment before deploying; no implicit all-platform apply.
