@@ -12,7 +12,7 @@ Personal dotfiles managed with Make, Bash scripts, and
 [mise](https://mise.jdx.dev/dotfiles.html).
 
 > For an alternative to mise's dotfile management, consider
-> [chezmoi](https://www.chezmoi.io/); for a simpler, symlink-based setup, consider
+> [chezmoi](https://www.chezmoi.io/); for a symlink-focused setup, consider
 > [GNU Stow](https://www.gnu.org/software/stow/).
 
 This setup is shared for inspiration; it isn't intended for every machine.
@@ -65,15 +65,15 @@ fit together.
 
 ## Install
 
+This setup supports Apple Silicon macOS and Omarchy machines. Git and Make must
+already be available; see the [setup notes](docs/commands.md#setup-notes) for
+platform prerequisites. Bootstrap handles the remaining prerequisites.
+
 ```bash
 git clone https://github.com/mjyocca/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 make bootstrap
 ```
-
-You'll need Git and Make to get started; bootstrap handles the remaining platform
-prerequisites. See the [setup notes](docs/commands.md#setup-notes) for help getting
-started on a fresh machine.
 
 ## Lifecycle
 
@@ -94,9 +94,9 @@ Both commands run their steps in order and stop if a step fails.
 make sync
 ```
 
-Sync installs system packages, checks out any optional repositories you've
-configured, puts dotfiles in place, and installs development tools and plugin
-integrations. Pull updates to this repository with Git first when you want the
-latest configuration; sync doesn't pull them for you.
+Sync installs system packages, provisions optional workspace repositories, deploys
+dotfiles, and installs development tools, language runtimes, and plugin
+integrations. Pull repository updates with Git first; sync doesn't pull them for you.
 
 See the [command reference](docs/commands.md) for individual stages and previews.
+For project scaffolding and daily utilities, see the [dotf toolbox](docs/reference/dotf.md).

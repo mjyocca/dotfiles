@@ -2,13 +2,37 @@
 
 `dotf` is a dispatcher script deployed to `~/.local/bin/dotf`. It routes subcommands to individual scripts in `~/.local/bin/dotf.d/`.
 
+## Usage
+
+After deployment, run these commands from the directory where you want the files:
+
+```bash
+dotf --help       # list available commands
+dotf init         # select project templates with fzf
+dotf init --all   # copy all available templates without prompting
+```
+
+`dotf init` copies templates into the current directory; it does not detect or
+switch to the project root. Existing files, directories, and symlinks are skipped.
+Templates come from
+`${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/templates/`, so the selected
+Neovim configuration must have its templates deployed. If templates are missing,
+review the [deployment instructions](../architecture/mise.md#runtimes-and-project-environments).
+
+The tracked templates provide `mise.toml` and `.nvim.lua`. Review the generated
+configuration before trusting it. Run `mise trust` only after reviewing
+`mise.toml`, then `mise install` if you want to install its requested runtimes.
+Neovim's Lua trust decision is separate. The scaffolder does not trust
+configuration or install tools. See [project environment migration](../architecture/mise.md#migrating-project-environments-and-editor-setup)
+for legacy `.envrc` files and editor environment inheritance.
+
 ## Source Location
 
-```
+```text
 packages/scripts/.local/bin/
   dotf            # dispatcher — routes dotf <cmd> [args] to dotf.d/<cmd>
   dotf.d/         # one executable file per subcommand
-    init                    # scaffold template files into the current project root (fzf picker)
+    init            # scaffold template files into the current directory
 ```
 
 The `colima-*` subcommands live in `packages/colima-scripts/` and are selected

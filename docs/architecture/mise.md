@@ -272,7 +272,7 @@ reliably remove old hooks or environment state.
 Review `.tool-versions` requests for mise backend compatibility before installing.
 The checkout discovery policy and deployed global policy both enable these files.
 Preserved machine-local overrides can still affect discovery. After deployment,
-preview `make tools TOOLS_ARGS=--dry-run`, then install explicitly when authorized.
+preview `make tools TOOLS_ARGS=--dry-run`, then run `make tools` when ready to install.
 Prefer native mise backends; select an asdf plugin through mise only when needed.
 Using that backend does not require the asdf manager or share its install directory.
 

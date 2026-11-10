@@ -51,13 +51,21 @@ installation and updates remain explicit; installing TPM does not install them.
 
 ### Scoped previews
 
+Before using `make tools`, including its dry-run, deploy the global mise
+configuration and discovery policy with `make link`.
+
 ```bash
-make link DOTFILES_ARGS='--dry-run ~/.bashrc'
+make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.bashrc ~/.bash_profile'
 make tools TOOLS_ARGS=--dry-run
 ```
 
 `DOTFILES_ARGS` passes arguments to `mise dotfiles apply`; `TOOLS_ARGS` passes
 arguments to `mise install`.
+
+Include discovery policy when previewing or applying shell startup changes. The
+example above covers only Bash startup and discovery policy; see the
+[complete migration deployment](architecture/mise.md#runtimes-and-project-environments)
+for the remaining dotfiles.
 
 ## Utilities
 
@@ -74,6 +82,17 @@ selections or a missing platform configuration. Override detection explicitly:
 ```bash
 make bootstrap PROFILE=omarchy
 ```
+
+If your shell exports another project's environment, such as `MISE_ENV=staging`,
+select a matching profile and environment for this invocation:
+
+```bash
+make link PROFILE=macos MISE_ENV=macos
+# On Omarchy:
+make link PROFILE=omarchy MISE_ENV=omarchy
+```
+
+These command-line assignments do not change the parent shell's environment.
 
 Deployment seeds an ignored, create-only `.miserc.local.toml` with the selected
 platform. After deployment, direct mise commands inside the checkout can use that
