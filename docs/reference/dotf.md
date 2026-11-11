@@ -19,8 +19,13 @@ Templates come from
 Neovim configuration must have its templates deployed. If templates are missing,
 review the [deployment instructions](../architecture/mise.md#runtimes-and-project-environments).
 
-The tracked templates provide `mise.toml` and `.nvim.lua`. Review the generated
-configuration before trusting it. Run `mise trust` only after reviewing
+The tracked templates provide `mise.toml`, `mise.local.toml`, and `.nvim.lua`.
+The local mise override and Neovim project file are ignored by the dotfiles-managed
+global Git ignore; shared `mise.toml` remains eligible for commits. Existing tracked
+files are not untracked by these rules. Keep real secrets in a secret manager,
+not plaintext local overrides.
+
+Review the generated configuration before trusting it. Run `mise trust` only after reviewing
 `mise.toml`, then `mise install` if you want to install its requested runtimes.
 Neovim's Lua trust decision is separate. The scaffolder does not trust
 configuration or install tools. See [project environment migration](../architecture/mise.md#migrating-project-environments-and-editor-setup)

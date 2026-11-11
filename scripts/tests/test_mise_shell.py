@@ -516,12 +516,30 @@ class ProjectTemplateTests(MiseFixture):
                 self.assert_success(result)
                 self.assertEqual(result.stdout.splitlines(), private)
 
+    @unittest.skipUnless(shutil.which("git"), "git is required")
+    def test_global_ignore_hides_project_config_not_templates(self):
+        self.assert_success(self.run_command(["git", "init", "-q"]))
+        ignore = REPO / "packages/gitconfig/.config/git/.gitignore_global"
+        result = self.run_command([
+            "git", "-c", f"core.excludesFile={ignore}", "check-ignore", "--no-index",
+            ".nvim.lua", "nested/.nvim.lua", ".nvim.lua.template",
+            "fnox.toml", "nested/fnox.toml", ".fnox.toml", "nested/.fnox.toml",
+            "mise.local.toml.template",
+        ])
+        self.assert_success(result)
+        self.assertEqual(result.stdout.splitlines(), [
+            ".nvim.lua", "nested/.nvim.lua",
+            "fnox.toml", "nested/fnox.toml", ".fnox.toml", "nested/.fnox.toml",
+        ])
+
     @unittest.skipUnless(BASH, "bash is required")
     def test_scaffolder_generates_mise_not_envrc_without_running_trust_or_install(self):
         self.write(self.bin / "mise", '#!/bin/sh\nprintf "%s\\n" "$*" >> "$TEST_LOG"\nexit 91\n', True)
         result = self.run_command([BASH, str(self.scaffolder), "--all"])
         self.assert_success(result)
         self.assertTrue((self.outside / "mise.toml").is_file())
+        self.assertEqual((self.outside / "mise.local.toml").read_bytes(),
+                         (self.templates / "mise.local.toml.template").read_bytes())
         self.assertFalse((self.outside / ".envrc").exists())
         self.assertIn("mise trust", result.stdout)
         self.assertIn("mise exec -- nvim", result.stdout)
@@ -530,7 +548,10 @@ class ProjectTemplateTests(MiseFixture):
 
     @unittest.skipUnless(BASH, "bash is required")
     def test_scaffolder_preserves_existing_project_files(self):
-        originals = {"mise.toml": "# personal mise config\n", ".envrc": "# existing environment\n"}
+        originals = {"mise.toml": "# personal mise config\n",
+                     "mise.local.toml": "# personal local overrides\n",
+                     ".nvim.lua": "-- personal editor config\n",
+                     ".envrc": "# existing environment\n"}
         for name, text in originals.items():
             self.write(self.outside / name, text)
         result = self.run_command([BASH, str(self.scaffolder), "--all"])
@@ -561,7 +582,7 @@ class ProjectTemplateTests(MiseFixture):
 
         result = self.run_command([BASH, str(self.scaffolder), "--all"])
         self.assert_success(result)
-        expected = [".hidden", ".nvim.lua", "a project", "mise.toml", "z-last"]
+        expected = [".hidden", ".nvim.lua", "a project", "mise.local.toml", "mise.toml", "z-last"]
         written = [line.removeprefix("  wrote ") for line in result.stdout.splitlines()
                    if line.startswith("  wrote ")]
         self.assertEqual(written, expected)
