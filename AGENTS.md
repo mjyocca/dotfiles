@@ -66,6 +66,11 @@ Use `scripts/shared/detect-os.sh` to inspect platform detection.
 
 ## Safety and Verification
 
+- Never read, search contents, print, or source potentially sensitive local files:
+  `.bashrc.local`, `.zshrc.local`, `.env`, `.env.*`, `.envrc`, and other private
+  overrides or credential files. This includes indirect access through shell
+  startup, hooks, or symlinks. Use synthetic fixtures or user-provided redacted
+  excerpts instead; see `docs/instructions/security.md` for safe inspection limits.
 - Never commit secrets. Use git-ignored `~/.bashrc.local` or `~/.zshrc.local` for machine-local credentials.
 - Do not hardcode usernames or user-specific absolute paths; use `$HOME` or `~`.
 - Preserve unrelated changes. Do not provision, deploy, install software, grant permissions, or commit unless authorized by the task.

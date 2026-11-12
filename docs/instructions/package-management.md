@@ -68,9 +68,12 @@ may legitimately require a system runtime alongside the selected runtime version
 
 Inspect declarations, installed packages, and command resolution first. When
 installation/removal is authorized, verify the new provider before removing the old
-user-managed one. Preserve OS dependencies and unrelated edits. Check resolution in
-a fresh shell with `command -v <tool>` and inspect `mise config ls` and `mise current`.
-Do not infer successful installation from a text edit.
+user-managed one. Preserve OS dependencies and unrelated edits. Check resolution
+with `command -v <tool>` without loading private startup files; inspect only
+non-secret metadata from `mise config ls` and `mise current`. Fresh-shell tests
+must follow [isolation requirements](security.md#sensitive-local-files); request
+redacted user diagnostics when actual local settings matter. Do not infer
+successful installation from a text edit.
 
 ## Upstream References
 

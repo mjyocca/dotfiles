@@ -22,8 +22,10 @@ Paths below are relative to the **repository root**, not this skill's directory.
    full bootstrap merely to add one tool.
 6. For owner changes, verify the new provider before removing the old user-managed
    provider. Never remove OS-required packages to force a single installation.
-7. Recheck resolution in a fresh shell and the effective manager configuration
-   when runtime validation is authorized. Report declaration changes separately
+7. When runtime validation is authorized, recheck resolution and non-secret manager
+   metadata without reading private overrides. Fresh-shell tests must follow
+   `docs/instructions/security.md` isolation requirements; otherwise request
+   redacted user diagnostics. Report declaration changes separately
    from installation/verification results and note unresolved consumer defects.
 
 Installation, removal, deployment, and commits require authorization within the

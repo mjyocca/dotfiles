@@ -201,9 +201,7 @@ environment rather than task-scoped grants.
 
 For each project:
 
-1. Identify secret variables and non-secret configuration. During agent audits, do
-   not read or source secret-bearing files; use synthetic fixtures or narrowly
-   scoped redacted input under the [security policy](instructions/security.md).
+1. Identify secret variables and non-secret configuration.
 2. Move secrets through your provider's secure UI or interactive workflow. For
    1Password, create vault items and store only references in `fnox.toml`.
 3. Move non-secret configuration into `[env]` in `mise.toml` or `mise.local.toml`;
