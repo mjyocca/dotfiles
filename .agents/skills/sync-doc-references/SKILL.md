@@ -7,8 +7,8 @@ description: Reviews dated upstream references and reconciles dependent workspac
 
 Inputs: topic or repository path, optional maximum age in days, optional review
 cutoff date, and audit-only versus update mode. Default to a 90-day maximum age
-to bound review effort, not to declare older content wrong. If scope is omitted,
-use [agent guidance references](../../../docs/reference/agent-guidance.md).
+to bound review effort, not to declare older content wrong. If no topic or repository
+path is supplied or clear from the request, ask for one before reviewing sources.
 Audit-only requests never change files; ambiguous requests default to audit-only.
 
 1. Read [documentation policy](../../../docs/instructions/documentation.md).
@@ -24,8 +24,8 @@ Audit-only requests never change files; ambiguous requests default to audit-only
    Follow only links needed to resolve the selected claims. If access fails or
    content is incomplete/contradictory, report the gap and keep its date unchanged.
 4. Compare source claims against dependent instructions/skills and actual tracked
-   consumers. For agent-authoring topics, use the reference page's shared local
-   scope; elsewhere locate consumers by searching the source URL and topic.
+   consumers. Locate consumers within the requested scope by searching the source
+   URL and topic.
    Propose minimal corrections or link replacements. Upstream additions are not
    permission to add features, change configuration, or expand repository policy.
 5. In update mode, apply only supported corrections. Record `Last synced` as the

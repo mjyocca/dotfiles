@@ -25,7 +25,6 @@ All source files below live in `<repo>/.config/mise/`.
 | `workspace/opencode.jsonc.example` | Sanitized workspace-local OpenCode scaffold |
 | `workspace/miserc.<platform>.toml` | Create-only source for the checkout's ignored `.miserc.local.toml` environment default |
 | `miserc.toml` | Checkout discovery policy, also rendered globally; older global symlinks remain compatible |
-| `macos/` | Reserved for future macOS supporting files; retained with `.gitkeep` |
 | `omarchy/` | Omarchy hook scripts, theme templates, and user-override snippets deployed by the platform config |
 
 The `global/` directory holds deployment sources, not another mise discovery
@@ -172,21 +171,12 @@ different labels; removing a declaration does not unload an installed agent.
 | `make tools` | Normal effective requests, including machine-local additions and project overrides; requires deployed global fragments and discovery policy |
 | Everyday use outside this repository | System and user-global configuration, plus configuration discovered for the current project |
 
-The single installation path is clone → `make bootstrap`; no standalone platform
-installers clone or update the checkout. Bare `make` shows help without provisioning.
-
-Fresh bootstrap runs prerequisites (install/reuse mise) → packages → repos → link →
-tools → plugins → config → hooks. Packages use `mise bootstrap --only packages`;
-Omarchy extends that stage with interactive AUR installation. Repository provisioning
-uses `mise bootstrap repos apply`, and deployment uses `mise dotfiles apply`.
-The global tool fragments and discovery policy deploy before tool installation.
-
-`make sync` sequentially runs packages → repos → link → tools → plugins, even under
-`make -j`. Both workflows stop on the first failed stage. Neither transfers asdf
-runtimes to mise, pulls this checkout, requests upgrades/removals, or activates
-macOS LaunchAgents. Repository application can enforce a configured ref; it does
-not request the separate repository update operation. Run layers from the checkout;
-scripts pin mise operations to the repository root rather than interactive shell state.
+Make owns stage ordering; see [workflows](../commands.md#workflows) and
+[individual stages](../commands.md#individual-stages) for sequences and operational
+boundaries. Deployment precedes tool installation so mise can discover the global
+tool fragments and `.tool-versions` policy. Scripts pin mise operations to the
+repository root rather than interactive shell state. Repository application can
+enforce a configured ref without requesting the separate repository update operation.
 
 ## Global Deployment and Overrides
 

@@ -8,9 +8,16 @@ When freshness matters, check upstream content's **Last updated** date or source
 history and compare it with the installed version. HTTP `Last-Modified` may reflect
 a site deployment, not a content change; an absent date is not evidence of staleness.
 
-## Agent Guidance
+## Agent Tooling
 
-- [Agent guidance](agent-guidance.md) — official OpenCode V2, OpenAI, and Anthropic sources with review dates
+| Source | Repository use | Last synced |
+|---|---|---|
+| [OpenCode V2 instructions](https://opencode.ai/v2/docs/instructions/) | `AGENTS.md` discovery and workspace configuration | 2026-11-05 |
+| [OpenCode V2 skills](https://opencode.ai/v2/docs/skills/) | Discovery of repository-owned `.agents/skills/` | 2026-11-05 |
+
+Dates retain the prior review of repository guidance, not installed-version or
+runtime verification. For a refresh, use `sync-doc-references` with a topic or path.
+
 - [agent-desktop](https://github.com/vercel-labs/agent-desktop) — platform-specific automation guidance
 
 ## Terminal and Development
