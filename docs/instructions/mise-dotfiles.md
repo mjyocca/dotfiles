@@ -11,7 +11,9 @@ composition and global versus checkout scope.
 
 - Never deploy `packages/aur/`; it contains repository-only installation data.
 - Select the intended platform before deployment. Inspect `mise config ls` and
-  `mise dotfiles status`, including checkout-local overrides and system defaults.
+  `mise dotfiles status` for non-secret scope metadata. Never open private override
+  files; request redacted user diagnostics for their effects under the
+  [security constraints](security.md#sensitive-local-files).
 - Make requires a platform configuration and matching `PROFILE`/`MISE_ENV`.
   Direct mise commands bypass that check. After deployment, the checkout's ignored
   `.miserc.local.toml` supplies a default only when `-E` and `MISE_ENV` are absent;
@@ -33,7 +35,8 @@ composition and global versus checkout scope.
 - Include the discovery policy when deploying interactive shell changes.
   Native dependencies order selected targets but do not expand a scoped
   apply; template dry-runs do not validate rendered content. See
-  [runtime architecture](../architecture/mise.md#runtimes-and-project-environments).
+  [deployment procedure](../commands.md#updating-existing-deployments) and
+  [scoped previews](../commands.md#scoped-previews).
 
 ## Editing Deployment Configuration
 

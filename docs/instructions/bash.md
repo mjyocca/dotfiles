@@ -9,10 +9,11 @@ paths; do not assume non-interactive Bash reads `.bashrc`.
   interactive defaults after it. Do not use `OMARCHY_PATH` as proof of OS identity.
 - Keep standalone initialization separate from Omarchy-owned hooks; inspect
   installed defaults before adding another initialization path.
-- Inspect upstream environment overrides when application config appears ignored;
-  preserve intentional machine-local values.
+- Inspect tracked upstream initialization when application config appears ignored;
+  ask for redacted diagnostics rather than reading machine-local overrides.
 - Keep `~/.bashrc.local` ignored and sourced **last** for machine-specific settings
-  and credentials.
+  and credentials. Agents must not read or source the real file; see
+  [security constraints](security.md#sensitive-local-files).
 
 ## Change Constraints
 
@@ -28,10 +29,11 @@ paths; do not assume non-interactive Bash reads `.bashrc`.
 
 ## Verification and References
 
-Use `bash -n` on changed files for syntax without sourcing them. Startup can run
-hooks and create a local file; test fresh interactive/login contexts only when
-appropriate, and report platform coverage. Consult the relevant upstream page
-instead of copying tool initialization recipes:
+Use `bash -n` on changed source files for syntax without sourcing them. Run syntax
+and startup checks in an isolated fixture that cannot load real local overrides
+or dotenv files; startup can run hooks and create files. Report untested platform
+behavior and use user-provided redacted results for real-machine startup issues.
+Consult the relevant upstream page instead of copying initialization recipes:
 
 - [Bash startup files](https://www.gnu.org/software/bash/manual/bash.html#Bash-Startup-Files)
 - [Omarchy manual](https://omarchy.org/manual/)

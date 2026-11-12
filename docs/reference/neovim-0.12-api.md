@@ -1,8 +1,8 @@
 # Neovim 0.12 Compatibility References
 
 Use the installed editor's `:help news` and API help for version-specific behavior.
-The web manual may describe a newer version; verify APIs against the version in
-use rather than relying on a locally copied release-note catalog.
+The web manual may describe a newer version; verify APIs against the installed
+version.
 
 - [Neovim release notes](https://neovim.io/doc/user/news.html)
 - [Lua API](https://neovim.io/doc/user/lua.html)

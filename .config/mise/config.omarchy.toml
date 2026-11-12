@@ -121,6 +121,7 @@ dotfile_groups = [
 "pacman:resvg" = "latest" # Optional SVG previews in Yazi
 
 # Platform-managed CLI/TUI tools (Omarchy-specific)
+"pacman:1password-cli" = "latest"
 "pacman:herdr" = "latest"
 "pacman:dua-cli" = "latest"
 "pacman:lazydocker" = "latest"

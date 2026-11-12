@@ -1,0 +1,29 @@
+# mise.local.toml — machine-specific project overrides
+# Review before use; this file overrides shared mise.toml configuration.
+# Ignored by the dotfiles-managed global Git ignore; verify in each project:
+# git check-ignore mise.local.toml
+# Keep real secrets in a secret manager, not plaintext local overrides.
+
+[env]
+# Nonsecret local settings, for example:
+# APP_PORT = "3001"
+
+# Project secrets via fnox (requires [secrets.fnox] in project mise.toml)
+# Task-scoped grants:
+#
+# [settings]
+# experimental = true
+#
+# [secrets.fnox]
+#
+# [tasks.dev]
+# secrets = ["DATABASE_URL", "API_TOKEN"]
+# run = "make dev"
+#
+# Run with: mise run dev
+#
+# One-off command with secrets:
+# mise x --secrets DATABASE_URL,API_TOKEN -- make dev
+#
+# Note: secrets grant only what you specify; existing shell exports still inherited.
+# Neither approach reads .env/.envrc automatically. Define references in fnox.toml.

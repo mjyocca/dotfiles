@@ -3,6 +3,8 @@
 # Retained for explicit legacy use, not automatic runtime selection.
 "github:asdf-vm/asdf" = "latest"
 gitleaks = "latest"
+fnox = "latest"
+pnpm = "latest"
 lazydocker = "latest"
 hunk = "latest"
 "aqua:anomalyco/opencode" = "latest"

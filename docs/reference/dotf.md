@@ -17,13 +17,18 @@ switch to the project root. Existing files, directories, and symlinks are skippe
 Templates come from
 `${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/templates/`, so the selected
 Neovim configuration must have its templates deployed. If templates are missing,
-review the [deployment instructions](../architecture/mise.md#runtimes-and-project-environments).
+review the [deployment procedure](../commands.md#updating-existing-deployments).
 
-The tracked templates provide `mise.toml` and `.nvim.lua`. Review the generated
-configuration before trusting it. Run `mise trust` only after reviewing
-`mise.toml`, then `mise install` if you want to install its requested runtimes.
-Neovim's Lua trust decision is separate. The scaffolder does not trust
-configuration or install tools. See [project environment migration](../architecture/mise.md#migrating-project-environments-and-editor-setup)
+The tracked templates provide `mise.toml`, `mise.local.toml`, and `.nvim.lua`.
+The local mise override and Neovim project file are ignored by the dotfiles-managed
+global Git ignore; shared `mise.toml` remains eligible for commits. Existing tracked
+files are not untracked by these rules. Keep real secrets in a secret manager,
+not plaintext local overrides.
+
+Review generated files before running `mise trust`. To install the requested
+runtimes afterward, run `mise install`. Neovim's Lua trust decision is separate;
+scaffolding neither trusts configuration nor installs tools. See
+[project environment migration](../commands.md#migrating-project-environments-and-editor-setup)
 for legacy `.envrc` files and editor environment inheritance.
 
 ## Source Location
@@ -38,10 +43,6 @@ packages/scripts/.local/bin/
 The `colima-*` subcommands live in `packages/colima-scripts/` and are selected
 only by the macOS deployment profile, not the shared `scripts` group.
 
-## How It Works
-
-Running `dotf --help` auto-lists all commands with their one-line descriptions (pulled from the second line of each script).
-
 ## Adding a New Subcommand
 
 1. Create an executable file at `packages/scripts/.local/bin/dotf.d/<name>`
@@ -50,8 +51,6 @@ Running `dotf --help` auto-lists all commands with their one-line descriptions (
 4. Review the file and add it to Git's index (`git add <path>`); the deployment
    manifest includes only indexed files. A commit is not required to preview it.
 5. Inspect deployment status and a scoped dry-run before an authorized `make link`.
-
----
 
 ## Makefile vs. dotf
 

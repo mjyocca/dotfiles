@@ -5,6 +5,13 @@ mise.*.local.toml
 .mise.local.toml
 .mise.*.local.toml
 
+# Project fnox secrets and provider references.
+fnox.toml
+.fnox.toml
+
+# Private executable Neovim project configuration; trust is still required.
+.nvim.lua
+
 # OSX/MacOS generated files
 .AppleDB
 .AppleDesktop

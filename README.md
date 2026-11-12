@@ -94,9 +94,8 @@ Both commands run their steps in order and stop if a step fails.
 make sync
 ```
 
-Sync installs system packages, provisions optional workspace repositories, deploys
-dotfiles, and installs development tools, language runtimes, and plugin
-integrations. Pull repository updates with Git first; sync doesn't pull them for you.
+Pull repository updates with Git before syncing; sync applies the configuration
+already in this checkout.
 
 ```bash
 make upgrade
@@ -105,5 +104,10 @@ make upgrade
 Upgrade mise tools within their configured version ranges, keeping old versions.
 Pinned language runtimes stay pinned; system package upgrades are separate.
 
-See the [command reference](docs/commands.md) for individual stages and previews.
-For project scaffolding and daily utilities, see the [dotf toolbox](docs/reference/dotf.md).
+## Documentation
+
+- [Commands and setup](docs/commands.md) — Prerequisites, lifecycle stages, upgrades, deployment, and environment migration
+- [mise architecture](docs/architecture/mise.md) — Configuration composition, ownership, platform extension, and runtime behavior
+- [Project secrets](docs/secrets.md) — Fnox providers, task-scoped grants, and migration from plaintext environment files
+- [dotf toolbox](docs/reference/dotf.md) — Daily utilities and project scaffolding
+- [Tooling reference](docs/reference/tools.md) — Tool documentation and discovery collections

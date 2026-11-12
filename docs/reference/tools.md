@@ -1,61 +1,57 @@
 # Tooling Reference
 
-Human-facing discovery links, not a package inventory or installation policy.
-Consult upstream for features, compatibility, licensing, and commands; tracked
-declarations determine what this repository actually installs.
-
-When freshness matters, check upstream content's **Last updated** date or source
-history and compare it with the installed version. HTTP `Last-Modified` may reflect
-a site deployment, not a content change; an absent date is not evidence of staleness.
-
-## Agent Guidance
-
-- [Agent guidance](agent-guidance.md) — official OpenCode V2, OpenAI, and Anthropic sources with review dates
-- [agent-desktop](https://github.com/vercel-labs/agent-desktop) — platform-specific automation guidance
-
 ## Terminal and Development
 
-- [Ghostty docs](https://ghostty.org/docs) · [source](https://github.com/ghostty-org/ghostty)
-- [Rex docs](https://www.superlogical.com/rex/docs) · [repository configuration](rex.md)
-- [OpenCode V2 docs](https://opencode.ai/v2/docs/) — configuration and agent tooling
+- [Ghostty](https://ghostty.org/docs)
+- [Rex](rex.md) — repository configuration and upstream references
+- [OpenCode](https://opencode.ai/v2/docs/)
 - [lazygit](https://github.com/jesseduffield/lazygit) — Git UI
 - [lazydocker](https://github.com/jesseduffield/lazydocker) — container UI
 - [gh-dash](https://github.com/dlvhdr/gh-dash) — GitHub dashboard
-- [yazi docs](https://yazi-rs.github.io/docs/installation/) · [source](https://github.com/sxyazi/yazi)
-- [superfile docs](https://superfile.dev/) · [source](https://github.com/yorukot/superfile)
-- [television docs](https://alexpasmantier.github.io/television/) · [source](https://github.com/alexpasmantier/television)
+- [Yazi](https://yazi-rs.github.io/docs/installation/) · [Superfile](https://superfile.dev/) — file managers
+- [Television](https://alexpasmantier.github.io/television/) — fuzzy finder
 - [btop](https://github.com/aristocratos/btop) — resource monitor
 - [glow](https://github.com/charmbracelet/glow) — terminal Markdown
-- [Zellij docs](https://zellij.dev/documentation/) · [Tmux wiki](https://github.com/tmux/tmux/wiki)
+- [Zellij](https://zellij.dev/documentation/) · [Tmux](https://github.com/tmux/tmux/wiki)
+- [dotf toolbox](dotf.md) — repository helper commands
 
-## Configuration Managers
+Explore: [awesome-tuis](https://github.com/rothgar/awesome-tuis).
 
+## Editors and Languages
+
+- [Neovim API references](neovim-0.12-api.md)
+- [awesome-neovim](https://github.com/rockerBOO/awesome-neovim)
+- [awesome-go](https://github.com/avelino/awesome-go)
+- [awesome-rust](https://github.com/rust-unofficial/awesome-rust)
+
+## Configuration and Desktop
+
+- [mise architecture](../architecture/mise.md) — repository layout and composition
 - [mise configuration](https://mise.jdx.dev/configuration.html) · [dotfiles](https://mise.jdx.dev/dotfiles.html)
-- [mise development tools and runtimes](https://mise.jdx.dev/dev-tools/) · [project environment variables](https://mise.jdx.dev/environments/)
+- [mise tools and runtimes](https://mise.jdx.dev/dev-tools/) · [project environments](https://mise.jdx.dev/environments/)
 - [asdf configuration](https://asdf-vm.com/manage/configuration.html)
 - [Omarchy manual](https://omarchy.org/manual/)
+- [Herdr customization](herdr-app.md)
 
-For this repository's file layout and scope, see [mise architecture](../architecture/mise.md).
+Explore: [awesome-sysadmin](https://github.com/awesome-foss/awesome-sysadmin).
 
-## Containers and Virtual Machines
+## Containers and Infrastructure
 
-- [Colima](https://github.com/abiosoft/colima) · [Lima docs](https://lima-vm.io/docs/) · [Lima source](https://github.com/lima-vm/lima)
+- [Colima](https://github.com/abiosoft/colima) · [Lima](https://lima-vm.io/docs/)
 - [OrbStack Docker](https://docs.orbstack.dev/docker/) · [Linux machines](https://docs.orbstack.dev/machines/)
 - [Docker Desktop](https://docs.docker.com/desktop/)
 - [Podman](https://podman.io/docs/installation) · [Podman Desktop](https://podman-desktop.io/)
 - [containerd](https://containerd.io/docs/)
-- [QEMU docs](https://www.qemu.org/docs/master/) · [wiki](https://wiki.qemu.org/)
-- [UTM docs](https://docs.getutm.app/) · [source](https://github.com/utmapp/UTM)
-
-See [dotf](dotf.md) for repository helper commands.
-
-## Infrastructure
-
+- [QEMU](https://www.qemu.org/docs/master/) · [UTM](https://docs.getutm.app/)
 - Container sandboxing: [gVisor](https://gvisor.dev/docs/)
-- MicroVMs: [Firecracker](https://firecracker-microvm.github.io/) · [source](https://github.com/firecracker-microvm/firecracker)
+- MicroVMs: [Firecracker](https://firecracker-microvm.github.io/)
 - VM initialization: [cloud-init](https://docs.cloud-init.io/en/latest/)
 - Workload orchestration: [Kubernetes](https://kubernetes.io/docs/home/) · [Nomad](https://developer.hashicorp.com/nomad/docs)
 - Durable workflows: [Temporal](https://docs.temporal.io/) · [Cadence](https://cadenceworkflow.io/docs/get-started)
 - Network access: [Tailscale](https://tailscale.com/docs) · [Twingate](https://www.twingate.com/docs)
 - Service discovery/mesh: [Consul](https://developer.hashicorp.com/consul/docs)
 - Secrets management: [Vault](https://developer.hashicorp.com/vault/docs)
+
+Explore: [awesome-devops](https://github.com/AcalephStorage/awesome-devops),
+[awesome-kubernetes](https://github.com/ramitsurana/awesome-kubernetes), and
+[awesome-selfhosted](https://github.com/awesome-selfhosted/awesome-selfhosted).
