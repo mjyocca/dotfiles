@@ -114,4 +114,4 @@ For project scaffolding and daily utilities, see the [dotf toolbox](docs/referen
 - [mise architecture](docs/architecture/mise.md) — Configuration composition, ownership, platform extension, and runtime behavior
 - [Project secrets](docs/secrets.md) — Fnox providers, task-scoped grants, and migration from plaintext environment files
 - [dotf toolbox](docs/reference/dotf.md) — Daily utilities and project scaffolding
-- [Tooling reference](docs/reference/tools.md) — Upstream documentation and discovery links, not an installation inventory
+- [Tooling reference](docs/reference/tools.md) — Tool documentation and discovery collections

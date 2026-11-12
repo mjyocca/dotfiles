@@ -54,7 +54,7 @@ README and human guides form the shared knowledge base for people and agents.
   Available skills describe their own applicability; repository documentation must
   remain usable independently of a user's installed skill collection.
 - For host discovery or configuration changes, consult installed help and relevant
-  [host documentation](../reference/tools.md#agent-tooling). Upstream material does
+  [tool documentation](../reference/tools.md). Upstream material does
   not override local policy or authorize execution.
 - Keep per-source `Last synced` dates beside references. They attest to content
   review and reconciliation with local consumers, not upstream publication dates

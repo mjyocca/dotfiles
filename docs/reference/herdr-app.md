@@ -1,6 +1,6 @@
 # Herdr desktop customization
 
-## Guidance for future agents
+## Customization
 
 Before customizing Herdr, read `~/.config/herdr-app/AGENTS.md`. Herdr generates
 this guide on startup to match the installed version; prefer it over examples
@@ -12,8 +12,7 @@ before changing their structure or code.
 Follow the repository's [deployment guidance](../instructions/mise-dotfiles.md)
 when making changes persistent. Shared key customizations live in
 `packages/herdr-app/.config/herdr-app/keys.json`; each platform merges them into
-the existing keymap rather than replacing Herdr's platform defaults. Treat that
-JSON as the shortcut reference, not this document.
+the existing keymap rather than replacing Herdr's platform defaults.
 
 Open Herdr once on a new machine before deploying its key customizations so it
 can create its default keymap. A merge into a missing file only creates the
@@ -34,9 +33,6 @@ flow-control settings.
   — online reference; the locally generated guide is version-specific.
 - [Layouts and mods](https://github.com/herdrdev/herdr-app/blob/master/docs/mods.md)
   — customization boundaries, live reload, and validation.
-- [Tmux-prefix recipe](https://herdr.dev/mods/herdrdev/tmux-prefix) — the mod-based
-  approach investigated for the initial iteration; the native keymap does not
-  require this mod.
 - [Herdr key loader](https://github.com/herdrdev/herdr-app/blob/v0.1.12/src/keys.rs)
   and [GPUI sequence parser](https://github.com/herdrdev/herdr-app/blob/v0.1.12/vendor/gpui-pre/src/keymap/binding.rs)
   — native space-separated key sequences used by the current configuration.

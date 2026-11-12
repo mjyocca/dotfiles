@@ -192,14 +192,13 @@ Deployment links tool fragments and renders the machine discovery policy:
   miserc.toml                         Rendered from miserc.toml
 ```
 
-Bootstrap and deployment rules are not loaded globally. A declaration does not
-prove a link is deployed: inspect the target machine rather than recording
-deployment status here.
+Bootstrap and deployment rules are not loaded globally. Check links on the target
+machine to confirm deployment.
 
 The existing global `config.toml` overrides the tracked fragments; deployment
 never rewrites it or machine-local overrides. Do not treat `mise use -g` as an edit
 to tracked declarations. Consult upstream [configuration discovery and precedence](https://mise.jdx.dev/configuration.html#configuration-hierarchy)
-and inspect effective configuration rather than relying on a copied precedence list.
+and inspect effective configuration for the target machine.
 
 ## Machine Scope and Runtime Ownership
 

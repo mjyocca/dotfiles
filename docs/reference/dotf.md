@@ -43,10 +43,6 @@ packages/scripts/.local/bin/
 The `colima-*` subcommands live in `packages/colima-scripts/` and are selected
 only by the macOS deployment profile, not the shared `scripts` group.
 
-## How It Works
-
-Running `dotf --help` auto-lists all commands with their one-line descriptions (pulled from the second line of each script).
-
 ## Adding a New Subcommand
 
 1. Create an executable file at `packages/scripts/.local/bin/dotf.d/<name>`
@@ -55,8 +51,6 @@ Running `dotf --help` auto-lists all commands with their one-line descriptions (
 4. Review the file and add it to Git's index (`git add <path>`); the deployment
    manifest includes only indexed files. A commit is not required to preview it.
 5. Inspect deployment status and a scoped dry-run before an authorized `make link`.
-
----
 
 ## Makefile vs. dotf
 
