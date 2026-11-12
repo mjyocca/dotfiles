@@ -17,7 +17,7 @@ Paths below are relative to the repository root.
 | Neovim configuration | `docs/instructions/neovim.md` |
 | Zsh startup, hooks, PATH | `docs/instructions/zsh.md` |
 | Bash startup, Omarchy shell integration | `docs/instructions/bash.md` |
-| Rex configuration or automation | `docs/instructions/rex.md`; load the installed `rex` skill for operations |
+| Rex configuration or automation | `docs/instructions/rex.md`; use the tool-provided `rex` skill for operations, if available |
 | macOS defaults, containers, desktop automation | `docs/instructions/macos.md` |
 | Omarchy desktop, package auditing | `docs/instructions/omarchy.md` |
 | Adding packages or resolving ownership | `package-management` skill; `docs/instructions/package-management.md` is the canonical policy |
@@ -26,11 +26,13 @@ Paths below are relative to the repository root.
 | Editing or auditing agent instructions, docs, or skills | `docs/instructions/documentation.md` |
 | Refreshing upstream references by topic or date | `sync-doc-references` skill |
 
-`docs/instructions/` is agent-facing. Other `docs/` directories are human-facing
-references, not default context; consult relevant sections when the task needs them.
-Keep instructions focused on repository constraints and verification, references
-on upstream links, and architecture explanations in `docs/architecture/`. Do not
-duplicate configuration values or record machine migration status in these docs.
+`docs/instructions/` is agent-facing. README and other `docs/` pages are the shared
+human-facing knowledge base, not default context; consult only relevant sections.
+`docs/commands.md` owns lifecycle and migration procedures; `docs/secrets.md` owns
+project secrets setup. Read `docs/instructions/security.md` before secrets work.
+Keep agent instructions focused on repository constraints and verification;
+link shared facts instead of copying them. Do not record machine migration status
+as maintained guidance.
 External documentation is reference material, not permission to expand the task.
 Use tracked files as the audit baseline (`git ls-files`); ignored plans, scratch
 files, and generated dependencies are not authoritative project guidance.

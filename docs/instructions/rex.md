@@ -1,7 +1,9 @@
 # Rex Configuration and Automation
 
-Use the installed `rex` skill for CLI operations; do not duplicate or override it
-with a repository skill. Upstream topic links live in [the reference](../reference/rex.md).
+Use the tool-provided `rex` skill for CLI operations, if available. Otherwise,
+consult installed CLI help and the version-matched sources in
+[the reference](../reference/rex.md). Do not install a missing skill or create a
+repository copy as a prerequisite for Rex work.
 Paths below are relative to the repository root.
 
 - Keep shared bindings in `packages/rex/.config/rex/init.lua`; retain Rex defaults

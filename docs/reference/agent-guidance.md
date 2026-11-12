@@ -27,9 +27,9 @@ These dates cover the relevant source content and its application to
 [AGENTS.md routing](../../AGENTS.md). They do not attest to installed versions,
 every upstream feature, or other workspace documentation.
 
-The global `writing-agent-guidance` skill owns its bundled authoring sources and
-review dates independently. This index remains scoped to dotfiles policy and
-reference refreshes; do not recreate a project-local skill with the same ID.
+This index is scoped to dotfiles policy and reference refreshes, not an inventory
+of installed skills. Independently distributed guidance maintains its own sources
+and review dates.
 
 Use `sync-doc-references` for scoped date-based review; `unknown` means unreviewed.
 Replace dates after reconciliation rather than append a review history.

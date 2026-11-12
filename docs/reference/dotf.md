@@ -17,7 +17,7 @@ switch to the project root. Existing files, directories, and symlinks are skippe
 Templates come from
 `${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/templates/`, so the selected
 Neovim configuration must have its templates deployed. If templates are missing,
-review the [deployment instructions](../architecture/mise.md#runtimes-and-project-environments).
+review the [deployment procedure](../commands.md#updating-existing-deployments).
 
 The tracked templates provide `mise.toml`, `mise.local.toml`, and `.nvim.lua`.
 The local mise override and Neovim project file are ignored by the dotfiles-managed
@@ -28,7 +28,7 @@ not plaintext local overrides.
 Review the generated configuration before trusting it. Run `mise trust` only after reviewing
 `mise.toml`, then `mise install` if you want to install its requested runtimes.
 Neovim's Lua trust decision is separate. The scaffolder does not trust
-configuration or install tools. See [project environment migration](../architecture/mise.md#migrating-project-environments-and-editor-setup)
+configuration or install tools. See [project environment migration](../commands.md#migrating-project-environments-and-editor-setup)
 for legacy `.envrc` files and editor environment inheritance.
 
 ## Source Location

@@ -51,21 +51,73 @@ installation and updates remain explicit; installing TPM does not install them.
 
 ### Scoped previews
 
-Before using `make tools`, including its dry-run, deploy the global mise
-configuration and discovery policy with `make link`.
+Before deployment, inspect effective configuration, selected platform groups, and
+target collisions. With your intended environment selected, use `mise config ls`
+and `mise dotfiles status`; before initial deployment, select it explicitly, for
+example `mise -E macos config ls`. See [platform selection](#platform-selection-and-direct-mise-use)
+if `PROFILE`, `MISE_ENV`, or a workspace default disagree.
+
+`DOTFILES_ARGS` passes arguments to `mise dotfiles apply`; `TOOLS_ARGS` passes
+arguments to `mise install`. Preview Bash startup and discovery policy together:
 
 ```bash
 make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.bashrc ~/.bash_profile'
+```
+
+After reviewing the preview and resolving conflicts, apply that scope:
+
+```bash
+make link DOTFILES_ARGS='~/.config/mise/miserc.toml ~/.bashrc ~/.bash_profile'
+```
+
+For Zsh, select `~/.zshenv` and `~/.zshrc` instead of the Bash files. Include the
+discovery policy in either case. These commands deploy only shell startup and
+discovery policy, not the complete setup. Native dependencies order selected entries
+without expanding a scoped apply; template previews do not validate rendered content.
+For complete deployment, use the procedure below.
+
+### Updating existing deployments
+
+From the repository root, preview all selected dotfiles. The subsequent apply
+deploys configuration to your home directory; review the selected groups, changes,
+and target collisions first. Templates are rendered copies that can replace local
+edits; editing through an existing symlink changes its tracked source. Preserve
+local settings in supported overrides rather than rendered files.
+
+```bash
+make link DOTFILES_ARGS=--dry-run
+```
+
+After reviewing the preview and resolving conflicts, apply the selected dotfiles:
+
+```bash
+make link
+```
+
+This also deploys the global mise tool configuration, discovery policy, Neovim
+templates, scaffolder, and prompt configuration. Already-linked files expose
+checkout edits immediately, but newly added files need deployment. Existing
+installations need deployment to gain `templates/mise.toml.template` in the
+platform's Neovim config. Open a fresh shell afterward; re-sourcing does not
+reliably remove old hooks or environment state.
+
+Review `.tool-versions` requests for mise backend compatibility before installing.
+The checkout and deployed discovery policies enable these files; preserved
+machine-local overrides can still affect discovery. Prefer native mise backends;
+an asdf plugin used through mise neither needs the asdf manager nor shares its
+install directory.
+
+After deploying the global tool configuration and discovery policy, preview tool
+installation:
+
+```bash
 make tools TOOLS_ARGS=--dry-run
 ```
 
-`DOTFILES_ARGS` passes arguments to `mise dotfiles apply`; `TOOLS_ARGS` passes
-arguments to `mise install`.
-
-Include discovery policy when previewing or applying shell startup changes. The
-example above covers only Bash startup and discovery policy; see the
-[complete migration deployment](architecture/mise.md#runtimes-and-project-environments)
-for the remaining dotfiles.
+Run `make tools` when ready to install the effective requests, including intentional
+machine-local additions. Existing asdf runtime installations are not transferred.
+Removing declarations does not authorize pruning deployed files or uninstalling
+tools; treat removal as a separately scoped operation.
 
 ## Upgrades
 
@@ -152,3 +204,33 @@ preserved; deployment will not repair an incorrect create-only default.
 
 See [mise configuration architecture](architecture/mise.md) for global versus
 checkout scope, machine-local overrides, optional repositories, and LaunchAgents.
+
+## Migrating project environments and editor setup
+
+Migration is deliberate, project by project. Mise does not automatically execute
+`.envrc`. Move non-secret exports into `[env]`, explicit dotenv loading into
+`_.file`, and PATH additions into `_.path`. Compatible Bash scripts can be loaded
+with `_.source`, but direnv functions such as `PATH_add`, `layout`, and `source_up`
+are not automatically available. Sourced scripts may run repeatedly; review them
+for side effects and credential fetching before opting in. Do not globally discover
+or source `.envrc` files, or register both environment loaders for the same project.
+For task-scoped secret delivery rather than broad `[env]` exposure, see
+[project secrets](secrets.md).
+
+`dotf init` offers `mise.toml` instead of `.envrc`, including optional Neovim plugin
+gating and `NVIM_LOCAL_CONFIG`. Review the generated file before trusting it; the
+scaffolder neither trusts configs nor installs runtimes and never overwrites an
+existing destination. Neovim's separate Lua trust check remains in place. Its
+environment is inherited at launch, not refreshed when its working directory changes.
+Use `mise exec -- nvim` when children should inherit the launching project's tool
+paths; validate the actual editor/plugin workflows that matter to the project.
+See the [dotf toolbox](reference/dotf.md) for scaffolding commands.
+
+Existing project `.envrc` files, runtime installations, and machine-local settings
+are not rewritten or deleted. The `packages/asdf/` sources, including
+`.asdf-direnv.sh`, remain for existing symlink consumers, but neither platform
+deploys them anymore. Preserving these files supports older setups; it does not
+load their variables in a mise-only shell. Retain the legacy helper until its
+consumers have migrated across machines. Stale shell integration files are no
+longer sourced; removing them or uninstalling dependencies requires a separate,
+explicitly scoped operation.

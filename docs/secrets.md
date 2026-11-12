@@ -1,26 +1,43 @@
 # Project Secrets with Fnox and Mise
 
-Mise's experimental fnox integration gives tasks access to secrets without exposing them to your shell. This guide walks through the setup, explains the boundary between fnox and mise, and covers migration from `.env` and `.envrc` files.
+Mise's experimental fnox integration gives selected tasks access to secrets without
+exporting those values to your interactive shell. This guide covers project setup
+and migration from `.env` and `.envrc` files. Dotfiles declares the supporting tools;
+it does not configure providers or grant secrets to projects automatically.
 
 ## What This Solves
 
 Projects need environment variables—database URLs, API tokens, signing keys. Storing them in plaintext `.env` files creates risk: accidental commits, broad shell exposure, and unclear who gets what.
 
-Fnox fetches secrets from a provider (1Password, AWS Secrets Manager, age-encrypted files, others) at the moment a command needs them. Mise controls which commands receive the values. The result: secrets stay in your vault, reach only the tasks that request them, and redact from normal output.
+Fnox resolves secrets from a provider, such as 1Password, AWS Secrets Manager, or
+age-encrypted values. Mise controls which tasks receive them and redacts captured
+task output. Granted values reach the task and its children; grants do not sanitize
+existing shell exports or isolate processes running as the same user. Interactive
+or raw tasks and one-off commands have [redaction limits](#output-shows-plaintext-secret).
 
 ## Prerequisites
 
 Before starting:
 
 - **Mise version**: 2026.10.4 or newer supports the `secrets` field on tasks. Check with `mise --version`.
-- **Fnox**: already declared in your dotfiles' global mise tools. Install or verify with:
+- **Fnox**: 1.39.0 or newer is required by mise's integration. Fnox is declared in
+  the [global tool configuration](../.config/mise/global/tools.toml); declarations
+  do not prove it is installed. Verify the available version with:
   ```bash
-  mise install fnox@latest
   mise exec -- fnox --version
   ```
+  If missing, use the [tool installation workflow](commands.md#updating-existing-deployments).
 - **Provider access**: for 1Password, sign in with the desktop app integration or `op signin`. Verify with `op vault list`. For other providers, follow their authentication flow.
 
-Fnox and `op` are system tools, not project dependencies. Projects reference them through mise configuration.
+In this dotfiles setup, mise manages fnox as a global development tool and the
+platform package manager supplies `op`. A project or CI runner cannot assume those
+tools are present; declare or provision its required tools separately.
+
+Run the setup and task commands below from the target project's root, not the
+dotfiles checkout. Replace the example vault, item, and task names with your own.
+Review the project's configuration and commands before trusting or running them.
+The examples assume your project defines the Make targets they invoke; this guide
+does not create those targets or an application schema.
 
 ## Core Concepts
 
@@ -42,7 +59,10 @@ mise x --secrets MY_GLOBAL_KEY -- make dev
 mise run --secrets MY_GLOBAL_KEY <task>
 ```
 
-This prevents a cloned repository from declaring access to your personal secrets.
+With fnox versions that report key provenance, mise rejects automatic project grants
+for keys from your own config. Older versions may not provide that distinction;
+review the [current integration restrictions](https://mise.jdx.dev/environments/secrets/fnox.html#personal-keys)
+before relying on it. Grants are not a sandbox against a repository's executable code.
 
 ### Grants vs. Inheritance
 
@@ -54,7 +74,19 @@ To fully migrate a secret: move the value into your provider, remove the old she
 
 ### 1. Configure Fnox Providers
 
-Create `fnox.toml` at the project root with provider definitions and secret references:
+Create `fnox.toml` at the project root with provider definitions and secret references.
+The dotfiles-managed global ignore excludes it, but verify that your project uses
+that rule and that the file is not already tracked:
+
+```bash
+git check-ignore -v fnox.toml
+git ls-files -- fnox.toml
+```
+
+The first command should identify an ignore rule; the second should print nothing.
+If either check disagrees, resolve the project's tracking policy before adding
+private references. An ignore rule does not untrack an existing file. Never put
+plaintext secret values into this file, even when it is ignored.
 
 ```toml
 # fnox.toml — project secret references
@@ -84,6 +116,8 @@ Expected output: confirmation that fnox can reach the provider. If it fails, che
 Add to `mise.toml` or `mise.local.toml`:
 
 ```toml
+min_version = "2026.10.4"
+
 [settings]
 experimental = true  # mise secrets is experimental
 
@@ -106,7 +140,9 @@ secrets = ["DATABASE_URL"]
 run = "make test"
 ```
 
-Each task lists only the keys it needs. The `build` task receives nothing; the `deploy` task gets only its listed keys. Dependencies don't inherit secrets from the tasks that depend on them.
+The `dev` task receives both keys; `test` receives only `DATABASE_URL`. Tasks without
+grants receive no fnox values from this integration. Dependencies need their own
+grants, while ordinary child processes inherit the granted task's environment.
 
 ### 4. Verify the Configuration
 
@@ -116,7 +152,10 @@ Check what mise sees:
 mise secrets ls
 ```
 
-Expected output: a table listing each key, which tasks grant it, and whether it's injectable. If a key shows as "unknown," check the spelling and profile in `fnox.toml`.
+The listing shows key names, task grants, and whether a key is injectable, not secret
+values. If mise reports an unknown key, check its spelling and the selected profile
+in `fnox.toml`. A successful listing alone does not prove that all grants are valid;
+review warnings and validate the task definitions too.
 
 Validate task definitions:
 
@@ -132,7 +171,10 @@ Expected output: no errors. If a task grants an unknown key, mise reports it her
 mise run dev
 ```
 
-Fnox fetches the requested keys, passes them to `make dev`, and redacts them from the task's output. If fnox needs to prompt for provider authentication, it receives the terminal and waits.
+Fnox resolves the requested keys and mise passes them to `make dev`. Mise redacts
+captured task output; tasks explicitly configured as raw or interactive can bypass
+that capture in a terminal. If provider authentication needs a prompt, fnox can
+receive the terminal while mise waits.
 
 ## Usage Patterns
 
@@ -145,7 +187,9 @@ mise run dev
 mise run deploy
 ```
 
-Tasks that don't list secrets receive no fnox values. Their dependencies also receive nothing, even if the parent task is granted keys.
+Tasks without grants receive no fnox values from this integration. Dependencies
+receive only their own grants, not those of the tasks that depend on them. Existing
+environment variables and ordinary child-process inheritance still apply.
 
 ### One-Off Commands
 
@@ -153,7 +197,7 @@ For ad-hoc access without defining a task:
 
 ```bash
 mise x --secrets DATABASE_URL,API_TOKEN -- make dev
-mise x --secrets DATABASE_URL -- psql -c "SELECT 1"
+mise x --secrets DATABASE_URL -- make test
 ```
 
 The command after `--` receives the granted keys. **`mise x` does not redact output**—avoid printing secrets.
@@ -187,20 +231,27 @@ You can reference secrets in task environment variables without exporting the ra
 ```toml
 [tasks.migrate]
 env.DATABASE_URL = "postgres://app:{{ secrets.DB_PASSWORD }}@db.internal/app"
-run = "psql \"$DATABASE_URL\" -f schema.sql"
+run = "make migrate"
 ```
 
-The task receives `DATABASE_URL` as a composed value. `DB_PASSWORD` itself is not exported unless you also list it in `secrets`.
+The task receives `DATABASE_URL` as a composed value, which the project's migration
+target must consume. `DB_PASSWORD` itself is not exported unless you also list it
+in `secrets`. Avoid expanding secret values into command arguments or logging them.
 
 ## Migrating from .env and .envrc
 
-Migration is deliberate, project by project—not automatic. Fnox and mise don't read `.env` or `.envrc` files.
+Migration is deliberate, project by project—not automatic. The fnox integration
+does not automatically load `.env` or `.envrc`. Mise can load a dotenv file through
+an explicit `_.file` declaration; those values enter its broader `[env]`
+environment rather than task-scoped grants.
 
 ### What Moves
 
 1. **Secrets** (database URLs, API tokens, signing keys): move into your provider through its secure UI or interactive workflow. Store only references in `fnox.toml`.
 2. **Non-secret environment** (feature flags, debug settings, local ports): move into mise's `[env]` block in `mise.toml` or `mise.local.toml`.
-3. **PATH and runtime configuration**: already handled by mise's `[tools]` and shims.
+3. **PATH and runtime configuration**: use mise's `[tools]` and `_.path`. This
+   dotfiles setup activates real tool paths interactively and preserves inherited
+   paths in child shells; it does not inject shims into non-interactive startup.
 
 ### Migration Steps
 
@@ -216,9 +267,14 @@ For each project:
 ### What Doesn't Migrate
 
 - **Direnv's standard library** (`layout python`, `dotenv`, etc.): mise provides its own environment features. Translate direnv idioms to mise equivalents.
-- **Executable shell loading**: mise doesn't automatically source `.envrc` or run shell scripts on directory entry. Secrets must come through fnox or explicit `[env]` declarations.
+- **Executable shell loading**: mise does not automatically source `.envrc`.
+  Explicit `_.source` scripts can run during environment activation; review their
+  side effects rather than assuming they behave like task-scoped secret grants.
 
-Keep direnv installed for projects not yet migrated. The two systems can coexist during transition.
+Direnv remains an installed dependency, but this dotfiles setup does not register
+its shell hook. Retain legacy files until their consumers have migrated; do not
+enable both environment loaders for the same project. See the
+[environment migration guide](commands.md#migrating-project-environments-and-editor-setup).
 
 ## Troubleshooting
 
@@ -232,7 +288,9 @@ op vault list  # verify 1Password authentication
 op whoami      # confirm signed-in identity
 ```
 
-**Fix**: sign in with the desktop app integration or `op signin`. Fnox uses whatever session `op` has. For CI, provide `OP_SERVICE_ACCOUNT_TOKEN` as an environment variable.
+**Fix**: sign in with the desktop app integration or `op signin`. Fnox uses whatever
+session `op` has. In CI, supply `OP_SERVICE_ACCOUNT_TOKEN` through the CI secret
+store on the step that needs it, not as a checked-in value or a job-wide export.
 
 ### Unknown Secret
 
@@ -243,7 +301,9 @@ op whoami      # confirm signed-in identity
 - The key exists in `fnox.toml`
 - The profile matches (if using `profile = "dev"`)
 
-**Fix**: correct the reference, or add the key to `fnox.toml`. Fnox profiles are isolated—keys from the `default` profile don't appear in `dev` unless explicitly defined there.
+**Fix**: correct the reference or define the key in the intended fnox configuration.
+Check the selected profile rather than assuming it has the same keys as another
+profile; consult [fnox profiles](https://fnox.jdx.dev/guide/profiles.html) for composition rules.
 
 ### Secret Not Reaching Task
 
@@ -260,9 +320,14 @@ mise secrets ls  # confirm the key is granted to this task
 
 **Problem**: a secret value appears in task output.
 
-**Cause**: `mise x` does not redact output. Only `mise run` redacts.
+**Cause**: `mise x` does not redact output. In a terminal, a task explicitly marked
+`raw = true` or `interactive = true` also receives the terminal without redaction.
+Redaction applies to captured output, not every place a program can write a value.
 
-**Fix**: use a task definition with `mise run`, or avoid printing the secret in one-off commands.
+**Fix**: avoid printing secrets. Prefer a task with captured output through
+`mise run` when redaction is needed; do not rely on it for raw or interactive tasks,
+files, or transformed values. If a real secret reached shared logs, treat it as
+exposed and rotate it through the provider's secure workflow.
 
 ### Shell Still Has Old Secret
 
@@ -289,7 +354,8 @@ For machines where AI agents or untrusted repositories are common, set `paranoid
 ### What's Protected
 
 - Secrets don't reach your shell, `mise env`, shims you run yourself, or the task cache.
-- Task output is redacted when using `mise run`.
+- Captured task output is redacted when using `mise run`; raw or interactive
+  terminal output is not.
 - Keys provided as files (`as_file = true`) are written to owner-only directories and deleted when the task ends.
 
 ### What's Not Protected
@@ -297,12 +363,14 @@ For machines where AI agents or untrusted repositories are common, set `paranoid
 - A task's child processes inherit granted secrets.
 - Other processes running as the same user can read a granted task's environment while it runs.
 - `mise x` output is not redacted.
+- Raw or interactive task output in a terminal is not redacted.
 - Existing shell exports remain accessible to child processes.
 
 ## References
 
 - [Mise secrets documentation](https://mise.jdx.dev/environments/secrets/)
+- [Mise fnox integration](https://mise.jdx.dev/environments/secrets/fnox.html)
 - [Fnox providers](https://fnox.jdx.dev/providers/overview.html)
 - [1Password provider](https://fnox.jdx.dev/providers/1password.html)
 - [Fnox installation](https://fnox.jdx.dev/guide/installation.html)
-- [Dotfiles toolbox](dotf.md) for project scaffolding with `mise.local.toml` templates
+- [Dotfiles toolbox](reference/dotf.md) for project scaffolding with `mise.local.toml` templates

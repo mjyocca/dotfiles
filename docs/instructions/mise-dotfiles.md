@@ -33,7 +33,8 @@ composition and global versus checkout scope.
 - Include the discovery policy when deploying interactive shell changes.
   Native dependencies order selected targets but do not expand a scoped
   apply; template dry-runs do not validate rendered content. See
-  [runtime architecture](../architecture/mise.md#runtimes-and-project-environments).
+  [deployment procedure](../commands.md#updating-existing-deployments) and
+  [scoped previews](../commands.md#scoped-previews).
 
 ## Editing Deployment Configuration
 

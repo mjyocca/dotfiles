@@ -2,6 +2,9 @@
 
 This page maps repository-specific wiring, not installed-machine state. The
 TOML files and `Makefile` are authoritative; consult upstream for mise semantics.
+For operational procedures, see [commands and setup](../commands.md), including
+[deployment](../commands.md#updating-existing-deployments) and
+[project environment migration](../commands.md#migrating-project-environments-and-editor-setup).
 
 ## File Roles
 
@@ -242,66 +245,20 @@ Omarchy's upstream Bash defaults already activate mise; the local startup does
 not wrap that invocation or activate it a second time. Verify actual startup
 against the installed Omarchy version.
 
-Before deployment, inspect effective mise configuration, platform group selection,
-and target collisions. A scoped preview and apply for discovery and Zsh startup are:
-
-```bash
-make link DOTFILES_ARGS='--dry-run ~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
-make link DOTFILES_ARGS='~/.config/mise/miserc.toml ~/.zshenv ~/.zshrc'
-```
-
-For Bash, select `~/.bashrc` and `~/.bash_profile` instead of the Zsh files. These
-commands deploy only shell startup and discovery policy, not the complete migration.
-Native `depends` orders selected entries without expanding a scoped apply.
-
-For a complete migration, including upgrades of existing installations, preview
-all selected dotfiles and apply only after reviewing the changes and conflicts:
-
-```bash
-make link DOTFILES_ARGS=--dry-run
-make link
-```
-
-This also deploys the Neovim templates, scaffolder, and prompt configuration.
-Already-linked files expose checkout edits immediately, but file-by-file symlinks
-do not expose newly added files until deployment. In particular, existing
-installations need deployment to gain `templates/mise.toml.template` in the
-platform's Neovim config. Open a fresh shell afterward; re-sourcing does not
-reliably remove old hooks or environment state.
-
-Review `.tool-versions` requests for mise backend compatibility before installing.
-The checkout discovery policy and deployed global policy both enable these files.
-Preserved machine-local overrides can still affect discovery. After deployment,
-preview `make tools TOOLS_ARGS=--dry-run`, then run `make tools` when ready to install.
-Prefer native mise backends; select an asdf plugin through mise only when needed.
-Using that backend does not require the asdf manager or share its install directory.
+Shell startup and discovery policy must deploy together. Native dependencies order
+selected entries without expanding a scoped apply. The command guide owns
+[scoped previews](../commands.md#scoped-previews) and
+[complete deployment and tool installation](../commands.md#updating-existing-deployments),
+including collision checks and fresh-shell verification.
 
 ### Migrating project environments and editor setup
 
-Mise does not automatically execute `.envrc`. Migrate exports into `[env]`, dotenv
-loading into `_.file`, and PATH additions into `_.path`. Compatible Bash scripts
-can be loaded explicitly with `_.source`, but direnv functions such as `PATH_add`,
-`layout`, and `source_up` are not automatically available. Sourced scripts may run
-repeatedly; review them for side effects and credential fetching before opting in.
-Do not globally discover or source `.envrc` files, and do not register both loaders.
-Secrets delivery remains a separate decision.
-
-`dotf init` offers `mise.toml` instead of `.envrc`, including optional Neovim plugin
-gating and `NVIM_LOCAL_CONFIG`. Review the generated file before trusting it; the
-scaffolder neither trusts configs nor installs runtimes and never overwrites an
-existing destination. Neovim's separate Lua trust check remains in place. Its
-environment is inherited at launch, not refreshed when its working directory changes.
-Use `mise exec -- nvim` when children should inherit the launching project's tool
-paths; validate the actual editor/plugin workflows that matter to the project.
-
-Existing project `.envrc` files, runtime installations, and machine-local settings
-are not rewritten or deleted. The `packages/asdf/` sources, including
-`.asdf-direnv.sh`, remain for existing symlink consumers, but neither platform
-deploys them anymore. Preserving these files supports older setups; it does not
-load their variables in a mise-only shell. Migrate project environments manually
-and retain the legacy helper until its consumers have migrated across machines.
-Stale shell integration files are no longer sourced; removing them or uninstalling
-dependencies requires a separate, explicitly scoped operation.
+Project environments and editor processes use mise's runtime ownership described
+above; neither platform automatically loads `.envrc`. Follow the
+[migration procedure](../commands.md#migrating-project-environments-and-editor-setup)
+for exports, PATH, legacy consumers, and editor launch behavior. For optional
+task-scoped secrets, see the [project secrets guide](../secrets.md); dotfiles
+deployment does not configure a project's providers or grant its secrets.
 
 ## Official Documentation
 
