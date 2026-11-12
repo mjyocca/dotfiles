@@ -115,8 +115,3 @@ For project scaffolding and daily utilities, see the [dotf toolbox](docs/referen
 - [Project secrets](docs/secrets.md) — Fnox providers, task-scoped grants, and migration from plaintext environment files
 - [dotf toolbox](docs/reference/dotf.md) — Daily utilities and project scaffolding
 - [Tooling reference](docs/reference/tools.md) — Upstream documentation and discovery links, not an installation inventory
-
-These guides are written for people; agents may consult relevant sections too.
-[AGENTS.md](AGENTS.md) provides the agent entrypoint and task-based routes to
-repository constraints under `docs/instructions/`. Shared facts do not need a
-separate agent copy, and reading a guide does not authorize running its commands.
