@@ -3,8 +3,8 @@
 The macOS mise selection deploys `packages/rex/.config/rex/init.lua` to
 `~/.config/rex/init.lua`. Rex installation is managed separately.
 
-Bindings live in [init.lua](../../packages/rex/.config/rex/init.lua), not this
-reference. Rex defaults remain available; app-local shortcuts take precedence.
+See [init.lua](../../packages/rex/.config/rex/init.lua) for shared bindings.
+Rex defaults remain available; app-local shortcuts take precedence.
 
 Selected macOS UI preferences are tracked in
 [macOS mise configuration](../../.config/mise/config.macos.toml), applied by `make config`,

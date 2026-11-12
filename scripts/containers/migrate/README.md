@@ -1,8 +1,6 @@
 # Container / Volume Migration
 
-Scripts for switching between colima profiles and migrating docker volumes.
-
----
+Scripts for switching between Colima profiles and migrating Docker volumes.
 
 ## Colima Profile Management (`dotf` commands)
 
@@ -14,7 +12,7 @@ These are accessed via the `dotf` dispatcher (`~/.local/bin/dotf`).
 dotf colima-list
 ```
 
-Shows every colima profile under `~/.colima/`, its run state, mapped docker
+Shows every Colima profile under `~/.colima/`, its run state, mapped Docker
 context, and socket path. Marks the currently active context with `*`.
 
 ### Switch active profile
@@ -23,8 +21,8 @@ context, and socket path. Marks the currently active context with `*`.
 dotf colima-use <profile>
 ```
 
-1. Starts the colima VM if it is not already running
-2. Switches the active docker context (`docker context use colima[-<profile>]`)
+1. Starts the Colima VM if it is not already running
+2. Switches the active Docker context (`docker context use colima[-<profile>]`)
 3. Relinks `/var/run/docker.sock` to the selected profile's socket
 
 **Requires `sudo`** for the socket relink step.
@@ -53,9 +51,10 @@ dotf colima-use k8s       # context: colima-k8s
 dotf colima-migrate-volumes <src-profile> <dst-profile> [--all | --select]
 ```
 
-Exports every selected volume from the source colima context and imports it
-into the destination context. Archives are written to a temp directory and
-deleted on exit.
+Copies selected volumes from the source Colima context to the destination without
+deleting the originals. Existing destination volumes are skipped. The source
+profile must be running; the destination starts automatically if needed. Temporary
+archives are deleted on exit.
 
 | Flag | Behaviour |
 |---|---|
@@ -63,19 +62,17 @@ deleted on exit.
 | `--all` | Migrates all volumes without prompting. Default when fzf is absent. |
 
 ```bash
-# Interactively choose which volumes to move
+# Interactively choose which volumes to copy
 dotf colima-migrate-volumes default arm --select
 
-# Non-interactive: move everything
+# Non-interactive: copy everything
 dotf colima-migrate-volumes default arm --all
 ```
 
-The destination profile is started automatically if it is not running.
-Volumes that already exist in the destination are skipped.
-
----
-
 ## Low-level scripts
+
+Run these scripts from `scripts/containers/migrate/`. Archives are read from or
+written to the current directory.
 
 ### `export_volume.sh`
 
@@ -91,7 +88,9 @@ Exports a single named volume to a `.tar.gz` in the current directory.
 
 ### `import_volume.sh`
 
-Creates a volume and populates it from a `.tar.gz` in the current directory.
+Extracts `<volume_name>.tar.gz` into the named volume, creating it if needed.
+Unlike the migration wrapper, this script does not skip existing volumes;
+existing files may be overwritten. The archive must exist in the current directory.
 
 ```bash
 ./import_volume.sh <volume_name> [--context <docker_context>]
@@ -99,10 +98,6 @@ Creates a volume and populates it from a `.tar.gz` in the current directory.
 ./import_volume.sh my_volume
 ./import_volume.sh my_volume --context colima-arm
 ```
-
-The archive `<volume_name>.tar.gz` must already exist in the current directory.
-
----
 
 ## Troubleshooting
 

@@ -95,11 +95,9 @@ make link
 ```
 
 This also deploys the global mise tool configuration, discovery policy, Neovim
-templates, scaffolder, and prompt configuration. Already-linked files expose
-checkout edits immediately, but newly added files need deployment. Existing
-installations need deployment to gain `templates/mise.toml.template` in the
-platform's Neovim config. Open a fresh shell afterward; re-sourcing does not
-reliably remove old hooks or environment state.
+templates, scaffolder, and prompt configuration. Linked files reflect checkout
+edits immediately; newly added files require deployment. Open a fresh shell
+afterward—re-sourcing may leave old hooks or environment state.
 
 Review `.tool-versions` requests for mise backend compatibility before installing.
 The checkout and deployed discovery policies enable these files; preserved

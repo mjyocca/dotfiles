@@ -2,12 +2,10 @@
 
 ## Customization
 
-Before customizing Herdr, read `~/.config/herdr-app/AGENTS.md`. Herdr generates
-this guide on startup to match the installed version; prefer it over examples
-written for newer releases. Consult the adjacent `herdr.d.ts` and
-`gpui-kit.d.ts` when working with mods or app APIs. Do not edit those generated
-files. Use settings for appearance changes and clone shipped layouts or mods
-before changing their structure or code.
+Use Herdr's locally generated `~/.config/herdr-app/AGENTS.md` for installed-version
+guidance, and the adjacent `herdr.d.ts` and `gpui-kit.d.ts` for mods and app APIs.
+Herdr generates these files on startup; don't edit them. Use settings for appearance
+changes and clone shipped layouts or mods before changing their structure or code.
 
 Follow the repository's [deployment guidance](../instructions/mise-dotfiles.md)
 when making changes persistent. Shared key customizations live in

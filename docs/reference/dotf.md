@@ -25,10 +25,10 @@ global Git ignore; shared `mise.toml` remains eligible for commits. Existing tra
 files are not untracked by these rules. Keep real secrets in a secret manager,
 not plaintext local overrides.
 
-Review the generated configuration before trusting it. Run `mise trust` only after reviewing
-`mise.toml`, then `mise install` if you want to install its requested runtimes.
-Neovim's Lua trust decision is separate. The scaffolder does not trust
-configuration or install tools. See [project environment migration](../commands.md#migrating-project-environments-and-editor-setup)
+Review generated files before running `mise trust`. To install the requested
+runtimes afterward, run `mise install`. Neovim's Lua trust decision is separate;
+scaffolding neither trusts configuration nor installs tools. See
+[project environment migration](../commands.md#migrating-project-environments-and-editor-setup)
 for legacy `.envrc` files and editor environment inheritance.
 
 ## Source Location

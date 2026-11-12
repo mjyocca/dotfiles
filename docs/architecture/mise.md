@@ -1,7 +1,7 @@
 # mise Configuration Architecture
 
-This page maps repository-specific wiring, not installed-machine state. The
-TOML files and `Makefile` are authoritative; consult upstream for mise semantics.
+The TOML files define configuration composition; Make controls lifecycle ordering.
+Consult upstream for mise semantics.
 For operational procedures, see [commands and setup](../commands.md), including
 [deployment](../commands.md#updating-existing-deployments) and
 [project environment migration](../commands.md#migrating-project-environments-and-editor-setup).
@@ -82,27 +82,24 @@ a deployment override, so the choice persists outside the repository without
 requiring a shell environment variable. Platform group selections separately
 choose which application configs deploy.
 
-Make detects `PROFILE` unless explicitly supplied, and defaults `MISE_ENV` to
-that profile. Provisioning targets reject a missing platform file or a conflicting
-`MISE_ENV` before running their recipes. Each profile selects one independent
-environment; Omarchy does not inherit an Arch environment.
-Each platform's deployment seeds `<repo>/.miserc.local.toml` with its environment.
-mise reads this early file before discovering ordinary config, so direct commands
-inside the checkout and its subdirectories inherit the platform when `-E` and
-`MISE_ENV` are absent. This works in Bash, Zsh, and non-interactive invocations
-without shell initialization. It selects mise's environment, not a parent-shell
-export, and does not select a platform in unrelated projects.
+Make detects `PROFILE` unless supplied, defaults `MISE_ENV` to that profile, and
+rejects missing platform files or conflicting selections before provisioning.
+Each profile selects an independent environment; Omarchy does not inherit Arch.
+Initial deployment needs Make's selection or explicit `-E`.
 
-Explicit `-E` and then `MISE_ENV` take precedence over the workspace default.
-Shell startup does not set a default `MISE_ENV`; explicit exports remain valid.
-Initial deployment needs Make's profile selection or explicit `-E`. The seed is
-create-only: edit the ignored file locally to change an existing checkout's
-default, rather than expecting another deployment to overwrite it. Environment
-names alone do not perform OS or hostname detection.
+Deployment seeds the ignored `<repo>/.miserc.local.toml` with the platform.
+mise reads it before ordinary config discovery: explicit `-E` takes precedence,
+then `MISE_ENV`, then the workspace default. Direct commands in the checkout and
+its subdirectories use this default without shell initialization, including in
+non-interactive invocations. The seed is create-only; change an existing default
+locally rather than expecting redeployment to overwrite it. It neither exports
+`MISE_ENV` to the parent shell nor selects a platform in unrelated projects.
+Shell startup preserves explicit exports without setting a default `MISE_ENV`.
+Environment names alone do not detect the OS or hostname.
 
 Global tools and machine-local configuration still compose normally. Keep the
-workspace selection out of `miserc.toml`: that discovery policy
-deploys globally and must not impose this checkout's platform on other projects.
+workspace selection out of the globally deployed `miserc.toml` so it cannot impose
+this checkout's platform on other projects.
 Do not assume workspace and global `miserc` environment defaults are combined on
 every mise version. If a global environment profile must apply here too, include
 it alongside the platform in the ignored workspace `env` list and verify

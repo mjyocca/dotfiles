@@ -33,29 +33,28 @@ In this dotfiles setup, mise manages fnox as a global development tool and the
 platform package manager supplies `op`. A project or CI runner cannot assume those
 tools are present; declare or provision its required tools separately.
 
-Run the setup and task commands below from the target project's root, not the
-dotfiles checkout. Replace the example vault, item, and task names with your own.
-Review the project's configuration and commands before trusting or running them.
-The examples assume your project defines the Make targets they invoke; this guide
-does not create those targets or an application schema.
+Run commands from the target project's root, not the dotfiles checkout. Replace
+the example vault, item, and task names, and review the configuration and commands
+before trusting or running them. The examples assume the referenced Make targets
+already exist.
 
-## Core Concepts
-
-### Project vs. Global Configuration
+## Project vs. Global Configuration
 
 **Project-owned secrets** live in `fnox.toml` at the project root. Tasks in `mise.toml` or `mise.local.toml` can grant these keys automatically when you run `mise run <task>`.
 
-**Global secrets** live in `~/.config/fnox/config.toml`. They belong to you, not the project. Tasks cannot grant global keys automatically—you must name them explicitly:
+**Global secrets** live in `~/.config/fnox/config.toml`. When fnox reports key
+provenance, mise rejects automatic task grants for these personal keys. Grant them
+explicitly:
 
 ```bash
 mise x --secrets MY_GLOBAL_KEY -- make dev
 mise run --secrets MY_GLOBAL_KEY <task>
 ```
 
-With fnox versions that report key provenance, mise rejects automatic project grants
-for keys from your own config. Older versions may not provide that distinction;
-review the [current integration restrictions](https://mise.jdx.dev/environments/secrets/fnox.html#personal-keys)
-before relying on it. Grants are not a sandbox against a repository's executable code.
+Older fnox versions may not report provenance; review the
+[current integration restrictions](https://mise.jdx.dev/environments/secrets/fnox.html#personal-keys)
+before relying on this distinction. Grants are not a sandbox against a
+repository's executable code.
 
 ## Setup Workflow
 
@@ -135,24 +134,15 @@ Prefer specific Make targets with only their required keys over broad grants to
 
 ### 4. Verify the Configuration
 
-Check what mise sees:
-
 ```bash
 mise secrets ls
-```
-
-The listing shows key names, task grants, and whether a key is injectable, not secret
-values. If mise reports an unknown key, check its spelling and the selected profile
-in `fnox.toml`. A successful listing alone does not prove that all grants are valid;
-review warnings and validate the task definitions too.
-
-Validate task definitions:
-
-```bash
 mise tasks validate
 ```
 
-Expected output: no errors. If a task grants an unknown key, mise reports it here.
+`mise secrets ls` lists key names, task grants, and injectability without secret
+values. Review its warnings, then check that `mise tasks validate` reports no
+errors. A successful listing alone does not validate grants. For unknown keys,
+check spelling and the selected profile in `fnox.toml`.
 
 ### 5. Run a Task
 
