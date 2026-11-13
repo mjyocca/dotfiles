@@ -1,4 +1,8 @@
-# Shared user-global development tools; language versions are declared separately.
+# Shared user-global development tools and behavior; language versions are declared separately.
+[settings]
+not_found_auto_install = true
+exec_auto_install = true
+
 [tools]
 # Retained for explicit legacy use, not automatic runtime selection.
 "github:asdf-vm/asdf" = "latest"
