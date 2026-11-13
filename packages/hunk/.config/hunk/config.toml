@@ -15,3 +15,10 @@ hunk_headers = false
 copy_decorations = false
 cursor_line = "row"
 theme = "github-dark-default"
+
+[pager]
+mode = "unified"
+wrap_lines = false
+menu_bar = false
+agent_notes = false
+watch = false
