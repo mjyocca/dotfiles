@@ -6,3 +6,4 @@ java openjdk-17
 golang 1.27.4
 rust 1.100.0
 zig  0.17.1
+lua 5.5.1
