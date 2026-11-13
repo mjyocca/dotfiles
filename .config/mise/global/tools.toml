@@ -2,6 +2,9 @@
 [settings]
 not_found_auto_install = true
 exec_auto_install = true
+# Require content-bound approval for environment files and allow only registered plugins.
+# https://mise.jdx.dev/configuration/settings.html#paranoid
+paranoid = ["env_files", "plugins"]
 
 [tools]
 # Retained for explicit legacy use, not automatic runtime selection.
