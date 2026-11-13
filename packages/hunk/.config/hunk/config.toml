@@ -19,6 +19,10 @@ theme = "github-dark-default"
 [pager]
 mode = "unified"
 wrap_lines = false
+file_gap = 3
+hunk_gap = 2
+hunk_headers = true
+transparent_background = true
 menu_bar = false
 agent_notes = false
 watch = false
