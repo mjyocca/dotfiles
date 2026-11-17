@@ -45,6 +45,8 @@ rex.bind("ctrl+s>x", "close_preserving_fullscreen")
 rex.bind("ctrl+s>c", "client.tab.new")
 rex.bind("ctrl+s>n", "client.tab.next")
 rex.bind("ctrl+s>p", "client.tab.previous")
+rex.bind("alt+[", "client.tab.previous")
+rex.bind("alt+]", "client.tab.next")
 
 -- Sessions: Rex has Cmd+K. Reload Config is also available in Cmd+Shift+P's palette.
 rex.bind("ctrl+s>s", "session.switch")
