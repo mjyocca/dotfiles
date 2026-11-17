@@ -1,0 +1,7 @@
+# ~/.zshrc.local — machine-specific overrides, not committed to dotfiles
+# Sourced at the end of ~/.zshrc on every interactive shell.
+# Use this for aliases, functions, hooks, and settings that do not change PATH
+# or MISE_* state. Put pre-mise environment changes in ~/.zshrc.pre.local.
+#
+# Example:
+#   alias vpn="corporate-vpn connect"

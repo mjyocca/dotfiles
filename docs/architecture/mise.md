@@ -219,6 +219,21 @@ Both shells use full mise activation for interactive runtime and environment
 updates. No direnv hook, asdf completion/plugin initialization, or global asdf
 version-export mechanism is registered. Legacy ownership preferences have no effect.
 
+Zsh has two private, Git-ignored machine-local override phases. Mise dotfile
+deployment seeds both as `0600` create-only files, so existing contents are never
+replaced. Their tracked, placeholder-only sources live under
+`.config/mise/templates/zsh/`:
+
+| File | Loaded | Purpose |
+|---|---|---|
+| `~/.zshrc.pre.local` | Immediately before mise activation | Machine-specific PATH changes and variables needed by mise-managed tools; loading these first keeps mise's activation snapshot stable. |
+| `~/.zshrc.local` | Last in `.zshrc` | Aliases, functions, hooks, and settings that do not change PATH or `MISE_*` state. |
+
+Keep credentials and private machine details in these local files, never in the
+tracked create-only seed content. A PATH mutation in the final override invalidates
+mise's initial snapshot and can cause an additional environment calculation at the
+first prompt.
+
 Zsh activates mise in `.zshrc`; standalone Bash activates it in the interactive
 portion of `.bashrc`, which `.bash_profile` also sources. Activation adds real
 tool paths. Non-interactive startup does not inject shims ahead of inherited

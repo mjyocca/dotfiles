@@ -212,6 +212,8 @@ manifest = "git"
 [dotfile_groups.zsh.entries]
 "~/.zshenv" = { mode = "symlink" }
 "~/.zshrc" = { mode = "symlink", depends = ["~/.config/mise/miserc.toml"] }
+"~/.zshrc.pre.local" = { source = "../../.config/mise/templates/zsh/zshrc.pre.local", mode = "template", create_if_missing = true, permissions = "0600" }
+"~/.zshrc.local" = { source = "../../.config/mise/templates/zsh/zshrc.local", mode = "template", create_if_missing = true, permissions = "0600" }
 
 [bootstrap]
 # Select a platform environment before deploying; no implicit all-platform apply.

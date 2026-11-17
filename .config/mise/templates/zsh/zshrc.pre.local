@@ -1,0 +1,7 @@
+# ~/.zshrc.pre.local — machine-specific environment, not committed to dotfiles
+# Sourced before mise activation on every interactive shell.
+# Use this for PATH changes and variables that mise-managed tools need.
+#
+# Examples:
+#   export GITHUB_TOKEN="..."
+#   export PATH="/opt/corporate/bin:$PATH"

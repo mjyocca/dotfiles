@@ -4,8 +4,9 @@
 
 - Agents must never read, search contents, print, or source real machine- or
   project-local files that may contain secrets or sensitive information. This
-  includes `.bashrc.local`, `.zshrc.local`, other shell-local overrides, `.env`,
-  `.env.*`, `.envrc`, local mise/fnox configuration, and credential stores.
+  includes `.bashrc.local`, `.zshrc.pre.local`, `.zshrc.local`, other shell-local
+  overrides, `.env`, `.env.*`, `.envrc`, local mise/fnox configuration, and
+  credential stores.
   Treat these files as sensitive without opening them to check. Tracking or ignore
   status does not establish that their contents are safe.
 - Do not bypass this restriction through symlinks, broad content searches,

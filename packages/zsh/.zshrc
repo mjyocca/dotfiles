@@ -1,3 +1,24 @@
+# =================================================================
+# PNPM (see https://pnpm.io/installation)
+# Keep deterministic PATH changes before mise captures its activation state.
+# NOTE: `pnpm setup` overrides this current block `# pnpm ... # pnpm end`
+# =================================================================
+# pnpm
+export PNPM_HOME="$XDG_DATA_HOME/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# ================================================================
+# Pre-mise local environment (machine-specific, not committed)
+# ================================================================
+# Keep machine-local PATH changes and variables needed by mise here so its
+# activation snapshot includes them. Mise seeds this create-only file during
+# dotfile deployment; use ~/.zshrc.local for aliases and hooks.
+[[ -f ~/.zshrc.pre.local ]] && source ~/.zshrc.pre.local
+
 # ================================================================
 # mise — dev tool activation
 # ================================================================
@@ -16,37 +37,10 @@ fi
 # Load starship prompt first before other tools
 eval "$(starship init zsh)"
 
-# Create/Load machine-local overrides file
-if [[ ! -f ~/.zshrc.local ]]; then
-	cat <<'EOF' > ~/.zshrc.local
-# ~/.zshrc.local — machine-specific overrides, not committed to dotfiles
-# Sourced at the end of ~/.zshrc on every interactive shell.
-# Use this for work tools, credentials, aliases, or PATH additions
-# that should not be shared across machines.
-#
-# Examples:
-#   export GITHUB_TOKEN="..."
-#   export PATH="/opt/corporate/bin:$PATH"
-#   alias vpn="corporate-vpn connect"
-EOF
-fi
-
 # =================================================================
 # Shell completions (interactive only)
 # =================================================================
 autoload -Uz compinit && compinit
-
-# =================================================================
-# PNPM (see https://pnpm.io/installation)
-# NOTE: `pnpm setup` overrides this current block `# pnpm ... # pnpm end`
-# =================================================================
-# pnpm
-export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
 
 # ================================================================
 # CLI Tools
@@ -66,6 +60,7 @@ source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 # ================================================================
 # Local overrides (machine-specific, not committed)
 # ================================================================
-# ~/.zshrc.local is git-ignored. Use it for work-specific tools,
-# credentials, aliases, or anything that should not be shared.
+# ~/.zshrc.local is git-ignored. Keep PATH and MISE_* changes in the pre-mise
+# override so mise does not repeat its environment calculation at first prompt.
+# Mise seeds both files create-only during dotfile deployment.
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

@@ -15,11 +15,15 @@ mise.*.local.toml
 .miserc.local.toml
 .config/mise/config.local.toml
 .config/mise/config.*.local.toml
+.config/mise/conf.d/*.local.toml
+.config/mise/global/*.local.toml
+.config/mise/global/*.local.sh
 
 # Private workspace provisioning, seeded from a tracked example.
 .config/mise/conf.d/workspace.toml
 
 # Per-machine zsh overrides — not committed
+packages/zsh/.zshrc.pre.local
 packages/zsh/.zshrc.local
 
 # Per-machine bash overrides — not committed
