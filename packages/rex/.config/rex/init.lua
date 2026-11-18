@@ -42,11 +42,12 @@ rex.bind("ctrl+s>shift+7", "client.close")
 rex.bind("ctrl+s>x", "close_preserving_fullscreen")
 
 -- Tabs: Rex has Cmd+T, Ctrl+Tab / Ctrl+Shift+Tab, and Shift+Cmd+] / Shift+Cmd+[.
+-- alt+[ and alt+] cycle within the current session.
 rex.bind("ctrl+s>c", "client.tab.new")
 rex.bind("ctrl+s>n", "client.tab.next")
 rex.bind("ctrl+s>p", "client.tab.previous")
-rex.bind("alt+[", "client.tab.previous")
-rex.bind("alt+]", "client.tab.next")
+rex.bind("alt+[", "tab_session_previous")
+rex.bind("alt+]", "tab_session_next")
 
 -- Sessions: Rex has Cmd+K. Reload Config is also available in Cmd+Shift+P's palette.
 rex.bind("ctrl+s>s", "session.switch")
@@ -101,6 +102,39 @@ local function index_of(blocks, block_id)
     if id == block_id then return index end
   end
 end
+
+local function cycle_session_tab(ctx, step)
+  if not ctx.client_id then error("A Rex app client is required", 0) end
+  local view = session_view(ctx)
+  local current_window = window_for_block(view, ctx.block_id)
+  if not current_window then error("Current tab not found in the session", 0) end
+  local windows = view.windows or {}
+  for index, window in ipairs(windows) do
+    if window.window_id == current_window.window_id then
+      local target = windows[(index - 1 + step) % #windows + 1]
+      -- Select the app's displayed tab, not just the server's active window.
+      rex.client.queue("session.select", {
+        session_id = ctx.session_id, window_id = target.window_id,
+      })
+      return
+    end
+  end
+end
+
+-- Session-scoped tab navigation (within current session only).
+rex.action{
+  name = "tab_session_next",
+  title = "Next Tab (Session)",
+  category = "Tab",
+  run = function(ctx) cycle_session_tab(ctx, 1) end,
+}
+
+rex.action{
+  name = "tab_session_previous",
+  title = "Previous Tab (Session)",
+  category = "Tab",
+  run = function(ctx) cycle_session_tab(ctx, -1) end,
+}
 
 local function fullscreen_pane(ctx, block_id)
   -- Explicitly set zoom: toggling would unzoom a tab with only one pane.
