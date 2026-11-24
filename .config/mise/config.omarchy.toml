@@ -118,7 +118,14 @@ dotfile_groups = [
 # General Utilities (Omarchy-specific)
 "pacman:ffmpeg" = "latest"
 "pacman:wl-clipboard" = "latest"
+"pacman:wtype" = "latest" # Hex text injection on wlroots Wayland
 "pacman:resvg" = "latest" # Optional SVG previews in Yazi
+
+# Terminal Browser runtime libraries
+"pacman:alsa-lib" = "latest"
+"pacman:gtk3" = "latest"
+"pacman:mesa" = "latest"
+"pacman:nss" = "latest"
 
 # Platform-managed CLI/TUI tools (Omarchy-specific)
 "pacman:1password-cli" = "latest"

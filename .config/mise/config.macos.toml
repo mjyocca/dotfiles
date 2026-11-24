@@ -192,6 +192,7 @@ adopt = true
 "brew-cask:rectangle" = "latest"
 "brew-cask:alt-tab" = "latest"
 "brew-cask:tinycast" = "latest"
+"brew-cask:anomalyco/tap/hex" = "latest"
 "brew-cask:anomalyco/tap/spaceman" = "latest"
 "brew-cask:cleanshot" = "latest"
 "brew-cask:screen-studio" = "latest"

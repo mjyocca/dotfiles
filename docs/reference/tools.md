@@ -33,6 +33,11 @@ Explore: [awesome-tuis](https://github.com/rothgar/awesome-tuis).
 - [Omarchy manual](https://omarchy.org/manual/)
 - [Herdr customization](herdr-app.md)
 - [Spaceman configuration copies](../commands.md#spaceman-configuration-copies) — macOS tiling config and GUI-change review
+- [Hex](https://anoma.ly/hex/) — local voice dictation
+- [Browse](https://github.com/anomalyco/browse) — real-browser MCP relay
+- [Terminal Browser](https://terminal-browser.com/) — browser in supported terminals
+
+Last synced: 2026-11-24.
 
 Explore: [awesome-sysadmin](https://github.com/awesome-foss/awesome-sysadmin).
 

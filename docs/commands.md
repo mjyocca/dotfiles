@@ -219,6 +219,82 @@ Omarchy updater has no equivalent full dry-run exposed by these targets.
 | `make aur` | Rerun Omarchy's interactive AUR stage |
 | `make ghostty-shader REPO=<git-url>` | Import Ghostty shaders into the checkout for review |
 
+### Hex voice dictation
+
+Hex is declared as the official Homebrew cask on macOS and the `hex-bin` AUR
+package on Omarchy. Both paths are included in `make packages`; Omarchy prompts
+for the normal AUR package review. The macOS cask requires Apple silicon and
+macOS 15 or later. Review the
+[official cask](https://github.com/anomalyco/homebrew-tap/blob/master/Casks/hex.rb)
+before granting Homebrew 6 trust for the third-party tap:
+
+```bash
+brew trust --cask anomalyco/tap/hex
+brew install --cask anomalyco/tap/hex
+```
+
+Hex transcribes on-device after downloading a speech model. Its Linux app is
+beta; on Omarchy it uses `wl-clipboard` and `wtype` to paste into Wayland apps.
+The first launch downloads the model and may request microphone or desktop
+keyboard permissions; package installation does not grant them or enable login
+startup. Optional OpenCode rewriting sends dictated text to the configured
+model provider; leave that step off to keep dictation local.
+
+Upstream: [Hex](https://anoma.ly/hex/),
+[Homebrew cask](https://github.com/anomalyco/homebrew-tap/blob/master/Casks/hex.rb),
+[Linux guide](https://github.com/anomalyco/hex/blob/dev/docs/linux.md), and
+[AUR package](https://aur.archlinux.org/packages/hex-bin).
+Last synced: 2026-11-24.
+
+### Browse browser access
+
+Browse is declared as the shared `npm:@opencode/browse` mise tool, available on
+macOS and Omarchy. It does not replace `agent-browser`: the command names and
+browser workflows are distinct. `agent-browser` normally drives its own
+Chrome-for-Testing session; Browse connects through an extension to a supported
+Chromium browser and can access its signed-in tabs. Avoid pointing both tools
+at the same browser session at the same time.
+
+The OpenCode MCP entry is in
+[`opencode.jsonc.example`](../packages/opencode/.config/opencode/opencode.jsonc.example).
+Merge its `mcp.servers.browse` block into the global OpenCode config you use
+(`~/.config/opencode/opencode.json` or `opencode.jsonc`); the example is not
+deployed automatically, so it does not overwrite private configuration.
+The entry disables Browse's self-installing updates so mise remains the tool
+owner. It still checks for releases; update Browse with mise.
+
+After installing the tool and configuring OpenCode, run
+`browse install --agent none` to install/pair the browser extension without
+letting Browse edit agent configuration. The extension can read and operate on
+pages in the paired browser, including authenticated sites. Treat page content
+as agent-provided input, and don't leave sensitive tabs available to an agent
+unless you intend it to access them.
+
+Upstream: [Browse README](https://github.com/anomalyco/browse) and
+[OpenCode MCP configuration](https://opencode.ai/docs/mcp-servers).
+Last synced: 2026-11-24.
+
+### Terminal Browser
+
+Terminal Browser is declared as a shared mise GitHub tool for macOS and Linux.
+`make tools` installs it and `make upgrade` updates it; use mise rather than
+`terminal-browser upgrade` so the package owner stays consistent. Its Linux
+runtime libraries (`alsa-lib`, `gtk3`, `mesa`, and `nss`) are declared for
+Omarchy and installed by `make packages`.
+
+Terminal Browser renders its own browser inside supported terminals and offers
+an agent-control CLI. It complements, rather than replaces, Browse's access to
+your paired browser or `agent-browser`'s separate Chrome session. The optional
+`terminal-browser setup` installs agent skills and can edit agent configuration;
+run it only if you want that integration. The app also collects usage telemetry
+and crash reports; disable both in its settings or with
+`TERMINAL_BROWSER_NO_TELEMETRY=1`.
+
+Upstream: [Terminal Browser](https://terminal-browser.com/),
+[GitHub releases](https://github.com/zenbu-labs/terminal-browser/releases), and
+[Homebrew cask metadata](https://github.com/Homebrew/homebrew-cask/blob/master/Casks/t/terminal-browser.rb).
+Last synced: 2026-11-24.
+
 ### Spaceman installation
 
 Spaceman is declared as `brew-cask:anomalyco/tap/spaceman` in the macOS package
