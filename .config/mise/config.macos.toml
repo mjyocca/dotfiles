@@ -190,7 +190,6 @@ adopt = true
 "brew-cask:qmk-toolbox" = "latest"
 "brew-cask:monitorcontrol" = "latest"
 "brew-cask:rectangle" = "latest"
-"brew-cask:alt-tab" = "latest"
 "brew-cask:tinycast" = "latest"
 "brew-cask:anomalyco/tap/hex" = "latest"
 "brew-cask:anomalyco/tap/spaceman" = "latest"

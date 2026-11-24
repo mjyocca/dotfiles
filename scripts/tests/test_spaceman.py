@@ -34,7 +34,9 @@ class SpacemanDeclarationTests(unittest.TestCase):
                     if line.strip() and not line.lstrip().startswith("#")]
         self.assertEqual(settings, [
             "version = 1", "[settings]", "hud = true",
-            'hud_style = "icons"', 'update_channel = "stable"',
+            'hud_style = "icons"', 'update_channel = "dev"',
+            'mouse_follows_focus = "window"', "[settings.gaps]",
+            "inner = 6", "top = 6", "bottom = 6", "left = 6", "right = 6",
         ])
 
 
