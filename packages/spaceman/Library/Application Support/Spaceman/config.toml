@@ -1,0 +1,8 @@
+# Deployed as a copy; review GUI changes before copying them back to this source.
+# See docs/commands.md#spaceman-configuration-copies in the dotfiles checkout.
+version = 1
+
+[settings]
+hud = true
+hud_style = "icons"
+update_channel = "stable"

@@ -32,6 +32,7 @@ Explore: [awesome-tuis](https://github.com/rothgar/awesome-tuis).
 - [asdf configuration](https://asdf-vm.com/manage/configuration.html)
 - [Omarchy manual](https://omarchy.org/manual/)
 - [Herdr customization](herdr-app.md)
+- [Spaceman configuration copies](../commands.md#spaceman-configuration-copies) — macOS tiling config and GUI-change review
 
 Explore: [awesome-sysadmin](https://github.com/awesome-foss/awesome-sysadmin).
 

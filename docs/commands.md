@@ -117,6 +117,65 @@ machine-local additions. Existing asdf runtime installations are not transferred
 Removing declarations does not authorize pruning deployed files or uninstalling
 tools; treat removal as a separately scoped operation.
 
+### Spaceman configuration copies
+
+The macOS profile deploys
+`packages/spaceman/Library/Application Support/Spaceman/config.toml` as a regular
+file at `~/Library/Application Support/Spaceman/config.toml`. The dotfile group manages
+only configuration, not login startup, logs, or recovery state. App installation is
+[a separate operation](#spaceman-installation).
+Keep parked-window recovery files intact; never copy the entire Application Support
+directory into Git.
+
+Spaceman replaces its config atomically when saving Settings or workspace display
+routes, which would replace a file symlink. GUI changes therefore stay in the live
+copy until you bring them back into the checkout. Before applying repository
+changes, review any live changes so deployment does not discard them.
+
+From the repository root, set these paths and compare the two files. `diff` exits
+with status 1 when they differ:
+
+```bash
+spaceman="/Applications/Spaceman.app/Contents/MacOS/spaceman"
+source_config="packages/spaceman/Library/Application Support/Spaceman/config.toml"
+live_config="$HOME/Library/Application Support/Spaceman/config.toml"
+diff -u "$source_config" "$live_config"
+```
+
+To keep GUI changes, validate the live file, then copy only that file back for
+review. Skip the copy if validation fails. Review rules and display identifiers
+before sharing them:
+
+```bash
+"$spaceman" config-check "$live_config" && cp -i "$live_config" "$source_config"
+git diff -- "$source_config"
+```
+
+To deploy repository changes instead, validate and preview this target alone.
+Inspect effective configuration and platform selection as described under
+[Scoped previews](#scoped-previews), and ensure new package files are in Git's
+index for the group's Git-filtered manifest:
+
+```bash
+"$spaceman" config-check "$source_config"
+mise -E macos dotfiles apply --dry-run "$live_config"
+```
+
+After validation succeeds and you have reviewed the preview and preserved any
+live edits, deploy just that file:
+
+```bash
+mise -E macos dotfiles apply "$live_config"
+```
+
+Spaceman reloads supported edits automatically. In v0.3.3, shortcuts are hard-coded;
+the Shortcuts settings page is a reference, not an editor. Custom aliases require
+an external hotkey tool invoking the CLI; this group does not install one or change
+the built-in bindings. See the upstream
+[configuration schema](https://github.com/anomalyco/spaceman/blob/v0.3.3/docs/configuration.md)
+and [controls](https://github.com/anomalyco/spaceman/blob/v0.3.3/docs/controls.md).
+Last synced: 2026-11-23.
+
 ## Upgrades
 
 | Command | Scope |
@@ -159,6 +218,50 @@ Omarchy updater has no equivalent full dry-run exposed by these targets.
 |---|---|
 | `make aur` | Rerun Omarchy's interactive AUR stage |
 | `make ghostty-shader REPO=<git-url>` | Import Ghostty shaders into the checkout for review |
+
+### Spaceman installation
+
+Spaceman is declared as `brew-cask:anomalyco/tap/spaceman` in the macOS package
+set. No custom installer is needed. Homebrew 6 requires explicit trust for
+third-party casks. Review the
+[official cask](https://github.com/anomalyco/homebrew-tap/blob/main/Casks/spaceman.rb)
+first, then grant trust for this cask and add the tap if needed:
+
+```bash
+brew trust --cask anomalyco/tap/spaceman
+brew tap anomalyco/tap
+```
+
+For a fresh installation, use Homebrew directly:
+
+```bash
+brew install --cask anomalyco/tap/spaceman
+```
+
+To bring an existing manual installation under Homebrew management, pause and quit
+Spaceman, confirm all parked windows have returned, then use `--adopt`. Homebrew
+requires the existing artifacts to match the cask and refuses differing ones;
+do not bypass a mismatch with `--force`:
+
+```bash
+brew install --cask --adopt anomalyco/tap/spaceman
+```
+
+The official cask verifies the release's SHA-256 and installs the bundled CLI.
+It is also included in `make packages`; the direct command above limits the
+installation to Spaceman. Neither operation launches the app, grants Accessibility
+access, enables login startup, or deploys configuration.
+
+Disable every other window manager before opening Spaceman, then grant
+Accessibility access yourself. Configuration deployment remains separate under
+[Spaceman configuration copies](#spaceman-configuration-copies). Never remove
+parked-window recovery files or use `brew uninstall --zap` while Spaceman has
+windows parked off-screen; pause/quit and confirm that all windows are restored
+first.
+
+Upstream: [official cask](https://github.com/anomalyco/homebrew-tap/blob/main/Casks/spaceman.rb)
+and [installation and recovery](https://github.com/anomalyco/spaceman/blob/v0.3.3/README.md).
+Last synced: 2026-11-23.
 
 ## Platform selection and direct mise use
 

@@ -153,6 +153,15 @@ manifest = "git"
 "~/.local/bin/dotf" = { mode = "symlink" }
 "~/.local/bin/dotf.d/init" = { mode = "symlink" }
 
+[dotfile_groups.spaceman]
+root = "spaceman"
+manifest = "git"
+mode = "copy"
+
+# Spaceman atomically replaces this file when saving Settings or display routes.
+[dotfile_groups.spaceman.entries]
+"~/Library/Application Support/Spaceman/config.toml" = { mode = "copy" }
+
 [dotfile_groups.ssh]
 root = "ssh"
 manifest = "git"
