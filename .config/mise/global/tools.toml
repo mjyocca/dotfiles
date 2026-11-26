@@ -33,5 +33,8 @@ yazi = "latest"
 # Sourcing github.com/hashicorp/tfctl-cli from http since Mise github backend requires binaries attached to the tagged release.
 [tools."http:tfctl"]
 version = "latest"
+version_list_url = "https://releases.hashicorp.com/tfctl/index.json"
+version_expr = 'filter(map(values(fromJSON(body).versions), { #.version }), { !(# contains "-") })'
+version_order = "semver"
 url = 'https://releases.hashicorp.com/tfctl/{{ version }}/tfctl_{{ version }}_{{ os(macos="darwin") }}_{{ arch(x64="amd64") }}.zip'
 checksum_url = "https://releases.hashicorp.com/tfctl/{{ version }}/tfctl_{{ version }}_SHA256SUMS"
